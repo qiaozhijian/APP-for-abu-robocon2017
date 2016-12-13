@@ -17,8 +17,8 @@
         android:layout_alignParentTop="true"
         android:layout_above="@+id/activity_bar">
         <Button
-            android:layout_width="@dimen/buttonWidth"
-            android:layout_height="@dimen/buttonHeight"
+            android:layout_width="100dp"
+            android:layout_height="80dp"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
@@ -27,8 +27,8 @@
             android:id="@+id/column1"
             android:text="c1"/>
         <Button
-            android:layout_width="@dimen/buttonWidth"
-            android:layout_height="@dimen/buttonHeight"
+            android:layout_width="100dp"
+            android:layout_height="80dp"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
@@ -37,8 +37,8 @@
             android:id="@+id/column2"
             android:text="c2"/>
         <Button
-            android:layout_width="@dimen/buttonWidth"
-            android:layout_height="@dimen/buttonHeight"
+            android:layout_width="100dp"
+            android:layout_height="80dp"
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
             android:id="@+id/column3"
@@ -46,8 +46,8 @@
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true" />
         <Button
-            android:layout_width="@dimen/buttonWidth"
-            android:layout_height="@dimen/buttonHeight"
+            android:layout_width="100dp"
+            android:layout_height="80dp"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
@@ -56,8 +56,8 @@
             android:id="@+id/column4"
             android:text="c4"/>
         <Button
-            android:layout_width="@dimen/buttonWidth"
-            android:layout_height="@dimen/buttonHeight"
+            android:layout_width="100dp"
+            android:layout_height="80dp"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
@@ -66,8 +66,8 @@
             android:id="@+id/column5"
             android:text="c5"/>
         <Button
-            android:layout_width="@dimen/buttonWidth"
-            android:layout_height="@dimen/buttonHeight"
+            android:layout_width="100dp"
+            android:layout_height="80dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
@@ -76,8 +76,8 @@
             android:id="@+id/column6"
             android:text="c6"/>
         <Button
-            android:layout_width="@dimen/buttonWidth"
-            android:layout_height="@dimen/buttonHeight"
+            android:layout_width="100dp"
+            android:layout_height="80dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
@@ -86,6 +86,7 @@
             android:id="@+id/column7"
             android:text="c7"/>
     </RelativeLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

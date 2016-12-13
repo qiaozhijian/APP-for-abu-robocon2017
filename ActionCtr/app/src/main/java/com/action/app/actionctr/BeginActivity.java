@@ -2,71 +2,145 @@ package com.action.app.actionctr;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View.OnClickListener;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
-public class BeginActivity extends BasicActivity implements OnClickListener{
+public class BeginActivity extends BasicActivity implements View.OnTouchListener {
 
-
+    // Used to load the 'native-lib' library on application startup.
+    static {
+        System.loadLibrary("native-lib");
+    }
+    private GestureDetector mGestureDetector;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_begin);
+        mGestureDetector = new GestureDetector(this,new gestureListener());
 
-
-        findViewById(R.id.column1).setOnClickListener(this);
-        findViewById(R.id.column2).setOnClickListener(this);
-        findViewById(R.id.column3).setOnClickListener(this);
-        findViewById(R.id.column4).setOnClickListener(this);
-        findViewById(R.id.column5).setOnClickListener(this);
-        findViewById(R.id.column6).setOnClickListener(this);
-        findViewById(R.id.column7).setOnClickListener(this);
-
-        findViewById(R.id.button_leftTop).setOnClickListener(this);
-        findViewById(R.id.button_Top).setOnClickListener(this);
-        findViewById(R.id.button_RightTop).setOnClickListener(this);
-        findViewById(R.id.button_left).setOnClickListener(this);
-        findViewById(R.id.buttun_center).setOnClickListener(this);
-        findViewById(R.id.button_right).setOnClickListener(this);
-        findViewById(R.id.button_leftBottom).setOnClickListener(this);
-        findViewById(R.id.button_Bottom).setOnClickListener(this);
-        findViewById(R.id.button_rightBottom).setOnClickListener(this);
+        Button column1 =(Button)findViewById(R.id.column1);
+        initColumn(column1);
+        Button column2 = (Button)findViewById(R.id.column2);
+        initColumn(column2);
+        Button column3 = (Button)findViewById(R.id.column3);
+        initColumn(column3);
+        Button column4 = (Button)findViewById(R.id.column4);
+        initColumn(column4);
+        Button column5 = (Button)findViewById(R.id.column5);
+        initColumn(column5);
+        Button column6 = (Button)findViewById(R.id.column6);
+        initColumn(column6);
+        Button column7 = (Button)findViewById(R.id.column7);
+        initColumn(column7);
     }
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    public void onClick(View v)
+    private void initColumn(Button bt)
     {
-        switch (v.getId())
-        {
-            case R.id.column1:
-            case R.id.column2:
-            case R.id.column3:
-            case R.id.column4:
-            case R.id.column5:
-            case R.id.column6:
-            case R.id.column7:
-                findViewById(R.id.activity_button).setVisibility(View.INVISIBLE);
-                findViewById(R.id.activity_choose).setVisibility(View.VISIBLE);
-                break;
-            case R.id.button_leftTop:
-            case R.id.button_Top:
-            case R.id.button_RightTop:
-            case R.id.button_left:
-            case R.id.buttun_center:
-            case R.id.button_right:
-            case R.id.button_leftBottom:
-            case R.id.button_Bottom:
-            case R.id.button_rightBottom:
-                findViewById(R.id.activity_button).setVisibility(View.VISIBLE);
-                findViewById(R.id.activity_choose).setVisibility(View.INVISIBLE);
-                Intent intent=new Intent(this,ParamChangeActivity.class);
-                intent.putExtra("button_id",v.getId());
-                startActivity(intent);
-                finish();
-                break;
+        bt.setOnTouchListener(this);
+        bt.setFocusable(true);
+        bt.setClickable(true);
+        bt.setLongClickable(true);
+    }
+
+    //飞盘落点
+    private String landPlace;
+    //手势是否已经识别
+    private boolean recognizeGesture=false;
+
+    //重写OnTouchListener的onTouch方法
+    //此方法在触摸屏被触摸，即发生触摸事件（接触和抚摸两个事件，挺形象）的时候被调用。
+    @Override
+    public
+    boolean onTouch(View v, MotionEvent event) {
+        mGestureDetector.onTouchEvent(event);
+
+        if(recognizeGesture ) {
+            //实例化下一个活动
+            Intent intent=new Intent(this,ParamChangeActivity.class);
+            Log.i("MyGesture", "success");
+            recognizeGesture =  false;
+            intent.putExtra("button_id",landPlace);
+            startActivity(intent);
+            finish();
+        }
+        return true;
+    }
+    private class gestureListener implements GestureDetector.OnGestureListener {
+        //在按下动作时被调用
+        @Override
+        public boolean onDown(MotionEvent e) {
+            return
+                    false;
+        }
+        //在按住时被调用
+        @Override
+        public void onShowPress(MotionEvent e) {
+        }
+        //在抬起时被调用
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            return
+                    false;
+        }
+        //在长按时被调用
+        @Override
+        public void onLongPress(MotionEvent e) {
+        }
+        //在滚动时调用
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            return
+                    false;
+        }
+        //在抛掷动作时被调用
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            if (velocityY > 300 &&  Math.abs(velocityX) < 0.5 * Math.abs(velocityY)) {
+                landPlace = "up";
+                recognizeGesture =  true;
+                Toast.makeText(BeginActivity.this, "up", Toast.LENGTH_SHORT).show();
+                Log.i("MyGesture", "up");
+            } else if (velocityY < -300 &&  Math.abs(velocityX) < 0.5 * Math.abs(velocityY)) {
+                Toast.makeText(BeginActivity.this, "down", Toast.LENGTH_SHORT).show();
+                Log.i("MyGesture", "down");
+                landPlace = "down";
+                recognizeGesture =  true;
+            } else if (Math.abs(velocityY) < 0.5 * Math.abs(velocityX)  && velocityX < -300) {
+                Toast.makeText(BeginActivity.this, "right", Toast.LENGTH_SHORT).show();
+                Log.i("MyGesture", "right");
+                landPlace = "right";
+                recognizeGesture =  true;
+            } else if ( Math.abs(velocityY) < 0.5 * Math.abs(velocityX) && velocityX > 300) {
+                Toast.makeText(BeginActivity.this, "left", Toast.LENGTH_SHORT).show();
+                Log.i("MyGesture", "left");
+                landPlace = "left";
+                recognizeGesture =  true;
+            } else if (velocityY < -300 && velocityX < -300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
+                Toast.makeText(BeginActivity.this, "right-down", Toast.LENGTH_SHORT).show();
+                Log.i("MyGesture", "right-down");
+                landPlace = "right-down";
+                recognizeGesture =  true;
+            } else if (velocityY > 300 && velocityX > 300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
+                Toast.makeText(BeginActivity.this, "left-up", Toast.LENGTH_SHORT).show();
+                Log.i("MyGesture", "left-up");
+                landPlace = "left-up";
+                recognizeGesture =  true;
+            } else if (velocityY < -300 && velocityX > 300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
+                Toast.makeText(BeginActivity.this, "left-down", Toast.LENGTH_SHORT).show();
+                Log.i("MyGesture", "left-down");
+                landPlace = "left-down";
+                recognizeGesture =  true;
+            } else if (velocityY > 300 &&  velocityX < -300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
+                Toast.makeText(BeginActivity.this, "right-up", Toast.LENGTH_SHORT).show();
+                Log.i("MyGesture", "right-up");
+                landPlace = "right-up";
+                recognizeGesture =  true;
+            }
+            return
+                    false;
         }
     }
 }

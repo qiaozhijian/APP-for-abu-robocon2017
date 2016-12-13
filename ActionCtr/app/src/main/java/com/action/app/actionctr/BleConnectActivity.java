@@ -1,18 +1,19 @@
 package com.action.app.actionctr;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
-import java.util.ArrayList;
 
 
 /**
@@ -20,71 +21,97 @@ import java.util.ArrayList;
  */
 
 public class BleConnectActivity extends BasicActivity implements View.OnClickListener {
-
-    private  BluetoothManager bleManager;
-    private BluetoothAdapter bleAdapter;
-    private final int REQUEST_ENABLE_BT=2;
-    private ArrayList<BluetoothDevice> devicesList;
-
-    private Handler mHandler;
-    private final int SCAN_PERIOD=1000;
-    private BluetoothAdapter.LeScanCallback mLeScanCallback;
-
     private ProgressBar progressView;
+    private BluetoothAdapter bleAdapter;
+    private BluetoothManager bleManager;
+
+    private BleService.DataSend state;
+    private ServiceConnection connection=new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            state=(BleService.DataSend)iBinder;
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+        }
+    };
+
+    Handler handler;
 
     @Override
     protected void onCreate(Bundle s) {
         super.onCreate(s);
         setContentView(R.layout.activity_ble_connect);
         Log.d("ble", "App running");
-        bleManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        bleAdapter= bleManager.getAdapter();
-        devicesList=new ArrayList<>();
         progressView=(ProgressBar)findViewById(R.id.ble_connect_progress);
         progressView.setProgress(0);
         progressView.setMax(100);
 
+        bleManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        bleAdapter= bleManager.getAdapter();
+
         if (bleAdapter == null) {
             Toast.makeText(this, "device do not support bluetooth", Toast.LENGTH_SHORT).show();
-            Log.d("ble", "device do not support bluetooth");
+            Log.d("Ble", "device do not support bluetooth");
             finish();
         }
         if (!bleAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent,REQUEST_ENABLE_BT);
+            startActivityForResult(enableBtIntent,2);
         }
-        Log.d("ble", "ble enable");
+        Log.d("Ble", "ble enable");
         progressView.setProgress(10);
-        mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
-            @Override
-            public void onLeScan(final BluetoothDevice device, int rssi,
-                                 byte[] scanRecord) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(!devicesList.contains(device)) {
-                            devicesList.add(device);
-                            Log.d("ble","find device , name="+device.getName());
-                            progressView.setProgress(50);
-                        }
-                    }
-                });
-             }
-        };
-        mHandler=new Handler();
-        mHandler.postDelayed(new Runnable() {
+        Intent intentService=new Intent(this,BleService.class);
+        startService(intentService);
+
+        Intent bindIntent=new Intent(this,BleService.class);
+        bindService(bindIntent,connection,BIND_AUTO_CREATE);
+
+
+        final Runnable runnable=new Runnable() {
             @Override
             public void run() {
-                bleAdapter.stopLeScan(mLeScanCallback);
+                Message msg=new Message();
+                msg.what=state.getBleStatus();
+                handler.sendMessage(msg);
+                Log.d("Ble","handler running");
             }
-        }, SCAN_PERIOD);
-        bleAdapter.startLeScan(mLeScanCallback);
-        Log.d("ble", "ble scanning");
-        progressView.setProgress(20);
+        };
+
+        handler=new Handler(){
+            @Override
+            public void handleMessage(Message msg)
+            {
+                switch (msg.what)
+                {
+                    case BleService.BleProfile.BLE_IDLE:
+                        progressView.setProgress(20);
+                        break;
+                    case BleService.BleProfile.BLE_SCANING:
+                        progressView.setProgress(50);
+                        break;
+                    case BleService.BleProfile.BLE_CONNECTED:
+                        progressView.setProgress(100);
+                        Intent intent=new Intent(BleConnectActivity.this,BeginActivity.class);
+                        startActivity(intent);
+                        break;
+                }
+                if(msg.what!=BleService.BleProfile.BLE_CONNECTED)
+                    handler.postDelayed(runnable,500);
+                else
+                    finish();
+            }
+        };
+        handler.postDelayed(runnable,500);
     }
 
     @Override
     public void onClick(View v) {
 
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unbindService(connection);
     }
 }

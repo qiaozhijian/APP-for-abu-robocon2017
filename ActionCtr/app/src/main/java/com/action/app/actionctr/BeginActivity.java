@@ -7,15 +7,13 @@ import android.view.View;
 
 public class BeginActivity extends BasicActivity implements OnClickListener{
 
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_begin);
+
+
         findViewById(R.id.column1).setOnClickListener(this);
         findViewById(R.id.column2).setOnClickListener(this);
         findViewById(R.id.column3).setOnClickListener(this);
@@ -34,13 +32,10 @@ public class BeginActivity extends BasicActivity implements OnClickListener{
         findViewById(R.id.button_Bottom).setOnClickListener(this);
         findViewById(R.id.button_rightBottom).setOnClickListener(this);
     }
-
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 
     public void onClick(View v)
     {

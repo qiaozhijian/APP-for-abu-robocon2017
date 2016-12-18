@@ -1,6 +1,5 @@
 package com.action.app.actionctr.sqlite;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -8,7 +7,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.action.app.actionctr.ParamChangeActivity;
 import com.facebook.stetho.Stetho;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 import okhttp3.OkHttpClient;
@@ -23,7 +21,6 @@ public class Manage {
     public float yaw;
     public int   speed1;
     public int   speed2;
-
 
     private MyDatabaseHelper dbHelper;
     private SQLiteDatabase dbRead;

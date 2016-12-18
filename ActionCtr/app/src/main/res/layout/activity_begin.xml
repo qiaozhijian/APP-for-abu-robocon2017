@@ -17,8 +17,8 @@
         android:layout_alignParentTop="true"
         android:layout_above="@+id/activity_bar">
         <Button
-            android:layout_width="100dp"
-            android:layout_height="80dp"
+            android:layout_width="@dimen/buttonWidth"
+            android:layout_height="@dimen/buttonHeight"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
@@ -27,8 +27,8 @@
             android:id="@+id/column1"
             android:text="c1"/>
         <Button
-            android:layout_width="100dp"
-            android:layout_height="80dp"
+            android:layout_width="@dimen/buttonWidth"
+            android:layout_height="@dimen/buttonHeight"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
@@ -37,8 +37,8 @@
             android:id="@+id/column2"
             android:text="c2"/>
         <Button
-            android:layout_width="100dp"
-            android:layout_height="80dp"
+            android:layout_width="@dimen/buttonWidth"
+            android:layout_height="@dimen/buttonHeight"
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
             android:id="@+id/column3"
@@ -46,8 +46,8 @@
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true" />
         <Button
-            android:layout_width="100dp"
-            android:layout_height="80dp"
+            android:layout_width="@dimen/buttonWidth"
+            android:layout_height="@dimen/buttonHeight"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
@@ -56,8 +56,8 @@
             android:id="@+id/column4"
             android:text="c4"/>
         <Button
-            android:layout_width="100dp"
-            android:layout_height="80dp"
+            android:layout_width="@dimen/buttonWidth"
+            android:layout_height="@dimen/buttonHeight"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
@@ -66,8 +66,8 @@
             android:id="@+id/column5"
             android:text="c5"/>
         <Button
-            android:layout_width="100dp"
-            android:layout_height="80dp"
+            android:layout_width="@dimen/buttonWidth"
+            android:layout_height="@dimen/buttonHeight"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
@@ -76,8 +76,8 @@
             android:id="@+id/column6"
             android:text="c6"/>
         <Button
-            android:layout_width="100dp"
-            android:layout_height="80dp"
+            android:layout_width="@dimen/buttonWidth"
+            android:layout_height="@dimen/buttonHeight"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
@@ -85,78 +85,6 @@
             android:layout_alignRight="@+id/column3"
             android:id="@+id/column7"
             android:text="c7"/>
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/activity_choose"
-        android:visibility="invisible"
-        android:layout_alignParentTop="true"
-        android:layout_above="@+id/activity_bar">
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_leftTop"
-            android:text="左上"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_Top"
-            android:text="上"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_RightTop"
-            android:text="右上"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_left"
-            android:text="左"
-            android:layout_centerVertical="true"
-            android:layout_alignParentLeft="true" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/buttun_center"
-            android:text="中"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_right"
-            android:text="右"
-            android:layout_centerVertical="true"
-            android:layout_alignParentRight="true" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_leftBottom"
-            android:text="左下"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentBottom="true"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_Bottom"
-            android:text="下"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_rightBottom"
-            android:text="右下"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"/>
     </RelativeLayout>
 
     <LinearLayout

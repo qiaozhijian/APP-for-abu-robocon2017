@@ -24,7 +24,9 @@
             <EditText
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:inputType="numberDecimal"
+                android:id="@+id/edit_yaw"/>
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -47,7 +49,9 @@
             <EditText
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:inputType="numberDecimal"
+                android:id="@+id/edit_pitch"/>
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -70,7 +74,9 @@
             <EditText
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:inputType="numberDecimal"
+                android:id="@+id/edit_roll"/>
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -93,13 +99,15 @@
         <EditText
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:inputType="numberSigned"
+            android:id="@+id/edit_speed1"/>
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="increase"/>
-    </LinearLayout>
+        </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -116,12 +124,30 @@
             <EditText
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:inputType="numberSigned"
+                android:id="@+id/edit_speed2"/>
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="increase"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:id="@+id/column_num"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:id="@+id/column_ward"/>
         </LinearLayout>
     </LinearLayout>
 

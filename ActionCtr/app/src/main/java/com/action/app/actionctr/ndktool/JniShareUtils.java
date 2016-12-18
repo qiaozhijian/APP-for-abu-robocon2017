@@ -1,4 +1,4 @@
-package com.action.app.actionctr.com.action.app.jnitool;
+package com.action.app.actionctr.ndktool;
 
 /**
  * Created by 56390 on 2016/12/13.

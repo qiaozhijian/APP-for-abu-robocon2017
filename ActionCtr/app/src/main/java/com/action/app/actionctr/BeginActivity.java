@@ -7,14 +7,9 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 public class BeginActivity extends BasicActivity implements View.OnTouchListener {
 
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
     private GestureDetector mGestureDetector;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,12 +52,48 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
     boolean onTouch(View v, MotionEvent event) {
         mGestureDetector.onTouchEvent(event);
 
+        int buttonIdInt;
         if(recognizeGesture ) {
+            switch (v.getId())
+            {
+                case R.id.column1:
+                    Log.d("MyGesture","c1");
+                    buttonIdInt=1;
+                    break;
+                case R.id.column2:
+                    Log.d("MyGesture","c2");
+                    buttonIdInt=2;
+                    break;
+                case R.id.column3:
+                    Log.d("MyGesture","c3");
+                    buttonIdInt=3;
+                    break;
+                case R.id.column4:
+                    Log.d("MyGesture","c4");
+                    buttonIdInt=4;
+                    break;
+                case R.id.column5:
+                    Log.d("MyGesture","c5");
+                    buttonIdInt=5;
+                    break;
+                case R.id.column6:
+                    Log.d("MyGesture","c6");
+                    buttonIdInt=6;
+                    break;
+                case R.id.column7:
+                    Log.d("MyGesture","c7");
+                    buttonIdInt=7;
+                    break;
+                default:
+                    buttonIdInt=0;
+                    break;
+            }
             //实例化下一个活动
             Intent intent=new Intent(this,ParamChangeActivity.class);
             Log.i("MyGesture", "success");
             recognizeGesture =  false;
-            intent.putExtra("button_id",landPlace);
+            intent.putExtra("button_id",buttonIdInt);
+            intent.putExtra("gesture_ward",landPlace);
             startActivity(intent);
             finish();
         }
@@ -99,44 +130,36 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             if (velocityY > 300 &&  Math.abs(velocityX) < 0.5 * Math.abs(velocityY)) {
+                landPlace = "dowm";
+                recognizeGesture =  true;
+                Log.i("MyGesture", "dowm");
+            } else if (velocityY < -300 &&  Math.abs(velocityX) < 0.5 * Math.abs(velocityY)) {
+                Log.i("MyGesture", "up");
                 landPlace = "up";
                 recognizeGesture =  true;
-                Toast.makeText(BeginActivity.this, "up", Toast.LENGTH_SHORT).show();
-                Log.i("MyGesture", "up");
-            } else if (velocityY < -300 &&  Math.abs(velocityX) < 0.5 * Math.abs(velocityY)) {
-                Toast.makeText(BeginActivity.this, "down", Toast.LENGTH_SHORT).show();
-                Log.i("MyGesture", "down");
-                landPlace = "down";
-                recognizeGesture =  true;
             } else if (Math.abs(velocityY) < 0.5 * Math.abs(velocityX)  && velocityX < -300) {
-                Toast.makeText(BeginActivity.this, "right", Toast.LENGTH_SHORT).show();
-                Log.i("MyGesture", "right");
-                landPlace = "right";
-                recognizeGesture =  true;
-            } else if ( Math.abs(velocityY) < 0.5 * Math.abs(velocityX) && velocityX > 300) {
-                Toast.makeText(BeginActivity.this, "left", Toast.LENGTH_SHORT).show();
                 Log.i("MyGesture", "left");
                 landPlace = "left";
                 recognizeGesture =  true;
-            } else if (velocityY < -300 && velocityX < -300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
-                Toast.makeText(BeginActivity.this, "right-down", Toast.LENGTH_SHORT).show();
-                Log.i("MyGesture", "right-down");
-                landPlace = "right-down";
+            } else if ( Math.abs(velocityY) < 0.5 * Math.abs(velocityX) && velocityX > 300) {
+                Log.i("MyGesture", "right");
+                landPlace = "right";
                 recognizeGesture =  true;
-            } else if (velocityY > 300 && velocityX > 300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
-                Toast.makeText(BeginActivity.this, "left-up", Toast.LENGTH_SHORT).show();
+            } else if (velocityY < -300 && velocityX < -300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
                 Log.i("MyGesture", "left-up");
                 landPlace = "left-up";
                 recognizeGesture =  true;
-            } else if (velocityY < -300 && velocityX > 300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
-                Toast.makeText(BeginActivity.this, "left-down", Toast.LENGTH_SHORT).show();
-                Log.i("MyGesture", "left-down");
-                landPlace = "left-down";
+            } else if (velocityY > 300 && velocityX > 300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
+                Log.i("MyGesture", "right-down");
+                landPlace = "right-down";
                 recognizeGesture =  true;
-            } else if (velocityY > 300 &&  velocityX < -300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
-                Toast.makeText(BeginActivity.this, "right-up", Toast.LENGTH_SHORT).show();
+            } else if (velocityY < -300 && velocityX > 300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
                 Log.i("MyGesture", "right-up");
                 landPlace = "right-up";
+                recognizeGesture =  true;
+            } else if (velocityY > 300 &&  velocityX < -300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
+                Log.i("MyGesture", "left-down");
+                landPlace = "left-down";
                 recognizeGesture =  true;
             }
             return

@@ -72,7 +72,12 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
             @Override
             public void run() {
                 Message msg=new Message();
-                msg.what=state.getBleStatus();
+                if(state!=null){
+                    msg.what=state.getBleStatus();
+                }
+                else {
+                    msg.what=BleService.BleProfile.BLE_IDLE;
+                }
                 handler.sendMessage(msg);
                 Log.d("Ble","handler running");
             }

@@ -6,20 +6,16 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
-
 
 public class BleService extends Service {
 
@@ -101,7 +97,8 @@ public class BleService extends Service {
                 Log.d("Ble","onServiceDiscovered: " + status);
                 gattService=mBluetoothGatt.getService(UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb"));
                 characteristic=gattService.getCharacteristic(UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb"));
-                mBluetoothGatt.readCharacteristic(characteristic);
+                characteristic.setValue(new String("AC_START_000"));
+                mBluetoothGatt.writeCharacteristic(characteristic);
                 mBluetoothGatt.setCharacteristicNotification(characteristic,true);
             }
             @Override

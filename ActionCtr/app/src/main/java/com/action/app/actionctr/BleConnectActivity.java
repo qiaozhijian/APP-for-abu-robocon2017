@@ -2,18 +2,18 @@ package com.action.app.actionctr;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.action.app.actionctr.ble.BleService;
+import com.action.app.actionctr.ble.bleDataProcess;
 
 
 /**
@@ -24,18 +24,7 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
     private ProgressBar progressView;
     private BluetoothAdapter bleAdapter;
     private BluetoothManager bleManager;
-
-    private BleService.DataSend state;
-    private ServiceConnection connection=new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            state=(BleService.DataSend)iBinder;
-        }
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-        }
-    };
-
+    private bleDataProcess state;
     Handler handler;
 
     @Override
@@ -43,6 +32,7 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
         super.onCreate(s);
         setContentView(R.layout.activity_ble_connect);
         Log.d("ble", "App running");
+
         progressView=(ProgressBar)findViewById(R.id.ble_connect_progress);
         progressView.setProgress(0);
         progressView.setMax(100);
@@ -63,10 +53,7 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
         progressView.setProgress(10);
         Intent intentService=new Intent(this,BleService.class);
         startService(intentService);
-
-        Intent bindIntent=new Intent(this,BleService.class);
-        bindService(bindIntent,connection,BIND_AUTO_CREATE);
-
+        state=new bleDataProcess(this);
 
         final Runnable runnable=new Runnable() {
             @Override
@@ -117,6 +104,6 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unbindService(connection);
+        state.unbind();
     }
 }

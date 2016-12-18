@@ -42,13 +42,22 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     {
         super.onCreate(s);
         setContentView(R.layout.activity_param_change);
-
         sqlManage=new Manage(this);
-
 
         findViewById(R.id.button_param_cancel).setOnClickListener(this);
         findViewById(R.id.button_param_save).setOnClickListener(this);
         findViewById(R.id.button_param_change).setOnClickListener(this);
+
+        findViewById(R.id.roll_decrease).setOnClickListener(this);
+        findViewById(R.id.roll_increase).setOnClickListener(this);
+        findViewById(R.id.pitch_decrease).setOnClickListener(this);
+        findViewById(R.id.pitch_increase).setOnClickListener(this);
+        findViewById(R.id.yaw_decrease).setOnClickListener(this);
+        findViewById(R.id.yaw_increase).setOnClickListener(this);
+        findViewById(R.id.speed1_decrease).setOnClickListener(this);
+        findViewById(R.id.speed1_increase).setOnClickListener(this);
+        findViewById(R.id.speed2_decrease).setOnClickListener(this);
+        findViewById(R.id.speed2_increase).setOnClickListener(this);
 
         Intent intent=getIntent();
         buttonId=intent.getIntExtra("button_id",0);
@@ -80,6 +89,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     @Override
     public void onClick(View v)
     {
+        float valueF;
+        int   valueI;
+        EditText editText=null;
         switch (v.getId())
         {
             case R.id.button_param_save:
@@ -107,7 +119,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     }
                 });
                 dialog.show();
-
                 break;
             case R.id.button_param_change:
                 break;
@@ -116,6 +127,76 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 startActivity(intent);
                 finish();
                 break;
+            case R.id.pitch_increase:
+                editText=(EditText)findViewById(R.id.edit_pitch);
+                break;
+            case R.id.roll_increase:
+                editText=(EditText)findViewById(R.id.edit_roll);
+                break;
+            case R.id.yaw_increase:
+                editText=(EditText)findViewById(R.id.edit_yaw);
+                break;
+            case R.id.pitch_decrease:
+                editText=(EditText)findViewById(R.id.edit_pitch);
+                break;
+            case R.id.roll_decrease:
+                editText=(EditText)findViewById(R.id.edit_roll);
+                break;
+            case R.id.yaw_decrease:
+                editText=(EditText)findViewById(R.id.edit_yaw);
+                break;
+            case R.id.speed1_increase:
+                editText=(EditText)findViewById(R.id.edit_speed1);
+                break;
+            case R.id.speed2_increase:
+                editText=(EditText)findViewById(R.id.edit_speed2);
+                break;
+            case R.id.speed1_decrease:
+                editText=(EditText)findViewById(R.id.edit_speed1);
+                break;
+            case R.id.speed2_decrease:
+                editText=(EditText)findViewById(R.id.edit_speed2);
+                break;
+            default:
+                Log.e("button","no case for button click");
+                finish();
+                break;
         }
+        if(editText!=null){
+            switch (v.getId())
+            {
+                case R.id.pitch_increase:
+                case R.id.roll_increase:
+                case R.id.yaw_increase:
+                    valueF=Float.parseFloat(editText.getText().toString());
+                    valueF+=0.5f;
+                    editText.setText(String.valueOf(valueF));
+                    break;
+                case R.id.pitch_decrease:
+                case R.id.roll_decrease:
+                case R.id.yaw_decrease:
+                    valueF=Float.parseFloat(editText.getText().toString());
+                    valueF-=0.5f;
+                    editText.setText(String.valueOf(valueF));
+                    break;
+                case R.id.speed1_increase:
+                case R.id.speed2_increase:
+                    valueI=Integer.parseInt(editText.getText().toString());
+                    valueI+=1;
+                    editText.setText(String.valueOf(valueI));
+                    break;
+                case R.id.speed1_decrease:
+                case R.id.speed2_decrease:
+                    valueI=Integer.parseInt(editText.getText().toString());
+                    valueI-=1;
+                    editText.setText(String.valueOf(valueI));
+                    break;
+                default:
+                    Log.e("button","no case for button click");
+                    finish();
+                    break;
+            }
+        }
+
     }
 }

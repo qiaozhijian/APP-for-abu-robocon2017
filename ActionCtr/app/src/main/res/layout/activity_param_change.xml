@@ -15,7 +15,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="decrease"/>
+                android:id="@+id/yaw_decrease"
+                android:text="decrease" />
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -31,6 +32,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:id="@+id/yaw_increase"
                 android:text="increase"/>
         </LinearLayout>
         <LinearLayout
@@ -40,6 +42,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:id="@+id/pitch_decrease"
                 android:text="decrease"/>
             <TextView
                 android:layout_width="0dp"
@@ -56,6 +59,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:id="@+id/pitch_increase"
                 android:text="increase"/>
         </LinearLayout>
         <LinearLayout
@@ -65,6 +69,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:id="@+id/roll_decrease"
                 android:text="decrease"/>
             <TextView
                 android:layout_width="0dp"
@@ -81,6 +86,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:id="@+id/roll_increase"
                 android:text="increase"/>
         </LinearLayout>
         <LinearLayout
@@ -90,6 +96,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:id="@+id/speed1_decrease"
             android:text="decrease"/>
         <TextView
             android:layout_width="0dp"
@@ -106,6 +113,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:id="@+id/speed1_increase"
             android:text="increase"/>
         </LinearLayout>
         <LinearLayout
@@ -115,6 +123,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:id="@+id/speed2_decrease"
                 android:text="decrease"/>
             <TextView
                 android:layout_width="0dp"
@@ -131,6 +140,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:id="@+id/speed2_increase"
                 android:text="increase"/>
         </LinearLayout>
         <LinearLayout

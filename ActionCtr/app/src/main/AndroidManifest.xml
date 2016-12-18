@@ -31,7 +31,7 @@
             android:screenOrientation="landscape"></activity>
 
         <service
-            android:name=".BleService"
+            android:name=".ble.BleService"
             android:enabled="true"
             android:exported="true"></service>
     </application>

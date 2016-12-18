@@ -1,4 +1,4 @@
-package com.action.app.actionctr;
+package com.action.app.actionctr.ble;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -32,15 +32,17 @@ public class BleService extends Service {
     private BluetoothGattCharacteristic characteristic;
     private BluetoothGattService        gattService;
 
+    private final int dataLen=12;
+    private byte[] dataReceive;
+
     public interface BleProfile{
          int BLE_CONNECTED=0;
          int BLE_DISCONNECTED=1;
          int BLE_SCANING=2;
          int BLE_IDLE=3;
     }
-    private DataSend dataSend=new DataSend();
-    public class DataSend extends Binder {
-
+    private myBleBand dataSend=new myBleBand();
+    public class myBleBand extends Binder {
         private int ble_status=BleProfile.BLE_IDLE;
         public void send(byte[] data){
             Log.d("Ble","dataSend = "+data.toString());
@@ -56,7 +58,6 @@ public class BleService extends Service {
         {
             return ble_status;
         }
-
     }
 
     @Override
@@ -107,6 +108,7 @@ public class BleService extends Service {
             }
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic){
+                dataReceive=characteristic.getValue();
                 Log.d("Ble","notify: "+characteristic.getStringValue(0));
             }
             @Override

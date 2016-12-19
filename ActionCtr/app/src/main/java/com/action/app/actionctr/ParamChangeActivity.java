@@ -1,6 +1,7 @@
 package com.action.app.actionctr;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,12 +9,15 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.action.app.actionctr.ble.bleDataProcess;
 import com.action.app.actionctr.sqlite.Manage;
 import com.facebook.stetho.Stetho;
 import com.facebook.stetho.common.StringUtil;
@@ -28,12 +32,15 @@ import okhttp3.OkHttpClient;
 public class ParamChangeActivity extends BasicActivity implements View.OnClickListener {
 
     private Manage sqlManage;
+    private bleDataProcess bleDataManage;
 
     private EditText editTextRoll;
     private EditText editTextPitch;
     private EditText editTextYaw;
     private EditText editTextSpeed1;
     private EditText editTextSpeed2;
+
+    private ProgressDialog progressDialog;
 
     private int buttonId;
     private String buttonWard;
@@ -43,6 +50,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         super.onCreate(s);
         setContentView(R.layout.activity_param_change);
         sqlManage=new Manage(this);
+        bleDataManage=new bleDataProcess(this);
 
         findViewById(R.id.button_param_cancel).setOnClickListener(this);
         findViewById(R.id.button_param_save).setOnClickListener(this);
@@ -71,20 +79,18 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         editTextSpeed1=(EditText)findViewById(R.id.edit_speed1);
         editTextSpeed2=(EditText)findViewById(R.id.edit_speed2);
 
-        if(sqlManage.Select(buttonId)){
-            (editTextRoll).setText(String.valueOf(sqlManage.roll));
-            (editTextPitch).setText(String.valueOf(sqlManage.pitch));
-            (editTextYaw).setText(String.valueOf(sqlManage.yaw));
-            (editTextSpeed1).setText(String.valueOf(sqlManage.speed1));
-            (editTextSpeed2).setText(String.valueOf(sqlManage.speed2));
+        if(!sqlManage.Select(buttonId)){
+            sqlManage.roll=0.0f;
+            sqlManage.pitch=0.0f;
+            sqlManage.yaw=0.0f;
+            sqlManage.speed1=0;
+            sqlManage.speed2=0;
         }
-        else{
-            editTextRoll.setText(String.valueOf(0.0f));
-            editTextPitch.setText(String.valueOf(0.0f));
-            editTextYaw.setText(String.valueOf(0.0f));
-            editTextSpeed1.setText(String.valueOf(0));
-            editTextSpeed2.setText(String.valueOf(0));
-        }
+        (editTextRoll).setText(String.valueOf(sqlManage.roll));
+        (editTextPitch).setText(String.valueOf(sqlManage.pitch));
+        (editTextYaw).setText(String.valueOf(sqlManage.yaw));
+        (editTextSpeed1).setText(String.valueOf(sqlManage.speed1));
+        (editTextSpeed2).setText(String.valueOf(sqlManage.speed2));
     }
     @Override
     public void onClick(View v)
@@ -121,6 +127,65 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 dialog.show();
                 break;
             case R.id.button_param_change:
+                sqlManage.roll=Float.parseFloat(editTextRoll.getText().toString());
+                sqlManage.pitch=Float.parseFloat(editTextPitch.getText().toString());
+                sqlManage.yaw=Float.parseFloat(editTextYaw.getText().toString());
+
+                sqlManage.speed1=Integer.parseInt(editTextSpeed1.getText().toString());
+                sqlManage.speed2=Integer.parseInt(editTextSpeed2.getText().toString());
+
+                Log.d("data change","roll: "+String.valueOf(sqlManage.roll));
+                Log.d("data change","pitch: "+String.valueOf(sqlManage.pitch));
+                Log.d("data change","yaw: "+String.valueOf(sqlManage.yaw));
+                Log.d("data change","speed1: "+String.valueOf(sqlManage.speed1));
+                Log.d("data change","speed2: "+String.valueOf(sqlManage.speed2));
+
+                progressDialog=new ProgressDialog(ParamChangeActivity.this);
+                progressDialog.setTitle("data sending,please wait......");
+                progressDialog.setCancelable(true);
+                progressDialog.setCanceledOnTouchOutside(false);
+                progressDialog.show();
+
+                final Handler handler=new Handler();
+                Runnable runnable=new Runnable() {
+                    private byte id=0;
+                    @Override
+                    public void run() {
+                        if(bleDataManage.checkSendOk()){
+                            switch (id) {
+                                case 0:
+                                    bleDataManage.sendParam(id,sqlManage.roll);
+                                    break;
+                                case 1:
+                                    bleDataManage.sendParam(id,sqlManage.pitch);
+                                    break;
+                                case 2:
+                                    bleDataManage.sendParam(id,sqlManage.yaw);
+                                    break;
+                                case 3:
+                                    bleDataManage.sendParam(id,sqlManage.speed1);
+                                    break;
+                                case 4:
+                                    bleDataManage.sendParam(id,sqlManage.speed2);
+                                    break;
+                                case 5:
+                                    progressDialog.cancel();
+                                    break;
+                                default:
+                                    Log.e("change button","onclick run err run err!!!!!");
+                                    break;
+                            }
+                            if(id!=5){
+                                handler.postDelayed(this,50);
+                            }
+                            id++;
+                        }
+                        else {
+                            handler.postDelayed(this,50);
+                        }
+                    }
+                };
+                handler.postDelayed(runnable,50);
                 break;
             case R.id.button_param_cancel:
                 Intent intent=new Intent(this,BeginActivity.class);
@@ -198,5 +263,10 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             }
         }
 
+    }
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        bleDataManage.unbind();
     }
 }

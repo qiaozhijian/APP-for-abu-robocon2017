@@ -12,9 +12,12 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
 public class BleService extends Service {
@@ -32,31 +35,53 @@ public class BleService extends Service {
     private BluetoothGattCharacteristic characteristic;
     private BluetoothGattService        gattService;
 
-    private final int dataLen=12;
+    Handler handler;
+
     private byte[] dataReceive;
+    private byte[] dataTrans;
 
     public interface BleProfile{
          int BLE_CONNECTED=0;
          int BLE_DISCONNECTED=1;
          int BLE_SCANING=2;
          int BLE_IDLE=3;
+         int dataLen=12;
     }
     private myBleBand dataSend=new myBleBand();
     public class myBleBand extends Binder {
         private int ble_status=BleProfile.BLE_IDLE;
         public void send(byte[] data){
-            Log.d("Ble","dataSend = "+data.toString());
-            characteristic.setValue(data);
+
+            if(data.length!=BleProfile.dataLen){
+                Log.e("version err","length of senddata is not equal to require");
+            }
+
+            dataTrans=data;
+            characteristic.setValue(dataTrans);
             mBluetoothGatt.writeCharacteristic(characteristic);
-        }
-        public void send(String s){
-            Log.d("Ble","dataSend = "+s);
-            characteristic.setValue(s);
-            mBluetoothGatt.writeCharacteristic(characteristic);
+
+            final Runnable runnable=new Runnable() {
+                @Override
+                public void run() {
+                    if(!checkSendOk()) {
+                        characteristic.setValue(dataTrans);
+                        mBluetoothGatt.writeCharacteristic(characteristic);
+                        Log.w("Ble","communication with mcu may not be stable");
+                        handler.postDelayed(this,30);
+                    }
+                }
+            };
+            handler.postDelayed(runnable,30);
         }
         public int  getBleStatus()
         {
             return ble_status;
+        }
+        public boolean checkSendOk(){
+            if(Arrays.equals(dataReceive,dataTrans)) {
+                return true;
+            }
+            return false;
         }
     }
 
@@ -98,22 +123,37 @@ public class BleService extends Service {
                 Log.d("Ble","onServiceDiscovered: " + status);
                 gattService=mBluetoothGatt.getService(UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb"));
                 characteristic=gattService.getCharacteristic(UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb"));
-                characteristic.setValue(new String("AC_START_000"));
-                mBluetoothGatt.writeCharacteristic(characteristic);
                 mBluetoothGatt.setCharacteristicNotification(characteristic,true);
             }
             @Override
             public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-                Log.d("Ble","read value: "+characteristic.getStringValue(0));
+                String log_out=new String();
+                for (int i=0;i<BleProfile.dataLen;i++){
+                    log_out+=String.valueOf((int)characteristic.getValue()[i])+'\t';
+                }
+                Log.d("Ble","read value: "+log_out);
             }
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic){
                 dataReceive=characteristic.getValue();
-                Log.d("Ble","notify: "+characteristic.getStringValue(0));
+
+                String log_out=new String();
+                for (int i=0;i<BleProfile.dataLen;i++){
+                    log_out+=String.valueOf((int)dataReceive[i])+'\t';
+                }
+
+                if(dataReceive.length!=BleProfile.dataLen){
+                    Log.e("version err","length of receivedata is not equal to require");
+                }
+                Log.d("Ble","notify: "+log_out);
             }
             @Override
             public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status){
-                Log.d("Ble","write: "+characteristic.getStringValue(0));
+                String log_out=new String();
+                for (int i=0;i<BleProfile.dataLen;i++){
+                    log_out+=String.valueOf((int)characteristic.getValue()[i])+'\t';
+                }
+                Log.d("Ble","write: "+log_out);
             }
         };
         mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
@@ -129,6 +169,8 @@ public class BleService extends Service {
         };
         bleAdapter.startLeScan(mLeScanCallback);
         dataSend.ble_status=BleProfile.BLE_SCANING;
+
+        handler=new Handler();
     }
     @Override
     public int onStartCommand(Intent intent,int flags,int startId){

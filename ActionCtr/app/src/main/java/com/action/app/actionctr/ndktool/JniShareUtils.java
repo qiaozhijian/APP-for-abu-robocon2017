@@ -5,8 +5,6 @@ package com.action.app.actionctr.ndktool;
  */
 
 public class JniShareUtils {
-
-
     public native byte[] floatToByte(float s);
     static {
         System.loadLibrary("native-lib");

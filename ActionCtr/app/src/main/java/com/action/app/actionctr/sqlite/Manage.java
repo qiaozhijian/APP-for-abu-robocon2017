@@ -26,10 +26,10 @@ public class Manage {
     private SQLiteDatabase dbRead;
     private SQLiteDatabase dbwrite;
 
-    public Manage(Context context) {
+    public Manage(Context context,int version) {
         Stetho.initializeWithDefaults(context);
         new OkHttpClient.Builder().addNetworkInterceptor(new StethoInterceptor()).build();
-        dbHelper = new MyDatabaseHelper(context,"DataStore.db",null,1);
+        dbHelper = new MyDatabaseHelper(context,"DataStore.db",null,version);
         dbwrite=dbHelper.getWritableDatabase();
         dbRead=dbHelper.getReadableDatabase();
     }
@@ -89,7 +89,9 @@ public class Manage {
                     "pitch real," +
                     "yaw real," +
                     "speed1 integer," +
-                    "speed2 integer);";
+                    "speed2 integer,"+
+                    "direction,"+
+                    "date);";
 
             db.execSQL(create+"1"+param);
             db.execSQL(create+"2"+param);
@@ -102,9 +104,12 @@ public class Manage {
             Toast.makeText(mContext, "database create", Toast.LENGTH_SHORT).show();
         }
 
-        @Override  //这里注意，升级数据库的方式等版本确定后要  改成更好的
+        @Override  //这里注意，升级数据库的方式等版本确定后
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+
             Toast.makeText(mContext,"database updata",Toast.LENGTH_SHORT).show();
+
         }
     }
 }

@@ -37,12 +37,14 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
     private int buttonId;
     private String buttonWard;
+
+
     @Override
     protected void onCreate(Bundle s)
     {
         super.onCreate(s);
         setContentView(R.layout.activity_param_change);
-        sqlManage=new Manage(this);
+        sqlManage=new Manage(this,2);
 
         findViewById(R.id.button_param_cancel).setOnClickListener(this);
         findViewById(R.id.button_param_save).setOnClickListener(this);

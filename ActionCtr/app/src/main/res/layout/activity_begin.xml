@@ -101,7 +101,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="DATA"/>
+            android:text="DATA"
+            android:id="@+id/go_to_data_activity"/>
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"

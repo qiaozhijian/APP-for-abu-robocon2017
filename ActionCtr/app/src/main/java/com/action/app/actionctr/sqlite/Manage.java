@@ -7,6 +7,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.sql.Struct;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Vector;
+
 import com.facebook.stetho.Stetho;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 import okhttp3.OkHttpClient;
@@ -21,25 +27,31 @@ public class Manage {
     public float yaw;
     public int   speed1;
     public int   speed2;
+    public String   ward;
 
     private MyDatabaseHelper dbHelper;
     private SQLiteDatabase dbRead;
     private SQLiteDatabase dbwrite;
 
-    public Manage(Context context,int version) {
+    public Manage(Context context) {
         Stetho.initializeWithDefaults(context);
         new OkHttpClient.Builder().addNetworkInterceptor(new StethoInterceptor()).build();
-        dbHelper = new MyDatabaseHelper(context,"DataStore.db",null,version);
+        dbHelper = new MyDatabaseHelper(context,"DataStore.db",null,1);
         dbwrite=dbHelper.getWritableDatabase();
         dbRead=dbHelper.getReadableDatabase();
     }
     public void Insert(int num){
-        String cmd="insert into column"+String.valueOf(num)+" (roll,pitch,yaw,speed1,speed2) ";
+        SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String date=dateFormat.format(new Date(System.currentTimeMillis()));
+
+        String cmd="insert into column"+String.valueOf(num)+" (roll,pitch,yaw,speed1,speed2,direction,save_date) ";
         String data="values("+String.valueOf(roll)+","
                 +String.valueOf(pitch)+","
                 +String.valueOf(yaw)+","
                 +String.valueOf(speed1)+","
-                +String.valueOf(speed2)+");";
+                +String.valueOf(speed2)+","
+                +"'"+ward+"'"+","
+                +"'"+date+"'"+");";
 
         dbwrite.execSQL(cmd+data);
         Log.d("database","insert sql: "+cmd+data);
@@ -55,6 +67,7 @@ public class Manage {
             yaw=cursor.getFloat(cursor.getColumnIndex("yaw"));
             speed1=cursor.getInt(cursor.getColumnIndex("speed1"));
             speed2=cursor.getInt(cursor.getColumnIndex("speed2"));
+            ward=cursor.getString(cursor.getColumnIndex("direction"));
             Log.d("database","data read:");
 
             Log.d("database","roll: "+String.valueOf(roll));
@@ -64,11 +77,39 @@ public class Manage {
             Log.d("database","speed1: "+String.valueOf(speed1));
             Log.d("database","speed2: "+String.valueOf(speed2));
 
+            Log.d("database","direction: "+ward);
+
             return true;
         }
         else {
             return false;
         }
+    }
+
+    public ArrayList<dataSt> selectAll(String num){
+        Cursor cursor=dbRead.query(num,null,null,null,null,null,null);
+        ArrayList<dataSt> dataList=new ArrayList<>();
+        while (cursor.moveToNext()) {
+            dataSt data=new dataSt();
+            data.roll=cursor.getFloat(cursor.getColumnIndex("roll"));
+            data.pitch=cursor.getFloat(cursor.getColumnIndex("pitch"));
+            data.yaw=cursor.getFloat(cursor.getColumnIndex("yaw"));
+            data.speed1=cursor.getInt(cursor.getColumnIndex("speed1"));
+            data.speed2=cursor.getInt(cursor.getColumnIndex("speed2"));
+            data.date=cursor.getString(cursor.getColumnIndex("save_date"));
+            data.direction=cursor.getString(cursor.getColumnIndex("direction"));
+            dataList.add(data);
+        }
+        return dataList;
+    }
+    public class dataSt{
+        public float roll;
+        public float pitch;
+        public float yaw;
+        public int   speed1;
+        public int   speed2;
+        public String date;
+        public String direction;
     }
 
     public class MyDatabaseHelper extends SQLiteOpenHelper {
@@ -90,8 +131,8 @@ public class Manage {
                     "yaw real," +
                     "speed1 integer," +
                     "speed2 integer,"+
-                    "direction,"+
-                    "date);";
+                    "direction text,"+
+                    "save_date text);";
 
             db.execSQL(create+"1"+param);
             db.execSQL(create+"2"+param);
@@ -106,10 +147,7 @@ public class Manage {
 
         @Override  //这里注意，升级数据库的方式等版本确定后
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-
             Toast.makeText(mContext,"database updata",Toast.LENGTH_SHORT).show();
-
         }
     }
 }

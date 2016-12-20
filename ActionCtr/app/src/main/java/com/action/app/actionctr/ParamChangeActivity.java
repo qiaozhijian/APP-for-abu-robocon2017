@@ -69,9 +69,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
         Intent intent=getIntent();
         buttonId=intent.getIntExtra("button_id",0);
-        buttonWard=intent.getStringExtra("gesture_ward");
+        sqlManage.ward=intent.getStringExtra("gesture_ward");
         ((TextView)findViewById(R.id.column_num)).setText("column: "+String.valueOf(buttonId));
-        ((TextView)findViewById(R.id.column_ward)).setText("ward: "+buttonWard);
+        ((TextView)findViewById(R.id.column_ward)).setText("ward: "+sqlManage.ward);
 
         editTextRoll=(EditText)findViewById(R.id.edit_roll);
         editTextPitch=(EditText)findViewById(R.id.edit_pitch);

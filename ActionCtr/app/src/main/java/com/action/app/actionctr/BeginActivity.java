@@ -8,7 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
-public class BeginActivity extends BasicActivity implements View.OnTouchListener {
+public class BeginActivity extends BasicActivity implements View.OnTouchListener,View.OnClickListener {
 
     private GestureDetector mGestureDetector;
     @Override
@@ -16,6 +16,8 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_begin);
         mGestureDetector = new GestureDetector(this,new gestureListener());
+
+        findViewById(R.id.go_to_data_activity).setOnClickListener(this);
 
         Button column1 =(Button)findViewById(R.id.column1);
         initColumn(column1);
@@ -40,9 +42,7 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
         bt.setLongClickable(true);
     }
 
-    //飞盘落点
     private String landPlace;
-    //手势是否已经识别
     private boolean recognizeGesture=false;
 
     //重写OnTouchListener的onTouch方法
@@ -164,6 +164,16 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
             }
             return
                     false;
+        }
+    }
+    @Override
+    public void onClick(View v){
+        switch (v.getId()){
+            case R.id.go_to_data_activity:
+                Intent intent=new Intent(BeginActivity.this,DataActivity.class);
+                startActivity(intent);
+                finish();
+                break;
         }
     }
 }

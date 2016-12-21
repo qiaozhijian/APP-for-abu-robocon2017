@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -18,6 +19,17 @@ import com.action.app.actionctr.sqlite.Manage;
 import com.facebook.stetho.Stetho;
 import com.facebook.stetho.common.StringUtil;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
+
+import java.io.*;
+import java.io.File;
+
+import jxl.Workbook;
+import jxl.write.Label;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+
+import jxl.write.WriteException;
+import jxl.write.biff.*;
 
 import okhttp3.OkHttpClient;
 
@@ -37,6 +49,68 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
     private int buttonId;
     private String buttonWard;
+    /* Checks if external storage is available for read and write */
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+    /* Checks if external storage is available to at least read */
+    public boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static String getExcelDir() {
+        // SD卡指定文件夹
+      //  String sdcardPath = Environment.getExternalStorageDirectory().toString();
+
+        String sdcardPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString();
+        File dir = new File(sdcardPath/* + File.separator + "textexcel"*/);
+
+        if (dir.exists()) {
+            return dir.toString();
+
+        } else {
+            dir.mkdirs();
+            Log.e("BAG", "保存路径不存在,");
+            return dir.toString();
+        }
+    }
+
+
+    private void craetExcel() {
+        try {
+            // 打开文件
+            WritableWorkbook book = Workbook.createWorkbook(new File((/*"/testexcel/test.xls"*/getExcelDir() + File.separator + "1.xls")));
+            // 生成名为“第一张工作表”的工作表，参数0表示这是第一页
+            WritableSheet sheet = book.createSheet("第一张工作表", 0);
+            // 在Label对象的构造子中指名单元格位置是第一列第一行(0,0)
+            // 以及单元格内容为baby
+            Label label = new Label(0, 0, "baby");
+            // 将定义好的单元格添加到工作表中
+
+            sheet.addCell(label);
+            // 生成一个保存数字的单元格，必须使用Number的完整包路径，否则有语法歧义。
+            //单元格位置是第二列，第一行，值为123
+            jxl.write.Number number = new jxl.write.Number(1, 0, 123);
+            sheet.addCell(number);
+            //写入数据并关闭
+            book.write();
+            book.close();
+
+        } catch (WriteException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     @Override
@@ -93,10 +167,16 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     {
         float valueF;
         int   valueI;
+
+        String path ;
         EditText editText=null;
         switch (v.getId())
         {
             case R.id.button_param_save:
+           //     isExternalStorageWritable();
+          //      isExternalStorageReadable();
+         //       path = getExcelDir();
+                craetExcel();////////////////////////////////////////////////////////////////
                 AlertDialog.Builder dialog= new AlertDialog.Builder(ParamChangeActivity.this);
                 dialog.setTitle("Notice");
                 dialog.setMessage("Are you sure to change Param?");

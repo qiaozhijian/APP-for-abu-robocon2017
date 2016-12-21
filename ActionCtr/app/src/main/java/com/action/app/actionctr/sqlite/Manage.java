@@ -56,7 +56,10 @@ public class Manage {
         dbwrite.execSQL(cmd+data);
         Log.d("database","insert sql: "+cmd+data);
     }
-
+    public  int getDataBaseCount(int num){
+        Cursor cursor=dbRead.query("column"+String.valueOf(num),null,null,null,null,null,null);
+        return(cursor.getCount());
+    }
     public boolean Select(int num){
         Cursor cursor=dbRead.query("column"+String.valueOf(num),null,null,null,null,null,null);
 

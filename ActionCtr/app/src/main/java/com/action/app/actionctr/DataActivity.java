@@ -1,9 +1,11 @@
 package com.action.app.actionctr;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,11 +17,17 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.action.app.actionctr.sqlite.Manage;
-
+import  com.action.app.actionctr.excel.Excel;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
 
 public class DataActivity extends BasicActivity implements AdapterView.OnItemSelectedListener,View.OnClickListener{
 
@@ -58,7 +66,30 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
     @Override
     public void onClick(View v){
         switch (v.getId()){
-            case R.id.save_data:
+            case R.id.save_data: //保存到excel
+
+                AlertDialog.Builder dialog= new AlertDialog.Builder(DataActivity.this);
+                dialog.setTitle("Notice");
+                dialog.setMessage("Are you sure to save as excel?");
+                dialog.setCancelable(false);
+                dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        String date=dateFormat.format(new Date(System.currentTimeMillis()));
+                        Excel data_excel = new Excel(date+".xls");
+                        data_excel.storeExcel(manage);  //  讲数据库中的内容导出到excel
+
+                    }
+                });
+                dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                    }
+                });
+                dialog.show();
+
                 break;
             case R.id.cancel_data:
                 Intent intent=new Intent(DataActivity.this,BeginActivity.class);

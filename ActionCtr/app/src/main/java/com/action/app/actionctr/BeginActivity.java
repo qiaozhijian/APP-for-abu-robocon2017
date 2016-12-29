@@ -44,16 +44,14 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
 
     private String landPlace;
     private boolean recognizeGesture=false;
-
+    private int buttonIdInt;
     //重写OnTouchListener的onTouch方法
     //此方法在触摸屏被触摸，即发生触摸事件（接触和抚摸两个事件，挺形象）的时候被调用。
     @Override
     public
     boolean onTouch(View v, MotionEvent event) {
         mGestureDetector.onTouchEvent(event);
-
-        int buttonIdInt;
-        if(recognizeGesture ) {
+        if(recognizeGesture) {
             switch (v.getId())
             {
                 case R.id.column1:
@@ -90,7 +88,7 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
             }
             //实例化下一个活动
             Intent intent=new Intent(this,ParamChangeActivity.class);
-            Log.i("MyGesture", "success");
+            Log.d("MyGesture", "success");
             recognizeGesture =  false;
             intent.putExtra("button_id",buttonIdInt);
             intent.putExtra("gesture_ward",landPlace);
@@ -103,8 +101,7 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
         //在按下动作时被调用
         @Override
         public boolean onDown(MotionEvent e) {
-            return
-                    false;
+            return false;
         }
         //在按住时被调用
         @Override
@@ -113,8 +110,9 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
         //在抬起时被调用
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
-            return
-                    false;
+            landPlace="no ward";
+            recognizeGesture =  true;
+            return false;
         }
         //在长按时被调用
         @Override
@@ -123,54 +121,53 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
         //在滚动时调用
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            return
-                    false;
+            return false;
         }
         //在抛掷动作时被调用
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             if (velocityY > 300 &&  Math.abs(velocityX) < 0.5 * Math.abs(velocityY)) {
-                landPlace = "dowm";
+                landPlace = "down";
                 recognizeGesture =  true;
-                Log.i("MyGesture", "dowm");
+                Log.d("MyGesture", "down");
             } else if (velocityY < -300 &&  Math.abs(velocityX) < 0.5 * Math.abs(velocityY)) {
-                Log.i("MyGesture", "up");
+                Log.d("MyGesture", "up");
                 landPlace = "up";
                 recognizeGesture =  true;
             } else if (Math.abs(velocityY) < 0.5 * Math.abs(velocityX)  && velocityX < -300) {
-                Log.i("MyGesture", "left");
+                Log.d("MyGesture", "left");
                 landPlace = "left";
                 recognizeGesture =  true;
             } else if ( Math.abs(velocityY) < 0.5 * Math.abs(velocityX) && velocityX > 300) {
-                Log.i("MyGesture", "right");
+                Log.d("MyGesture", "right");
                 landPlace = "right";
                 recognizeGesture =  true;
             } else if (velocityY < -300 && velocityX < -300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
-                Log.i("MyGesture", "left-up");
+                Log.d("MyGesture", "left-up");
                 landPlace = "left-up";
                 recognizeGesture =  true;
             } else if (velocityY > 300 && velocityX > 300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
-                Log.i("MyGesture", "right-down");
+                Log.d("MyGesture", "right-down");
                 landPlace = "right-down";
                 recognizeGesture =  true;
             } else if (velocityY < -300 && velocityX > 300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
-                Log.i("MyGesture", "right-up");
+                Log.d("MyGesture", "right-up");
                 landPlace = "right-up";
                 recognizeGesture =  true;
             } else if (velocityY > 300 &&  velocityX < -300 && Math.abs(Math.abs(velocityY) - Math.abs(velocityX)) < 0.5 * Math.abs(velocityX)) {
-                Log.i("MyGesture", "left-down");
+                Log.d("MyGesture", "left-down");
                 landPlace = "left-down";
                 recognizeGesture =  true;
             }
-            return
-                    false;
+            return false;
         }
     }
     @Override
     public void onClick(View v){
+        Intent intent;
         switch (v.getId()){
             case R.id.go_to_data_activity:
-                Intent intent=new Intent(BeginActivity.this,DataActivity.class);
+                intent=new Intent(BeginActivity.this,DataActivity.class);
                 startActivity(intent);
                 finish();
                 break;

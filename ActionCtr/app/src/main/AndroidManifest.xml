@@ -37,7 +37,6 @@
             android:name=".ble.BleService"
             android:enabled="true"
             android:exported="true" />
-
     </application>
 
 </manifest>

@@ -61,6 +61,7 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
     }
     @Override
     public void onDestroy(){
+        manage.close();
         super.onDestroy();
     }
     @Override
@@ -102,12 +103,9 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
     public void onItemSelected(AdapterView<?> adapter, View v,int arg1,long arg2){
         ArrayList<Manage.dataSt> data;
         data=manage.selectAll(adapter.getSelectedItem().toString());
-
         dataAdapter data_adapter=new dataAdapter(DataActivity.this,R.layout.item_listview_activity_data,data);
         ListView listView=(ListView)findViewById(R.id.list_data_display);
         listView.setAdapter(data_adapter);
-
-
         Log.d("dataDisplay","display");
     }
     public void onNothingSelected(AdapterView<?> adapter){

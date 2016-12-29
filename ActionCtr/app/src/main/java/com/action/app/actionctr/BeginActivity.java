@@ -18,6 +18,7 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
         mGestureDetector = new GestureDetector(this,new gestureListener());
 
         findViewById(R.id.go_to_data_activity).setOnClickListener(this);
+        findViewById(R.id.go_to_ctr_activity).setOnClickListener(this);
 
         Button column1 =(Button)findViewById(R.id.column1);
         initColumn(column1);
@@ -166,6 +167,11 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
     public void onClick(View v){
         Intent intent;
         switch (v.getId()){
+            case R.id.go_to_ctr_activity:
+                intent=new Intent(BeginActivity.this,CtrActivity.class);
+                startActivity(intent);
+                finish();
+                break;
             case R.id.go_to_data_activity:
                 intent=new Intent(BeginActivity.this,DataActivity.class);
                 startActivity(intent);

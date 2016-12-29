@@ -40,6 +40,10 @@ public class Manage {
         dbwrite=dbHelper.getWritableDatabase();
         dbRead=dbHelper.getReadableDatabase();
     }
+    public void close(){
+        dbHelper.close();
+    }
+
     public void Insert(int num){
         SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String date=dateFormat.format(new Date(System.currentTimeMillis()));

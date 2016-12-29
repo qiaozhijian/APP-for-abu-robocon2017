@@ -39,10 +39,8 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private ProgressDialog progressDialog;
 
     private int buttonId;
-    private String buttonWard;
     @Override
-    protected void onCreate(Bundle s)
-    {
+    protected void onCreate(Bundle s) {
         super.onCreate(s);
         setContentView(R.layout.activity_param_change);
         sqlManage=new Manage(this);
@@ -65,9 +63,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
         Intent intent=getIntent();
         buttonId=intent.getIntExtra("button_id",0);
-        sqlManage.ward=intent.getStringExtra("gesture_ward");
+
+        Log.d("paraChange","buttonId: "+String.valueOf(buttonId));
         ((TextView)findViewById(R.id.column_num)).setText("column: "+String.valueOf(buttonId));
-        ((TextView)findViewById(R.id.column_ward)).setText("ward: "+sqlManage.ward);
 
         editTextRoll=(EditText)findViewById(R.id.edit_roll);
         editTextPitch=(EditText)findViewById(R.id.edit_pitch);
@@ -87,6 +85,10 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         (editTextYaw).setText(String.valueOf(sqlManage.yaw));
         (editTextSpeed1).setText(String.valueOf(sqlManage.speed1));
         (editTextSpeed2).setText(String.valueOf(sqlManage.speed2));
+
+        sqlManage.ward=intent.getStringExtra("gesture_ward");
+        Log.d("paraChange","ward: "+sqlManage.ward);
+        ((TextView)findViewById(R.id.column_ward)).setText("ward: "+sqlManage.ward);
     }
     @Override
     public void onClick(View v)
@@ -111,6 +113,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
                         sqlManage.speed1=Integer.parseInt(editTextSpeed1.getText().toString());
                         sqlManage.speed2=Integer.parseInt(editTextSpeed2.getText().toString());
+
                         sqlManage.Insert(buttonId);
                         Toast.makeText(ParamChangeActivity.this, "save ok", Toast.LENGTH_SHORT).show();
                     }
@@ -150,19 +153,19 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         if(bleDataManage.checkSendOk()){
                             switch (id) {
                                 case 0:
-                                    bleDataManage.sendParam(id,sqlManage.roll);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5),sqlManage.roll);
                                     break;
                                 case 1:
-                                    bleDataManage.sendParam(id,sqlManage.pitch);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5),sqlManage.pitch);
                                     break;
                                 case 2:
-                                    bleDataManage.sendParam(id,sqlManage.yaw);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5),sqlManage.yaw);
                                     break;
                                 case 3:
-                                    bleDataManage.sendParam(id,sqlManage.speed1);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5),sqlManage.speed1);
                                     break;
                                 case 4:
-                                    bleDataManage.sendParam(id,sqlManage.speed2);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5),sqlManage.speed2);
                                     break;
                                 case 5:
                                     progressDialog.cancel();
@@ -263,6 +266,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     @Override
     public void onDestroy(){
         super.onDestroy();
+        sqlManage.close();
         bleDataManage.unbind();
     }
 }

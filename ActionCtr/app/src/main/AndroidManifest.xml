@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
-            android:name=".BleConnectActivity"
+            android:name=".BeginActivity"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".BeginActivity"
+            android:name=".BleConnectActivity"
             android:screenOrientation="landscape" />
         <activity
             android:name=".ParamChangeActivity"

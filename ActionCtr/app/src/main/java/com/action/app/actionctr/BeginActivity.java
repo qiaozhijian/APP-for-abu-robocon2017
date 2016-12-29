@@ -46,7 +46,7 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
     private boolean recognizeGesture=false;
     private int buttonIdInt;
     //重写OnTouchListener的onTouch方法
-    //此方法在触摸屏被触摸，即发生触摸事件（接触和抚摸两个事件，挺形象）的时候被调用。
+    //此方法在触摸屏被触摸，即发生触摸事件的时候被调用。
     @Override
     public
     boolean onTouch(View v, MotionEvent event) {

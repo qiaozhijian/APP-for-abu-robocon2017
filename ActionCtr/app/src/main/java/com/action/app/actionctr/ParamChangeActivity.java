@@ -13,6 +13,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -102,7 +103,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 AlertDialog.Builder dialog= new AlertDialog.Builder(ParamChangeActivity.this);
                 dialog.setTitle("Notice");
                 dialog.setMessage("Are you sure to change Param?");
-                dialog.setCancelable(false);
                 dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -123,7 +123,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     public void onClick(DialogInterface dialogInterface, int i) {
                     }
                 });
+                dialog.setCancelable(false);
                 dialog.show();
+
                 break;
             case R.id.button_param_change:
                 sqlManage.roll=Float.parseFloat(editTextRoll.getText().toString());
@@ -141,7 +143,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
                 progressDialog=new ProgressDialog(ParamChangeActivity.this);
                 progressDialog.setTitle("data sending,please wait......");
-                progressDialog.setCancelable(true);
+                progressDialog.setCancelable(false);
                 progressDialog.setCanceledOnTouchOutside(false);
                 progressDialog.show();
 

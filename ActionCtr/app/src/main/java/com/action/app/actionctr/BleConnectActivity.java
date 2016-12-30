@@ -72,10 +72,8 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
 
         handler=new Handler(){
             @Override
-            public void handleMessage(Message msg)
-            {
-                switch (msg.what)
-                {
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
                     case BleService.BleProfile.BLE_IDLE:
                         progressView.setProgress(20);
                         break;
@@ -89,12 +87,12 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
                         break;
                 }
                 if(msg.what!=BleService.BleProfile.BLE_CONNECTED)
-                    handler.postDelayed(runnable,500);
+                    handler.postDelayed(runnable,1000);
                 else
                     finish();
             }
         };
-        handler.postDelayed(runnable,500);
+        handler.postDelayed(runnable,1000);
     }
 
     @Override

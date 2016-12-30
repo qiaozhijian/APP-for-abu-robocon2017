@@ -6,13 +6,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true">
+        android:layout_above="@+id/activity_ble_connect_progress_bar"
+        android:orientation="horizontal">
         <ImageView
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:src="@drawable/yuezi"/>
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="game start"/>
     </LinearLayout>
     <LinearLayout
+        android:id="@+id/activity_ble_connect_progress_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">

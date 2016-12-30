@@ -42,7 +42,6 @@ public class BleService extends Service {
 
     public interface BleProfile{
          int BLE_CONNECTED=0;
-         int BLE_DISCONNECTED=1;
          int BLE_SCANING=2;
          int BLE_IDLE=3;
          int dataLen=12;
@@ -73,8 +72,7 @@ public class BleService extends Service {
             };
             handler.postDelayed(runnable,30);
         }
-        public int  getBleStatus()
-        {
+        public int  getBleStatus() {
             return ble_status;
         }
         public boolean checkSendOk(){
@@ -102,14 +100,14 @@ public class BleService extends Service {
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                 super.onConnectionStateChange(gatt, status, newState);
-                switch (newState)
-                {
+                switch (newState) {
                     case BluetoothProfile.STATE_CONNECTED:
                         dataSend.ble_status=BleProfile.BLE_CONNECTED;
                         Log.d("Ble","ble connected");
                         mBluetoothGatt.discoverServices();
                         break;
                     case BluetoothProfile.STATE_DISCONNECTED:
+                        dataSend.ble_status=BleProfile.BLE_IDLE;
                         Log.d("Ble","ble disconnected");
                         break;
                 }
@@ -162,8 +160,12 @@ public class BleService extends Service {
                 if (!devicesList.contains(device)) {
                     devicesList.add(device);
                     Log.d("Ble", "find device , name= " + device.getName());
-                    bleAdapter.stopLeScan(mLeScanCallback);
-                    mBluetoothGatt=device.connectGatt(BleService.this, false, mGattCallback);
+                    Log.d("Ble", "device address="+device.getAddress());
+
+                    if(device.getAddress().equals("90:59:AF:0E:62:A4")){
+                        bleAdapter.stopLeScan(mLeScanCallback);
+                        mBluetoothGatt=device.connectGatt(BleService.this, false, mGattCallback);
+                    }
                 }
             }
         };

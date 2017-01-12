@@ -16,17 +16,20 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.action.app.actionctr.ble.bleDataProcess;
 import com.action.app.actionctr.sqlite.Manage;
 
+import java.util.ArrayList;
+
 /**
  * Created by 56390 on 2016/12/8.
  */
 
-public class ParamChangeActivity extends BasicActivity implements View.OnClickListener {
+public class ParamChangeActivity extends BasicActivity implements View.OnClickListener,SeekBar.OnSeekBarChangeListener {
 
     private Manage sqlManage;
     private bleDataProcess bleDataManage;
@@ -37,7 +40,70 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private EditText editTextSpeed1;
     private EditText editTextSpeed2;
 
+
+    private SeekBar seekBar_pitch;
+    private SeekBar seekBar_roll;
+    private SeekBar seekBar_yaw;
+    private SeekBar seekBar_speed1;
+    private SeekBar seekBar_speed2;
+
     private ProgressDialog progressDialog;
+
+
+    private float progressToFloat(SeekBar seekBar,int val){
+        switch (seekBar.getId()){
+            case R.id.progress_pitch:
+                return (val/360.0f*36-6);
+            case R.id.progress_roll:
+                return (val/450.0f*45-0);
+            case R.id.progress_yaw:
+                return (val/900.0f*90-45);
+            case R.id.progress_speed1:
+                return (val/350.0f*350-0);
+            case R.id.progress_speed2:
+                return (val/350.0f*350-0);
+            default:
+                Log.e("paramChange","err progressToFloat");
+                return 0.0f;
+        }
+    }
+    private int floatToProgress(SeekBar seekBar,float val){
+        switch (seekBar.getId()){
+            case R.id.progress_pitch:
+                if(val<-6)
+                    val=-6;
+                if(val>30)
+                    val=30;
+                return (int)((val+6)/36*360);
+            case R.id.progress_roll:
+                if(val<-0)
+                    val=-0;
+                if(val>45)
+                    val=45;
+                return (int)((val+0)/45*450);
+            case R.id.progress_yaw:
+                if(val<-45)
+                    val=-45;
+                if(val>45)
+                    val=45;
+                return (int)((val+45)/90*900);
+            case R.id.progress_speed1:
+                if(val<-0)
+                    val=0;
+                if(val>350)
+                    val=350;
+                return (int)((val+0)/350*350);
+            case R.id.progress_speed2:
+                if(val<-0)
+                    val=0;
+                if(val>350)
+                    val=350;
+                return (int)((val+0)/350*350);
+            default:
+                Log.e("paramChange","err floatToProgress");
+                return 0;
+        }
+    }
 
     private int buttonId;
     @Override
@@ -61,6 +127,25 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         findViewById(R.id.speed1_increase).setOnClickListener(this);
         findViewById(R.id.speed2_decrease).setOnClickListener(this);
         findViewById(R.id.speed2_increase).setOnClickListener(this);
+
+        seekBar_pitch=((SeekBar)findViewById(R.id.progress_pitch));
+        seekBar_roll=((SeekBar)findViewById(R.id.progress_roll));
+        seekBar_yaw=((SeekBar)findViewById(R.id.progress_yaw));
+        seekBar_speed1=((SeekBar)findViewById(R.id.progress_speed1));
+        seekBar_speed2=((SeekBar)findViewById(R.id.progress_speed2));
+
+        seekBar_pitch.setMax(360);
+        seekBar_roll.setMax(450);
+        seekBar_yaw.setMax(900);
+        seekBar_speed1.setMax(350);
+        seekBar_speed2.setMax(350);
+
+
+        seekBar_pitch.setOnSeekBarChangeListener(this);
+        seekBar_roll.setOnSeekBarChangeListener(this);
+        seekBar_yaw.setOnSeekBarChangeListener(this);
+        seekBar_speed1.setOnSeekBarChangeListener(this);
+        seekBar_speed2.setOnSeekBarChangeListener(this);
 
         Intent intent=getIntent();
         buttonId=intent.getIntExtra("button_id",0);
@@ -87,6 +172,12 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         (editTextSpeed1).setText(String.valueOf(sqlManage.speed1));
         (editTextSpeed2).setText(String.valueOf(sqlManage.speed2));
 
+        seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,sqlManage.pitch));
+        seekBar_roll.setProgress(floatToProgress(seekBar_roll,sqlManage.roll));
+        seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,sqlManage.yaw));
+        seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,sqlManage.speed1));
+        seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,sqlManage.speed2));
+
         sqlManage.ward=intent.getStringExtra("gesture_ward");
         Log.d("paraChange","ward: "+sqlManage.ward);
         ((TextView)findViewById(R.id.column_ward)).setText("ward: "+sqlManage.ward);
@@ -97,6 +188,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         float valueF;
         int   valueI;
         EditText editText=null;
+        SeekBar  seekBar=null;
         switch (v.getId())
         {
             case R.id.button_param_save:
@@ -155,19 +247,19 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         if(bleDataManage.checkSendOk()){
                             switch (id) {
                                 case 0:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5),sqlManage.roll);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.roll);
                                     break;
                                 case 1:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5),sqlManage.pitch);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.pitch);
                                     break;
                                 case 2:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5),sqlManage.yaw);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.yaw);
                                     break;
                                 case 3:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5),sqlManage.speed1);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.speed1);
                                     break;
                                 case 4:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5),sqlManage.speed2);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.speed2);
                                     break;
                                 case 5:
                                     progressDialog.cancel();
@@ -195,40 +287,50 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 break;
             case R.id.pitch_increase:
                 editText=(EditText)findViewById(R.id.edit_pitch);
+                seekBar=(SeekBar)findViewById(R.id.progress_pitch);
                 break;
             case R.id.roll_increase:
                 editText=(EditText)findViewById(R.id.edit_roll);
+                seekBar=(SeekBar)findViewById(R.id.progress_roll);
                 break;
             case R.id.yaw_increase:
                 editText=(EditText)findViewById(R.id.edit_yaw);
+                seekBar=(SeekBar)findViewById(R.id.progress_yaw);
                 break;
             case R.id.pitch_decrease:
                 editText=(EditText)findViewById(R.id.edit_pitch);
+                seekBar=(SeekBar)findViewById(R.id.progress_pitch);
                 break;
             case R.id.roll_decrease:
                 editText=(EditText)findViewById(R.id.edit_roll);
+                seekBar=(SeekBar)findViewById(R.id.progress_roll);
                 break;
             case R.id.yaw_decrease:
                 editText=(EditText)findViewById(R.id.edit_yaw);
+                seekBar=(SeekBar)findViewById(R.id.progress_yaw);
                 break;
             case R.id.speed1_increase:
                 editText=(EditText)findViewById(R.id.edit_speed1);
+                seekBar=(SeekBar)findViewById(R.id.progress_speed1);
                 break;
             case R.id.speed2_increase:
                 editText=(EditText)findViewById(R.id.edit_speed2);
+                seekBar=(SeekBar)findViewById(R.id.progress_speed2);
                 break;
             case R.id.speed1_decrease:
                 editText=(EditText)findViewById(R.id.edit_speed1);
+                seekBar=(SeekBar)findViewById(R.id.progress_speed1);
                 break;
             case R.id.speed2_decrease:
                 editText=(EditText)findViewById(R.id.edit_speed2);
+                seekBar=(SeekBar)findViewById(R.id.progress_speed2);
                 break;
             default:
                 Log.e("button","no case for button click");
                 finish();
                 break;
         }
-        if(editText!=null){
+        if(editText!=null&&seekBar!=null){
             switch (v.getId())
             {
                 case R.id.pitch_increase:
@@ -236,26 +338,26 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 case R.id.yaw_increase:
                     valueF=Float.parseFloat(editText.getText().toString());
                     valueF+=0.5f;
-                    editText.setText(String.valueOf(valueF));
+                    seekBar.setProgress(floatToProgress(seekBar,valueF));
                     break;
                 case R.id.pitch_decrease:
                 case R.id.roll_decrease:
                 case R.id.yaw_decrease:
                     valueF=Float.parseFloat(editText.getText().toString());
                     valueF-=0.5f;
-                    editText.setText(String.valueOf(valueF));
+                    seekBar.setProgress(floatToProgress(seekBar,valueF));
                     break;
                 case R.id.speed1_increase:
                 case R.id.speed2_increase:
                     valueI=Integer.parseInt(editText.getText().toString());
                     valueI+=1;
-                    editText.setText(String.valueOf(valueI));
+                    seekBar.setProgress(floatToProgress(seekBar,valueI));
                     break;
                 case R.id.speed1_decrease:
                 case R.id.speed2_decrease:
                     valueI=Integer.parseInt(editText.getText().toString());
                     valueI-=1;
-                    editText.setText(String.valueOf(valueI));
+                    seekBar.setProgress(floatToProgress(seekBar,valueI));
                     break;
                 default:
                     Log.e("button","no case for button click");
@@ -264,6 +366,33 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             }
         }
 
+    }
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress,
+                                  boolean fromUser) {
+        switch (seekBar.getId()){
+            case R.id.progress_pitch:
+                editTextPitch.setText(String.valueOf(progressToFloat(seekBar,progress)));
+                break;
+            case R.id.progress_roll:
+                editTextRoll.setText(String.valueOf(progressToFloat(seekBar,progress)));
+                break;
+            case R.id.progress_yaw:
+                editTextYaw.setText(String.valueOf(progressToFloat(seekBar,progress)));
+                break;
+            case R.id.progress_speed1:
+                editTextSpeed1.setText(String.valueOf((int)progressToFloat(seekBar,progress)));
+                break;
+            case R.id.progress_speed2:
+                editTextSpeed2.setText(String.valueOf((int)progressToFloat(seekBar,progress)));
+                break;
+        }
+    }
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+    }
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
     }
     @Override
     public void onDestroy(){

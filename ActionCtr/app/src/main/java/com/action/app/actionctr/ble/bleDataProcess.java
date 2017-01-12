@@ -84,17 +84,7 @@ public class bleDataProcess{
             sendData[1]='C';
             sendData[2]='C';
             sendData[3]='T';
-            switch (num){
-                case 0:
-                    sendData[4]='0';
-                    sendData[5]='0';
-                    sendData[6]='0';
-                    sendData[7]='0';
-                    sendData[8]='0';
-                    break;
-                case 1:
-                    break;
-            }
+            sendData[4]=(byte)num;
             state.send(sendData);
             return true;
         }

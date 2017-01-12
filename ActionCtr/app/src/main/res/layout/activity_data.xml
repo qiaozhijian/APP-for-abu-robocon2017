@@ -29,13 +29,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="save to file"
+            android:text="保存到文件"
             android:id="@+id/save_data"/>
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="cancel"
+            android:text="取消"
             android:id="@+id/cancel_data"/>
     </LinearLayout>
 </RelativeLayout>

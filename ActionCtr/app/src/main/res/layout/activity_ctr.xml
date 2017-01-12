@@ -20,56 +20,56 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="button1"
+            android:text="按键1"
             android:id="@+id/activity_ctr_button1"/>
         <Button
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="button2"
+            android:text="按键2"
             android:id="@+id/activity_ctr_button2"/>
         <Button
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="button3"
+            android:text="按键3"
             android:id="@+id/activity_ctr_button3"/>
         <Button
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="button4"
+            android:text="按键4"
             android:id="@+id/activity_ctr_button4"/>
         <Button
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="button5"
+            android:text="按键5"
             android:id="@+id/activity_ctr_button5"/>
         <Button
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="button6"
+            android:text="按键6"
             android:id="@+id/activity_ctr_button6"/>
         <Button
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="button7"
+            android:text="按键7"
             android:id="@+id/activity_ctr_button7"/>
         <Button
             android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="button8"
+            android:text="按键8"
             android:id="@+id/activity_ctr_button8"/>
     </LinearLayout>
 
@@ -82,7 +82,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="cancel"
+            android:text="取消"
             android:id="@+id/activity_ctr_cancel"/>
     </LinearLayout>
 </RelativeLayout>

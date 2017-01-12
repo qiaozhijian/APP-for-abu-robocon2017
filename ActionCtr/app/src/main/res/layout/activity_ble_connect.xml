@@ -17,7 +17,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="game start"/>
+            android:text="比赛开始"/>
     </LinearLayout>
     <LinearLayout
         android:id="@+id/activity_ble_connect_progress_bar"

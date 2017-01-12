@@ -2,14 +2,17 @@ package com.action.app.actionctr;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.support.v4.app.FragmentActivity;
+
 
 public class BeginActivity extends BasicActivity implements View.OnTouchListener,View.OnClickListener {
-
+    private DrawerLayout mDrawerLayout;
     private GestureDetector mGestureDetector;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +37,43 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
         initColumn(column6);
         Button column7 = (Button)findViewById(R.id.column7);
         initColumn(column7);
+
+
+        initView();
+        initEvents();
     }
+
+    private void initView() {
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.activity_begin);
+        //    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.RIGHT);
+    }
+
+    private void initEvents() {
+        mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                Log.d("MyGesture","SSSlide");
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                Log.d("MyGesture","OOOpen");
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
+    }
+
+
+
     private void initColumn(Button bt)
     {
         bt.setOnTouchListener(this);

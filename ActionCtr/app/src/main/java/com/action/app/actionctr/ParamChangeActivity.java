@@ -1,5 +1,6 @@
 package com.action.app.actionctr;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
@@ -12,6 +13,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.ViewDragHelper;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -22,7 +26,9 @@ import android.widget.Toast;
 
 import com.action.app.actionctr.ble.bleDataProcess;
 import com.action.app.actionctr.sqlite.Manage;
+import com.action.app.actionctr.MenuRightFragment;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 /**
@@ -30,6 +36,8 @@ import java.util.ArrayList;
  */
 
 public class ParamChangeActivity extends BasicActivity implements View.OnClickListener,SeekBar.OnSeekBarChangeListener {
+
+    private DrawerLayout mDrawerLayout;
 
     private Manage sqlManage;
     private bleDataProcess bleDataManage;
@@ -113,6 +121,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         sqlManage=new Manage(this);
         bleDataManage=new bleDataProcess(this);
 
+
+
+
         findViewById(R.id.button_param_cancel).setOnClickListener(this);
         findViewById(R.id.button_param_save).setOnClickListener(this);
         findViewById(R.id.button_param_change).setOnClickListener(this);
@@ -181,7 +192,78 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         sqlManage.ward=intent.getStringExtra("gesture_ward");
         Log.d("paraChange","ward: "+sqlManage.ward);
         ((TextView)findViewById(R.id.column_ward)).setText("ward: "+sqlManage.ward);
+
+        setDrawerLeftEdgeSize(this, mDrawerLayout, 1.0f);
+
+        initView();
+        initEvents();
     }
+     /**
+     2  * 抽屉滑动范围控制
+     3  * @param activity
+     4  * @param drawerLayout
+     5  * @param displayWidthPercentage 占全屏的份额0~1
+     6  */
+            private void setDrawerLeftEdgeSize(Activity activity, DrawerLayout drawerLayout, float displayWidthPercentage) {
+            if (activity == null || drawerLayout == null)
+                   return;
+            try {
+                   // find ViewDragHelper and set it accessible
+                    Field leftDraggerField = drawerLayout.getClass().getDeclaredField("mLeftDragger");
+                     leftDraggerField.setAccessible(true);
+                     ViewDragHelper leftDragger = (ViewDragHelper) leftDraggerField.get(drawerLayout);
+                    // find edgesize and set is accessible
+                     Field edgeSizeField = leftDragger.getClass().getDeclaredField("mEdgeSize");
+                  edgeSizeField.setAccessible(true);
+                 int edgeSize = edgeSizeField.getInt(leftDragger);
+                   // set new edgesize
+                   // Point displaySize = new Point();
+                    DisplayMetrics dm = new DisplayMetrics();
+                   activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
+                     edgeSizeField.setInt(leftDragger, Math.max(edgeSize, (int) (dm.widthPixels * displayWidthPercentage)));
+                } catch (NoSuchFieldException e) {
+                    Log.e("NoSuchFieldException", e.getMessage().toString());
+                } catch (IllegalArgumentException e) {
+                Log.e("IllegalArgument", e.getMessage().toString());
+
+                } catch (IllegalAccessException e) {
+                  Log.e("IllegalAccessException", e.getMessage().toString());
+             }
+      }
+   //右滑菜单监听
+    private void initView() {
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.activity_param_change);
+        //    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.RIGHT);
+    }
+
+    private void initEvents() {
+        mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                Log.d("MyGesture","SSSlide");
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                Log.d("MyGesture","OOOpen");
+
+
+
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
+    }
+
+
     @Override
     public void onClick(View v)
     {

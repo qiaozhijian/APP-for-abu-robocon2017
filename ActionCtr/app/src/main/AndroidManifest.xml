@@ -18,10 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".BeginActivity"
+            android:name=".BleConnectActivity"
             android:screenOrientation="landscape"></activity>
         <activity
-            android:name=".BleConnectActivity"
+            android:name=".BeginActivity"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

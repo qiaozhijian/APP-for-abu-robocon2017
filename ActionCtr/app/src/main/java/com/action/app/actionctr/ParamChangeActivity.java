@@ -117,6 +117,8 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         findViewById(R.id.button_param_save).setOnClickListener(this);
         findViewById(R.id.button_param_change).setOnClickListener(this);
 
+        findViewById(R.id.button_param_shot).setOnClickListener(this);
+
         findViewById(R.id.roll_decrease).setOnClickListener(this);
         findViewById(R.id.roll_increase).setOnClickListener(this);
         findViewById(R.id.pitch_decrease).setOnClickListener(this);
@@ -139,7 +141,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         seekBar_yaw.setMax(900);
         seekBar_speed1.setMax(350);
         seekBar_speed2.setMax(350);
-
 
         seekBar_pitch.setOnSeekBarChangeListener(this);
         seekBar_roll.setOnSeekBarChangeListener(this);
@@ -191,10 +192,15 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         SeekBar  seekBar=null;
         switch (v.getId())
         {
+            case R.id.button_param_shot:
+                bleDataManage.sendCmd(1);
+                break;
             case R.id.button_param_save:
                 AlertDialog.Builder dialog= new AlertDialog.Builder(ParamChangeActivity.this);
-                dialog.setTitle("Notice");
-                dialog.setMessage("Are you sure to change Param?");
+                final EditText commentText=new EditText(ParamChangeActivity.this);
+                dialog.setTitle("注意");
+                dialog.setMessage("您是否确认需要将改组参数保存?下面请输入注释");
+                dialog.setView(commentText);
                 dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -205,6 +211,8 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
                         sqlManage.speed1=Integer.parseInt(editTextSpeed1.getText().toString());
                         sqlManage.speed2=Integer.parseInt(editTextSpeed2.getText().toString());
+
+                        sqlManage.comment=commentText.getText().toString();
 
                         sqlManage.Insert(buttonId);
                         Toast.makeText(ParamChangeActivity.this, "save ok", Toast.LENGTH_SHORT).show();

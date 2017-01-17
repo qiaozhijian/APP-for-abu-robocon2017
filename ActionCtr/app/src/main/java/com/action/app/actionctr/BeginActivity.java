@@ -8,6 +8,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
+import com.action.app.actionctr.wifi.wifiService;
+
 public class BeginActivity extends BasicActivity implements View.OnTouchListener,View.OnClickListener {
 
     private GestureDetector mGestureDetector;
@@ -15,6 +17,11 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_begin);
+
+        Intent intentService=new Intent(this,wifiService.class);
+        startService(intentService);
+
+
         mGestureDetector = new GestureDetector(this,new gestureListener());
 
         findViewById(R.id.go_to_data_activity).setOnClickListener(this);

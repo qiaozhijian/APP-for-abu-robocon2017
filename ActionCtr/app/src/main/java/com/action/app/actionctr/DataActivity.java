@@ -124,7 +124,7 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
         public View getView(int position, View contenView, ViewGroup parent){
             Manage.dataSt data=getItem(position);
             View view= LayoutInflater.from(getContext()).inflate(resourceId,null);
-            TextView[] text=new TextView[7];
+            TextView[] text=new TextView[8];
 
             text[0]=(TextView)view.findViewById(R.id.text1_data_item_listview);
             text[1]=(TextView)view.findViewById(R.id.text2_data_item_listview);
@@ -133,6 +133,7 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
             text[4]=(TextView)view.findViewById(R.id.text5_data_item_listview);
             text[5]=(TextView)view.findViewById(R.id.text6_data_item_listview);
             text[6]=(TextView)view.findViewById(R.id.text7_data_item_listview);
+            text[7]=(TextView)view.findViewById(R.id.text8_data_item_listview);
 
             text[0].setText(String.valueOf(data.roll));
             text[1].setText(String.valueOf(data.pitch));
@@ -141,7 +142,7 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
             text[4].setText(String.valueOf(data.speed2));
             text[5].setText(data.direction);
             text[6].setText(data.date);
-
+            text[7].setText(data.note);
             return view;
         }
     }

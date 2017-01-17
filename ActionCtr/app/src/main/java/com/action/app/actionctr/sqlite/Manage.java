@@ -28,6 +28,7 @@ public class Manage {
     public int   speed1;
     public int   speed2;
     public String   ward;
+    public String   comment;
 
     private MyDatabaseHelper dbHelper;
     private SQLiteDatabase dbRead;
@@ -48,15 +49,15 @@ public class Manage {
         SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String date=dateFormat.format(new Date(System.currentTimeMillis()));
 
-        String cmd="insert into column"+String.valueOf(num)+" (roll,pitch,yaw,speed1,speed2,direction,save_date) ";
+        String cmd="insert into column"+String.valueOf(num)+" (roll,pitch,yaw,speed1,speed2,direction,save_date,note_comment) ";
         String data="values("+String.valueOf(roll)+","
-                +String.valueOf(pitch)+","
-                +String.valueOf(yaw)+","
-                +String.valueOf(speed1)+","
-                +String.valueOf(speed2)+","
-                +"'"+ward+"'"+","
-                +"'"+date+"'"+");";
-
+                            +String.valueOf(pitch)+","
+                            +String.valueOf(yaw)+","
+                            +String.valueOf(speed1)+","
+                            +String.valueOf(speed2)+","
+                            +"'"+ward+"'"+","
+                            +"'"+date+"'"+","
+                            +"'"+comment+"'"+");";
         dbwrite.execSQL(cmd+data);
         Log.d("database","insert sql: "+cmd+data);
     }
@@ -75,17 +76,16 @@ public class Manage {
             speed1=cursor.getInt(cursor.getColumnIndex("speed1"));
             speed2=cursor.getInt(cursor.getColumnIndex("speed2"));
             ward=cursor.getString(cursor.getColumnIndex("direction"));
+            comment=cursor.getString(cursor.getColumnIndex("note_comment"));
             Log.d("database","data read:");
 
             Log.d("database","roll: "+String.valueOf(roll));
             Log.d("database","pitch: "+String.valueOf(pitch));
             Log.d("database","yaw: "+String.valueOf(yaw));
-
             Log.d("database","speed1: "+String.valueOf(speed1));
             Log.d("database","speed2: "+String.valueOf(speed2));
-
             Log.d("database","direction: "+ward);
-
+            Log.d("database","note_comment: "+comment);
             return true;
         }
         else {
@@ -105,6 +105,7 @@ public class Manage {
             data.speed2=cursor.getInt(cursor.getColumnIndex("speed2"));
             data.date=cursor.getString(cursor.getColumnIndex("save_date"));
             data.direction=cursor.getString(cursor.getColumnIndex("direction"));
+            data.note=cursor.getString(cursor.getColumnIndex("note_comment"));
             dataList.add(data);
         }
         return dataList;
@@ -117,6 +118,7 @@ public class Manage {
         public int   speed2;
         public String date;
         public String direction;
+        public String note;
     }
 
     public class MyDatabaseHelper extends SQLiteOpenHelper {
@@ -134,12 +136,13 @@ public class Manage {
             //调用SQLiteDatabase中的execSQL（）执行建表语句。
             String create="create table column";
             String param= "( roll real," +
-                    "pitch real," +
-                    "yaw real," +
-                    "speed1 integer," +
-                    "speed2 integer,"+
-                    "direction text,"+
-                    "save_date text);";
+                            "pitch real," +
+                            "yaw real," +
+                            "speed1 integer," +
+                            "speed2 integer,"+
+                            "direction text,"+
+                            "save_date text,"+
+                            "note_comment text);";
 
             db.execSQL(create+"1"+param);
             db.execSQL(create+"2"+param);

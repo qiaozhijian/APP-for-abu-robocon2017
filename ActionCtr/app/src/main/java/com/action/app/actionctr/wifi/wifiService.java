@@ -20,6 +20,8 @@ import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by 56390 on 2017/1/15.
@@ -38,9 +40,21 @@ public class wifiService extends Service {
     private final String presharedKey="12345678";
     private ServerSocket server;
 
+    private Runnable runnable;
+    private Runnable dataReceiveRunnable;
+    private Thread runnableThread;
+    private Thread dataReceiveThread;
+
     private BufferedReader in;
 
+    private ArrayList<String> wifiDataList;
+
+    private boolean destroyFlag=false;
+
     public class wifiServiceBinder extends Binder{
+        public ArrayList<String> getWifiStringDataList(){
+            return wifiDataList;
+        }
     }
 
     @Override
@@ -50,8 +64,9 @@ public class wifiService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        destroyFlag=false;
         Log.d("wifi","wifi service start onCreate");
+        wifiDataList=new ArrayList<String>();
         wifiManager=(WifiManager) getSystemService(Context.WIFI_SERVICE);
         broadcastReceiver=new wifiBroadcastReceiver(wifiManager,SSID,presharedKey);
         intentFilter=new IntentFilter();
@@ -66,35 +81,8 @@ public class wifiService extends Service {
         else if(!wifiManager.getConnectionInfo().getSSID().equals("\""+SSID+"\"")){
             wifiManager.setWifiEnabled(false);
         }
-        final Runnable dataReceiveRunnable=new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    String line;
-                    Log.d("wifi","socket start dataReceive");
-                    try {
-                        in=new BufferedReader(new InputStreamReader(server.accept().getInputStream()));
-                        if(server!=null){
-                            while ((line=in.readLine())!=null){
-                                Log.d("wifi","socket data:"+line);
-                            }
-                        }
-                        else {
-                            Log.d("wifi","socket client err || no data");
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
 
-        };
-        final Runnable runnable=new Runnable() {
+        runnable=new Runnable() {
             @Override
             public void run() {
                 while (!broadcastReceiver.checkOk()){
@@ -107,16 +95,17 @@ public class wifiService extends Service {
                 try {
                     Log.d("wifi","socket connecting");
                     server=new ServerSocket(port);
+                    server.setSoTimeout(3000);
                     Log.d("wifi","socket connect successfully");
-                    new Thread(dataReceiveRunnable).start();
+                    dataReceiveThread.start();
                 }catch (UnknownHostException e) {
                     Log.e("wifi","socket init unknownhost err");
                     e.printStackTrace();
                     Log.e("wife","Exception: "+Log.getStackTraceString(e));
                 } catch (IOException e) {
-                     Log.e("wifi","socket init io err");
+                    Log.e("wifi","socket init io err");
                     e.printStackTrace();
-                     Log.e("wife","Exception: "+Log.getStackTraceString(e));
+                    Log.e("wife","Exception: "+Log.getStackTraceString(e));
                 }catch (Exception e) {
                     Log.e("wifi","socket init connect err");
                     e.printStackTrace();
@@ -125,7 +114,40 @@ public class wifiService extends Service {
 
             }
         };
-        new Thread(runnable).start();
+        dataReceiveRunnable=new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    String line;
+                    Log.d("wifi","socket start dataReceive");
+                    try {
+                        in=new BufferedReader(new InputStreamReader(server.accept().getInputStream()));
+                        while ((line=in.readLine())!=null&&!destroyFlag){
+                            wifiDataList.add(line);
+                            while (!dataReceiveThread.isInterrupted());
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (Exception e){
+                        e.printStackTrace();
+                        Log.e("wifi","Exception： "+Log.getStackTraceString(e));
+                    }
+                    if (destroyFlag){
+                        try {
+                            Log.d("wifi","data receive thread destroy");
+                            in.close();
+                            server.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    Log.d("wifi","dataReceiveThread close successfully");
+                }
+            }
+        };
+        runnableThread=new Thread(runnable);
+        dataReceiveThread=new Thread(dataReceiveRunnable);
+        runnableThread.start();
     }
 
     @Override
@@ -135,8 +157,29 @@ public class wifiService extends Service {
     }
     @Override
     public void onDestroy(){
-        Log.d("Ble","Ble Service onDestroy");
+        Log.d("wifi","wifi Service onDestroy");
+        try {
+            in.close();
+            Log.d("wifi","inBuffer close successfully");
+            server.close();
+            Log.d("wifi","socket close successfully");
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        dataReceiveThread.interrupt();
+                        Log.d("wifi","dataReceiveThread close successfully");
+                    }catch (Exception e) {
+                        e.printStackTrace();
+                        new Handler().postDelayed(this,1000);
+                    }
+                }
+            },1000);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         unregisterReceiver(broadcastReceiver);
+        destroyFlag=true;
         super.onDestroy();
     }
 }

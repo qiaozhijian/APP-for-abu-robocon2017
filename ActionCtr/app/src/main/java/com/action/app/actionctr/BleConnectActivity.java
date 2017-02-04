@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.action.app.actionctr.ble.BleService;
 import com.action.app.actionctr.ble.bleDataProcess;
+import com.action.app.actionctr.wifi.wifiService;
 
 
 /**
@@ -51,10 +52,14 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
         }
         Log.d("Ble", "ble enable");
         progressView.setProgress(10);
-        Intent intentService=new Intent(this,BleService.class);
-        startService(intentService);
-        state=new bleDataProcess(this);
 
+        Intent intentBleService=new Intent(this,BleService.class);
+        startService(intentBleService);
+
+        Intent intentWifiService=new Intent(this,wifiService.class);
+        startService(intentWifiService);
+
+        state=new bleDataProcess(this);
         final Runnable runnable=new Runnable() {
             @Override
             public void run() {

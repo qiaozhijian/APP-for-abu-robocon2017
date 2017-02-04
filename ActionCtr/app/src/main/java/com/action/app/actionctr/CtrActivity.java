@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import com.action.app.actionctr.ble.bleDataProcess;
+import com.action.app.actionctr.wifi.wifiService;
 
 public class CtrActivity extends BasicActivity implements View.OnClickListener {
 

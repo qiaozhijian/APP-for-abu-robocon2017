@@ -102,8 +102,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="数据"
+            android:text="参数数据"
             android:id="@+id/go_to_data_activity"/>
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="调试数据"
+            android:id="@+id/go_to_debug_data_activity"/>
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"

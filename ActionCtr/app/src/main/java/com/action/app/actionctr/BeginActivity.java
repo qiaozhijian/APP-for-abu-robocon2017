@@ -18,14 +18,12 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_begin);
 
-        Intent intentService=new Intent(this,wifiService.class);
-        startService(intentService);
-
-
         mGestureDetector = new GestureDetector(this,new gestureListener());
 
         findViewById(R.id.go_to_data_activity).setOnClickListener(this);
         findViewById(R.id.go_to_ctr_activity).setOnClickListener(this);
+        findViewById(R.id.go_to_debug_data_activity).setOnClickListener(this);
+
 
         Button column1 =(Button)findViewById(R.id.column1);
         initColumn(column1);
@@ -181,6 +179,11 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
                 break;
             case R.id.go_to_data_activity:
                 intent=new Intent(BeginActivity.this,DataActivity.class);
+                startActivity(intent);
+                finish();
+                break;
+            case R.id.go_to_debug_data_activity:
+                intent=new Intent(BeginActivity.this,DebugDataDisplayActivity.class);
                 startActivity(intent);
                 finish();
                 break;

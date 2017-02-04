@@ -15,6 +15,9 @@ public class CtrActivity extends BasicActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ctr);
 
+        Intent intentWifiService=new Intent(this,wifiService.class);
+        startService(intentWifiService);
+
         findViewById(R.id.activity_ctr_button1).setOnClickListener(this);
         findViewById(R.id.activity_ctr_button2).setOnClickListener(this);
         findViewById(R.id.activity_ctr_button3).setOnClickListener(this);

@@ -124,7 +124,7 @@ public class wifiService extends Service {
                         in=new BufferedReader(new InputStreamReader(server.accept().getInputStream()));
                         while ((line=in.readLine())!=null&&!destroyFlag){
                             wifiDataList.add(line);
-                            while (!dataReceiveThread.isInterrupted());
+                            //while (!dataReceiveThread.isInterrupted());
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -158,26 +158,26 @@ public class wifiService extends Service {
     @Override
     public void onDestroy(){
         Log.d("wifi","wifi Service onDestroy");
-        try {
-            in.close();
-            Log.d("wifi","inBuffer close successfully");
-            server.close();
-            Log.d("wifi","socket close successfully");
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        dataReceiveThread.interrupt();
-                        Log.d("wifi","dataReceiveThread close successfully");
-                    }catch (Exception e) {
-                        e.printStackTrace();
-                        new Handler().postDelayed(this,1000);
-                    }
-                }
-            },1000);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            in.close();
+//            Log.d("wifi","inBuffer close successfully");
+//            server.close();
+//            Log.d("wifi","socket close successfully");
+//            new Handler().postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    try {
+//                        dataReceiveThread.interrupt();
+//                        Log.d("wifi","dataReceiveThread close successfully");
+//                    }catch (Exception e) {
+//                        e.printStackTrace();
+//                        new Handler().postDelayed(this,1000);
+//                    }
+//                }
+//            },1000);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         unregisterReceiver(broadcastReceiver);
         destroyFlag=true;
         super.onDestroy();

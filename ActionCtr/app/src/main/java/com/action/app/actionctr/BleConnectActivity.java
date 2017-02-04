@@ -56,8 +56,7 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
         Intent intentBleService=new Intent(this,BleService.class);
         startService(intentBleService);
 
-        Intent intentWifiService=new Intent(this,wifiService.class);
-        startService(intentWifiService);
+
 
         state=new bleDataProcess(this);
         final Runnable runnable=new Runnable() {

@@ -34,6 +34,7 @@ public class Excel {
     private WritableSheet sheet_column6;
     private WritableSheet sheet_column7;
     private WritableSheet sheet_column;
+    private WritableSheet StoreDebugData;
     public Excel(String name) //形式 "....xls"
     {
         filename = name ;
@@ -51,7 +52,29 @@ public class Excel {
             return dir.toString();
         }
     }
-
+    public void storeExcel(ArrayList<String> debugData) //用于wifi保存
+    {
+        Label label;
+        try {
+            file = new File((getExcelDir() + File.separator + filename));
+            if (!file.exists()) {
+                book = Workbook.createWorkbook(file);
+                //生成工作表
+                StoreDebugData=book.createSheet("DebugData",0);
+                for(int i=0;i<debugData.size();i++){
+                    label = new Label(0,i,debugData.get(i));
+                    StoreDebugData.addCell(label);
+                }
+                book.write();
+                book.close();
+            }
+        }catch (IOException e) {
+            e.printStackTrace();
+        }catch (WriteException e) {
+            e.printStackTrace();
+        }
+    }
+    //用于数据库保存
     public void storeExcel(Manage database) {
         ArrayList<Manage.dataSt> dataList = new ArrayList<>();
         Label label;

@@ -69,6 +69,7 @@ public class DebugDataDisplayActivity extends BasicActivity implements View.OnCl
                 handler.postDelayed(this,300);
             }
         };
+
         Runnable runnable=new Runnable() {
             @Override
             public void run() {

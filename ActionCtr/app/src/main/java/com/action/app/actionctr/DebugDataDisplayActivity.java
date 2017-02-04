@@ -35,6 +35,7 @@ public class DebugDataDisplayActivity extends BasicActivity implements View.OnCl
     private ArrayList<String> debugData;
 
     private boolean freshFlag=true;
+    private Handler handler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,12 +45,13 @@ public class DebugDataDisplayActivity extends BasicActivity implements View.OnCl
         findViewById(R.id.activity_debugdata_cancel).setOnClickListener(this);
         findViewById(R.id.activity_debug_data_fresh).setOnClickListener(this);
         findViewById(R.id.activity_debug_data_save).setOnClickListener(this);
+        findViewById(R.id.activity_debug_data_clear).setOnClickListener(this);
 
         final ListView listView=(ListView)findViewById(R.id.activity_debugdata_listview);
 
         dataProcess=new wifiDataProcess(this);
 
-        final Handler handler=new Handler(){
+        handler=new Handler(){
             @Override
             public void handleMessage(Message msg){
                 debugData.clear();
@@ -111,6 +113,12 @@ public class DebugDataDisplayActivity extends BasicActivity implements View.OnCl
                 freshFlag=false;
                 startActivity(intent);
                 finish();
+                break;
+            case R.id.activity_debug_data_clear:
+                dataProcess.getWifiStringDataList().clear();
+                Message message=new Message();
+                message.what=0;
+                handler.sendMessage(message);
                 break;
             case R.id.activity_debug_data_fresh:
                 freshFlag=!freshFlag;

@@ -10,6 +10,7 @@ import android.widget.Button;
 
 import com.action.app.actionctr.wifi.wifiService;
 
+
 public class BeginActivity extends BasicActivity implements View.OnTouchListener,View.OnClickListener {
 
     private GestureDetector mGestureDetector;
@@ -18,12 +19,14 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_begin);
 
+        Intent intentWifiService=new Intent(this,wifiService.class);
+        startService(intentWifiService);
+
         mGestureDetector = new GestureDetector(this,new gestureListener());
 
         findViewById(R.id.go_to_data_activity).setOnClickListener(this);
         findViewById(R.id.go_to_ctr_activity).setOnClickListener(this);
         findViewById(R.id.go_to_debug_data_activity).setOnClickListener(this);
-
 
         Button column1 =(Button)findViewById(R.id.column1);
         initColumn(column1);
@@ -167,6 +170,10 @@ public class BeginActivity extends BasicActivity implements View.OnTouchListener
             }
             return false;
         }
+    }
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
     }
     @Override
     public void onClick(View v){

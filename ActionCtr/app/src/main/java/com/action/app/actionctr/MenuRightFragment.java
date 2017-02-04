@@ -37,10 +37,16 @@ public class MenuRightFragment extends Fragment implements AdapterView.OnItemCli
 
     @Override
         public void onAttach(Context context) {
-               bleCtr=new bleDataProcess(context);
+                bleCtr=new bleDataProcess(context);
               super.onAttach(context);
               adapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, menuItems);
         }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        bleCtr.unbind();
+    }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)

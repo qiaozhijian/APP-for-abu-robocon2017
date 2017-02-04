@@ -34,9 +34,9 @@ public class wifiService extends Service {
     private wifiBroadcastReceiver broadcastReceiver;
     private IntentFilter intentFilter;
 
-    private final int port=8080;
+    private final int port=8086;
 
-    private final String SSID="ESP8266_TEST";
+    private final String SSID="ATK-ESP8266";
     private final String presharedKey="12345678";
     private ServerSocket server;
 
@@ -158,26 +158,6 @@ public class wifiService extends Service {
     @Override
     public void onDestroy(){
         Log.d("wifi","wifi Service onDestroy");
-//        try {
-//            in.close();
-//            Log.d("wifi","inBuffer close successfully");
-//            server.close();
-//            Log.d("wifi","socket close successfully");
-//            new Handler().postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        dataReceiveThread.interrupt();
-//                        Log.d("wifi","dataReceiveThread close successfully");
-//                    }catch (Exception e) {
-//                        e.printStackTrace();
-//                        new Handler().postDelayed(this,1000);
-//                    }
-//                }
-//            },1000);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
         unregisterReceiver(broadcastReceiver);
         destroyFlag=true;
         super.onDestroy();

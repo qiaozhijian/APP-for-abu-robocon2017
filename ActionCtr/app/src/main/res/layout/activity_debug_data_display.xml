@@ -36,6 +36,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:text="清除数据"
+            android:id="@+id/activity_debug_data_clear"/>
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="取消"
             android:id="@+id/activity_debugdata_cancel"/>
     </LinearLayout>

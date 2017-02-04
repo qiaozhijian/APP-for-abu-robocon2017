@@ -84,6 +84,9 @@ public class wifiBroadcastReceiver extends BroadcastReceiver {
                     case SUSPENDED:
                         status=false;
                         break;
+                    case CONNECTING:
+                        Log.d("wifi","wifi connecting");
+                        break;
                 }
             }
         }
@@ -94,22 +97,31 @@ public class wifiBroadcastReceiver extends BroadcastReceiver {
                     for (ScanResult device:scanResultList){
                         Log.d("wifi","scan result SSID:"+device.SSID);
                         if(device.SSID.equals(SSID)&&(!manager.getConnectionInfo().getSSID().equals("\""+SSID+"\""))){
-                            WifiConfiguration configuration=new WifiConfiguration();
                             List<WifiConfiguration> wifiConfigurationList;
-                            configuration.SSID="\""+device.SSID+"\"";
-                            configuration.preSharedKey="\""+ prekey +"\"";
-                            configuration.status=WifiConfiguration.Status.ENABLED;
                             wifiConfigurationList=manager.getConfiguredNetworks();
-                            for(WifiConfiguration config:wifiConfigurationList){
-                                if(config.SSID.equals(configuration.SSID)){
-                                    manager.removeNetwork(config.networkId);
+                            int wifiId;
+                            boolean check=false;
+                            for (WifiConfiguration config:wifiConfigurationList){
+                                if(config.SSID.equals("\""+device.SSID+"\"")){
+                                    check=true;
+                                    wifiId=config.networkId;
+                                    manager.enableNetwork(wifiId,true);
+                                    Log.d("wifi","serch ok");
+                                    Log.d("wifi","try to connect");
+                                    break;
                                 }
                             }
-                            int wifiId;
-                            wifiId=manager.addNetwork(configuration);
-                            manager.enableNetwork(wifiId,true);
-                            Log.d("wifi","serch ok");
-                            Log.d("wifi","try to connect");
+                            if(!check){
+                                WifiConfiguration configuration=new WifiConfiguration();
+                                configuration.SSID="\""+device.SSID+"\"";
+                                configuration.preSharedKey="\""+ prekey +"\"";
+                                configuration.status=WifiConfiguration.Status.ENABLED;
+                                Log.d("wifi","there is no configure for device");
+                                Log.d("wifi","try to init configuration");
+                                wifiId=manager.addNetwork(configuration);
+                                manager.enableNetwork(wifiId,true);
+                                Log.d("wifi","try to connect");
+                            }
                             break;
                         }
                     }

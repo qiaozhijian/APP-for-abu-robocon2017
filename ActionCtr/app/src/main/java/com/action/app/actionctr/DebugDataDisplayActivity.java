@@ -1,6 +1,8 @@
 package com.action.app.actionctr;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
@@ -15,11 +17,15 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.action.app.actionctr.excel.Excel;
 import com.action.app.actionctr.sqlite.Manage;
 import com.action.app.actionctr.wifi.wifiDataProcess;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DebugDataDisplayActivity extends BasicActivity implements View.OnClickListener{
@@ -108,6 +114,42 @@ public class DebugDataDisplayActivity extends BasicActivity implements View.OnCl
                 break;
             case R.id.activity_debug_data_fresh:
                 freshFlag=!freshFlag;
+                break;
+            case R.id.activity_debug_data_save://保存到excel
+                if(!freshFlag) {
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(DebugDataDisplayActivity.this);
+                    dialog.setTitle("注意");
+                    dialog.setMessage("确定保存数据到excel?");
+                    dialog.setCancelable(false);
+                    dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            String date = dateFormat.format(new Date(System.currentTimeMillis()));
+                            Excel data_excel = new Excel("DebugData" + date + ".xls");
+                            data_excel.storeExcel(debugData);  //  将wifi收到的数据保存到excel
+
+                        }
+                    });
+                    dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                        }
+                    });
+                    dialog.show();
+                }else{
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(DebugDataDisplayActivity.this);
+                    dialog.setTitle("警告");
+                    dialog.setMessage("请先暂停更新");
+                    dialog.setCancelable(false);
+                    dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                        }
+                    });
+                    dialog.show();
+                }
                 break;
         }
     }

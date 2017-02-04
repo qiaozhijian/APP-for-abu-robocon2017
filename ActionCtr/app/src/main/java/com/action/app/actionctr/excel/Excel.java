@@ -20,7 +20,10 @@ import jxl.write.WriteException;
 /**
  * Created by lenovo on 2016/12/21.
  */
-
+/*
+   attention:
+   2007~03版本的excel一个工作表最多有65536行
+ */
 public class Excel {
 
     private WritableWorkbook book;
@@ -34,7 +37,8 @@ public class Excel {
     private WritableSheet sheet_column6;
     private WritableSheet sheet_column7;
     private WritableSheet sheet_column;
-    private WritableSheet StoreDebugData;
+    ArrayList<WritableSheet> StoreData;
+
     public Excel(String name) //形式 "....xls"
     {
         filename = name ;
@@ -55,15 +59,38 @@ public class Excel {
     public void storeExcel(ArrayList<String> debugData) //用于wifi保存
     {
         Label label;
+
+        String sheetName;
+
+        int sheetNumber;
+        sheetNumber = debugData.size()/65536;
+        if(debugData.size()%65536 != 0)
+            sheetNumber = sheetNumber+1;
+
+        StoreData = new ArrayList<>();
         try {
             file = new File((getExcelDir() + File.separator + filename));
             if (!file.exists()) {
                 book = Workbook.createWorkbook(file);
+                for(int j = 0;j<sheetNumber;j++)
+                {
+                    StoreData.add( book.createSheet("DebugDataSheet"+toString().valueOf(j),j));
+                }
                 //生成工作表
-                StoreDebugData=book.createSheet("DebugData",0);
-                for(int i=0;i<debugData.size();i++){
-                    label = new Label(0,i,debugData.get(i));
-                    StoreDebugData.addCell(label);
+                for(int j=0;j<sheetNumber;j++)
+                {
+                    if(j == sheetNumber-1) {
+                        for(int i=0;i <  debugData.size()%65536 ; i++){
+                            label = new Label(0,i,debugData.get(i + 65536*j));
+                            StoreData.get(j).addCell(label);
+                        }
+                    }else{
+                        for(int i=0;i<65536;i++){
+                            label = new Label(0,i,debugData.get(i + 65536*j));
+                            StoreData.get(j).addCell(label);
+                        }
+                    }
+
                 }
                 book.write();
                 book.close();

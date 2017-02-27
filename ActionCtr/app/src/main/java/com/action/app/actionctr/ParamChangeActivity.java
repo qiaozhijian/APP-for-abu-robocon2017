@@ -49,10 +49,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private EditText editTextSpeed1;
     private EditText editTextSpeed2;
 
-    private EditText editTextColumnNum;
-    private EditText editTextGunNum;
-
-
     private SeekBar seekBar_pitch;
     private SeekBar seekBar_roll;
     private SeekBar seekBar_yaw;
@@ -61,9 +57,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
     private ProgressDialog progressDialog;
 
-
-    private String gunID;
-    private String columnID;
 
     private float progressToFloat(SeekBar seekBar,int val){
         switch (seekBar.getId()){
@@ -176,7 +169,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
         Intent intent=getIntent();
         buttonId=intent.getIntExtra("button_id",0);
-
         Log.d("paraChange","buttonId: "+String.valueOf(buttonId));
         ((TextView)findViewById(R.id.column_num)).setText("column: "+String.valueOf(buttonId));
 
@@ -281,7 +273,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         {
             case R.id.button_param_shot:
                 if(event.getAction() == MotionEvent.ACTION_UP){  //发射键按键松开事件
-
+                    //bleDataManage.sendCmd(2);
                 }
                 break;
             default:
@@ -353,27 +345,51 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 final Handler handler=new Handler();
                 Runnable runnable=new Runnable() {
                     private byte id=0;
+                    private byte id2=0;
                     @Override
                     public void run() {
+                        switch(String.valueOf(((TextView)findViewById(R.id.state)).getText())){
+                            case "打球":
+                                id2=0;
+                                break;
+                            case "打盘":
+                                id2=1;
+                                break;
+                            case "扔":
+                                id2=2;
+                                break;
+                        }
+                        id2=(byte)(id2*3);
+                        switch(String.valueOf(((TextView)findViewById(R.id.gun_num)).getText())){
+                            case "左":
+                                id2+=0;
+                                break;
+                            case "右":
+                                id2+=1;
+                                break;
+                            case "上":
+                                id2+=2;
+                                break;
+                        }
                         if(bleDataManage.checkSendOk()){
                             switch (id) {
                                 case 0:
-                                    //bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.roll);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),id2,sqlManage.roll);
                                     break;
                                 case 1:
-                                    //bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.pitch);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),id2,sqlManage.pitch);
                                     break;
                                 case 2:
-                                    //bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.yaw);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),id2,sqlManage.yaw);
                                     break;
                                 case 3:
-                                    //bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.speed1);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),id2,sqlManage.speed1);
                                     break;
                                 case 4:
-                                    //bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.speed2);
+                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),id2,sqlManage.speed2);
                                     break;
                                 case 5:
-                                    //progressDialog.cancel();
+                                    progressDialog.cancel();
                                     break;
                                 default:
                                     Log.e("change button","onclick run err run err!!!!!");

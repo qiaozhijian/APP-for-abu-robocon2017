@@ -48,7 +48,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private EditText editTextSpeed1;
     private EditText editTextSpeed2;
 
-
     private SeekBar seekBar_pitch;
     private SeekBar seekBar_roll;
     private SeekBar seekBar_yaw;
@@ -60,16 +59,16 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
     private float progressToFloat(SeekBar seekBar,int val){
         switch (seekBar.getId()){
-            case R.id.progress_pitch:
-                return (val/360.0f*36-6);
-            case R.id.progress_roll:
-                return (val/450.0f*45-0);
             case R.id.progress_yaw:
-                return (val/900.0f*90-45);
+                return (val-500)/10.0f;
+            case R.id.progress_pitch:
+                return (val+150)/10.0f;
+            case R.id.progress_roll:
+                return (val-0)/10.0f;
             case R.id.progress_speed1:
-                return (val/350.0f*350-0);
+                return val*10/10.0f;
             case R.id.progress_speed2:
-                return (val/350.0f*350-0);
+                return val*10/10.0f;
             default:
                 Log.e("paramChange","err progressToFloat");
                 return 0.0f;
@@ -77,36 +76,36 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     }
     private int floatToProgress(SeekBar seekBar,float val){
         switch (seekBar.getId()){
+            case R.id.progress_yaw:
+                if(val<-50)
+                    val=-50;
+                if(val>50)
+                    val=50;
+                return Math.round((val+50)*10);
             case R.id.progress_pitch:
-                if(val<-6)
-                    val=-6;
-                if(val>30)
-                    val=30;
-                return (int)((val+6)/36*360);
+                if(val<15)
+                    val=15;
+                if(val>40)
+                    val=40;
+                return Math.round((val-15)*10);
             case R.id.progress_roll:
                 if(val<-0)
                     val=-0;
                 if(val>45)
                     val=45;
-                return (int)((val+0)/45*450);
-            case R.id.progress_yaw:
-                if(val<-45)
-                    val=-45;
-                if(val>45)
-                    val=45;
-                return (int)((val+45)/90*900);
+                return Math.round((val+0)*10);
             case R.id.progress_speed1:
                 if(val<-0)
                     val=0;
                 if(val>350)
                     val=350;
-                return (int)((val+0)/350*350);
+                return Math.round((val+0));
             case R.id.progress_speed2:
                 if(val<-0)
                     val=0;
                 if(val>350)
                     val=350;
-                return (int)((val+0)/350*350);
+                return Math.round((val+0));
             default:
                 Log.e("paramChange","err floatToProgress");
                 return 0;
@@ -120,7 +119,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         setContentView(R.layout.activity_param_change);
         sqlManage=new Manage(this);
         bleDataManage=new bleDataProcess(this);
-
 
 
 
@@ -141,15 +139,16 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         findViewById(R.id.speed2_decrease).setOnClickListener(this);
         findViewById(R.id.speed2_increase).setOnClickListener(this);
 
+
         seekBar_pitch=((SeekBar)findViewById(R.id.progress_pitch));
         seekBar_roll=((SeekBar)findViewById(R.id.progress_roll));
         seekBar_yaw=((SeekBar)findViewById(R.id.progress_yaw));
         seekBar_speed1=((SeekBar)findViewById(R.id.progress_speed1));
         seekBar_speed2=((SeekBar)findViewById(R.id.progress_speed2));
 
-        seekBar_pitch.setMax(360);
+        seekBar_yaw.setMax(1000);
+        seekBar_pitch.setMax(250);
         seekBar_roll.setMax(450);
-        seekBar_yaw.setMax(900);
         seekBar_speed1.setMax(350);
         seekBar_speed2.setMax(350);
 
@@ -290,12 +289,10 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         sqlManage.roll=Float.parseFloat(editTextRoll.getText().toString());
                         sqlManage.pitch=Float.parseFloat(editTextPitch.getText().toString());
                         sqlManage.yaw=Float.parseFloat(editTextYaw.getText().toString());
-
                         sqlManage.speed1=Integer.parseInt(editTextSpeed1.getText().toString());
                         sqlManage.speed2=Integer.parseInt(editTextSpeed2.getText().toString());
 
                         sqlManage.comment=commentText.getText().toString();
-
                         sqlManage.Insert(buttonId);
                         Toast.makeText(ParamChangeActivity.this, "save ok", Toast.LENGTH_SHORT).show();
                     }
@@ -313,7 +310,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 sqlManage.roll=Float.parseFloat(editTextRoll.getText().toString());
                 sqlManage.pitch=Float.parseFloat(editTextPitch.getText().toString());
                 sqlManage.yaw=Float.parseFloat(editTextYaw.getText().toString());
-
                 sqlManage.speed1=Integer.parseInt(editTextSpeed1.getText().toString());
                 sqlManage.speed2=Integer.parseInt(editTextSpeed2.getText().toString());
 

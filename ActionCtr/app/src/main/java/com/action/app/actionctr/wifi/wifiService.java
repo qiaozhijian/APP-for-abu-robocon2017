@@ -140,8 +140,9 @@ public class wifiService extends Service {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        Log.d("wifi","dataReceiveThread close successfully");
                     }
-                    Log.d("wifi","dataReceiveThread close successfully");
+
                 }
             }
         };

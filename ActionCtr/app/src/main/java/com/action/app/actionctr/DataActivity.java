@@ -32,6 +32,8 @@ import java.util.List;
 public class DataActivity extends BasicActivity implements AdapterView.OnItemSelectedListener,View.OnClickListener{
 
     private Spinner spinner;
+    private Spinner state_spinner;
+    private Spinner gun_spinner;
     private Manage manage;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +43,10 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
         (findViewById(R.id.save_data)).setOnClickListener(this);
         (findViewById(R.id.cancel_data)).setOnClickListener(this);
 
-        spinner=(Spinner)findViewById(R.id.option_select);
+        spinner=(Spinner)findViewById(R.id.option_select);//柱子的选择
         List<String> optionSelect=new ArrayList<String>();
+
+
 
         optionSelect.add("column1");
         optionSelect.add("column2");
@@ -52,10 +56,15 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
         optionSelect.add("column6");
         optionSelect.add("column7");
 
+
+
         ArrayAdapter<String> optionSelectAdapter=new ArrayAdapter<String>(this,R.layout.support_simple_spinner_dropdown_item,optionSelect);
         optionSelectAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         spinner.setAdapter(optionSelectAdapter);
         spinner.setOnItemSelectedListener(this);
+
+
+
         manage=new Manage(this);
 
     }
@@ -80,7 +89,7 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
                         SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                         String date=dateFormat.format(new Date(System.currentTimeMillis()));
                         Excel data_excel = new Excel(date+".xls");
-                        data_excel.storeExcel(manage);  //  讲数据库中的内容导出到excel
+                        data_excel.storeExcel(manage,spinner.getSelectedItem().toString(),gun_spinner.getSelectedItem().toString(),state_spinner.getSelectedItem().toString());  //  讲数据库中的内容导出到excel
 
                     }
                 });
@@ -99,14 +108,54 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
                 break;
         }
     }
-    @Override
+    boolean database_ok =false;
+    @Override//实现两个spiner联动，需要嵌套
     public void onItemSelected(AdapterView<?> adapter, View v,int arg1,long arg2){
-        ArrayList<Manage.dataSt> data;
-        data=manage.selectAll(adapter.getSelectedItem().toString());
-        dataAdapter data_adapter=new dataAdapter(DataActivity.this,R.layout.item_listview_activity_data,data);
-        ListView listView=(ListView)findViewById(R.id.list_data_display);
-        listView.setAdapter(data_adapter);
-        Log.d("dataDisplay","display");
+        ;
+        switch(adapter.getId())
+        {
+            case R.id.state_select:
+                database_ok = true;
+                break;
+            case R.id.gun_select:
+                state_spinner=(Spinner)findViewById(R.id.state_select);//枪的选择
+                List<String> stateoptionSelect=new ArrayList<String>();
+
+                stateoptionSelect.add("扔");
+                stateoptionSelect.add("打球");
+                stateoptionSelect.add("打盘");
+                ArrayAdapter<String> stateoptionSelectAdapter=new ArrayAdapter<String>(this,R.layout.support_simple_spinner_dropdown_item,stateoptionSelect);
+                stateoptionSelectAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+                state_spinner.setAdapter(stateoptionSelectAdapter);
+                state_spinner.setOnItemSelectedListener(this);
+
+                //gun_spinner.getSelectedItem().toString();
+                break;
+            case R.id.option_select:
+                gun_spinner=(Spinner)findViewById(R.id.gun_select);//枪的选择
+                List<String> gunoptionSelect=new ArrayList<String>();
+                gunoptionSelect.add("左");
+                gunoptionSelect.add("上");
+                gunoptionSelect.add("右");
+                ArrayAdapter<String> gunoptionSelectAdapter=new ArrayAdapter<String>(this,R.layout.support_simple_spinner_dropdown_item,gunoptionSelect);
+                gunoptionSelectAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+                gun_spinner.setAdapter(gunoptionSelectAdapter);
+                gun_spinner.setOnItemSelectedListener(this);
+
+                break;
+            default:
+                break;
+        }
+       if(database_ok)
+       {
+           ArrayList<Manage.dataSt> data;
+           data=manage.selectAll(spinner.getSelectedItem().toString(),gun_spinner.getSelectedItem().toString(),state_spinner.getSelectedItem().toString());
+           dataAdapter data_adapter=new dataAdapter(DataActivity.this,R.layout.item_listview_activity_data,data);
+           ListView listView=(ListView)findViewById(R.id.list_data_display);
+           listView.setAdapter(data_adapter);
+           Log.d("dataDisplay","display");
+       }
+
     }
     public void onNothingSelected(AdapterView<?> adapter){
 

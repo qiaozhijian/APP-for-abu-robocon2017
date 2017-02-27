@@ -34,14 +34,22 @@
                 android:layout_weight="1"
                 android:id="@+id/gun_right"
                 android:text="枪.右"/>
-            <EditText
+            <TextView
                 android:layout_width="0dp"
-                android:id="@+id/edit_gunnum"
+                android:id="@+id/gun_num"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:inputType="text"
                 android:layout_weight="1"
-                android:text="枪："/>
+                android:text="左"/>
+            <TextView
+                android:layout_width="0dp"
+                android:id="@+id/state"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:inputType="text"
+                android:layout_weight="1"
+                android:text="扔"/>
             <TextView
                 android:layout_width="0dp"
                 android:id="@+id/column_num"

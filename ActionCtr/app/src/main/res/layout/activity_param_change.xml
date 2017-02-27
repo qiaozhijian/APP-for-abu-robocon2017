@@ -5,12 +5,51 @@
     android:layout_height="match_parent"
     android:id="@+id/activity_param_change"
     >
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:orientation="vertical"
         android:layout_above="@+id/ok_cancel_choose">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/gun_left"
+                android:text="枪.左"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/gun_up"
+                android:text="枪.上"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/gun_right"
+                android:text="枪.右"/>
+            <EditText
+                android:layout_width="0dp"
+                android:id="@+id/edit_gunnum"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:inputType="text"
+                android:layout_weight="1"
+                android:text="枪："/>
+            <TextView
+                android:layout_width="0dp"
+                android:id="@+id/column_num"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:text="Column："/>
+        </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -190,26 +229,31 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:text=""
-                android:id="@+id/column_num"/>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:text=""
-                android:id="@+id/column_ward"/>
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:gravity="center"
+                android:text="扔"
+                android:id="@+id/button_param_fly"/>
+            <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="打球"
+            android:id="@+id/button_param_shotball"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="打盘"
+                android:id="@+id/button_param_shotfrisbee"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
                 android:textStyle="bold"
                 android:textSize="40sp"
                 android:gravity="center"

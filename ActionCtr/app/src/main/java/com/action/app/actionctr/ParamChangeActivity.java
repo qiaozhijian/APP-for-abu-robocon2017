@@ -18,6 +18,7 @@ import android.support.v4.widget.ViewDragHelper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -35,7 +36,7 @@ import java.util.ArrayList;
  * Created by 56390 on 2016/12/8.
  */
 
-public class ParamChangeActivity extends BasicActivity implements View.OnClickListener,SeekBar.OnSeekBarChangeListener {
+public class ParamChangeActivity extends BasicActivity implements View.OnClickListener,SeekBar.OnSeekBarChangeListener,View.OnTouchListener {
 
     private DrawerLayout mDrawerLayout;
 
@@ -48,6 +49,10 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private EditText editTextSpeed1;
     private EditText editTextSpeed2;
 
+    private EditText editTextColumnNum;
+    private EditText editTextGunNum;
+
+
     private SeekBar seekBar_pitch;
     private SeekBar seekBar_roll;
     private SeekBar seekBar_yaw;
@@ -56,6 +61,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
     private ProgressDialog progressDialog;
 
+
+    private String gunID;
+    private String columnID;
 
     private float progressToFloat(SeekBar seekBar,int val){
         switch (seekBar.getId()){
@@ -120,13 +128,14 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         sqlManage=new Manage(this);
         bleDataManage=new bleDataProcess(this);
 
-
+        findViewById(R.id.button_param_shot).setOnClickListener(this);//射
+        findViewById(R.id.button_param_shot).setOnTouchListener(this);
 
         findViewById(R.id.button_param_cancel).setOnClickListener(this);
         findViewById(R.id.button_param_save).setOnClickListener(this);
         findViewById(R.id.button_param_change).setOnClickListener(this);
 
-        findViewById(R.id.button_param_shot).setOnClickListener(this);
+
 
         findViewById(R.id.roll_decrease).setOnClickListener(this);
         findViewById(R.id.roll_increase).setOnClickListener(this);
@@ -138,6 +147,13 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         findViewById(R.id.speed1_increase).setOnClickListener(this);
         findViewById(R.id.speed2_decrease).setOnClickListener(this);
         findViewById(R.id.speed2_increase).setOnClickListener(this);
+
+        findViewById(R.id.gun_left).setOnClickListener(this);
+        findViewById(R.id.gun_right).setOnClickListener(this);
+        findViewById(R.id.gun_up).setOnClickListener(this);
+        findViewById(R.id.button_param_shotball).setOnClickListener(this);
+        findViewById(R.id.button_param_shotfrisbee).setOnClickListener(this);
+        findViewById(R.id.button_param_fly).setOnClickListener(this);
 
 
         seekBar_pitch=((SeekBar)findViewById(R.id.progress_pitch));
@@ -169,6 +185,8 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         editTextYaw=(EditText)findViewById(R.id.edit_yaw);
         editTextSpeed1=(EditText)findViewById(R.id.edit_speed1);
         editTextSpeed2=(EditText)findViewById(R.id.edit_speed2);
+
+        editTextGunNum =  (EditText)findViewById(R.id.edit_gunnum);
 
         if(!sqlManage.Select(buttonId)){
             sqlManage.roll=0.0f;
@@ -263,7 +281,20 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         });
     }
 
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch(v.getId())
+        {
+            case R.id.button_param_shot:
+                if(event.getAction() == MotionEvent.ACTION_UP){  //发射键按键松开事件
 
+                }
+                break;
+            default:
+                break;
+        }
+        return false;
+    }
     @Override
     public void onClick(View v)
     {
@@ -410,6 +441,21 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             case R.id.speed2_decrease:
                 editText=(EditText)findViewById(R.id.edit_speed2);
                 seekBar=(SeekBar)findViewById(R.id.progress_speed2);
+                break;
+            case R.id.gun_left:
+                editTextGunNum.setText("左");
+                break;
+            case R.id.gun_up:
+                editTextGunNum.setText("上");
+                break;
+            case R.id.gun_right:
+                editTextGunNum.setText("下");
+                break;
+            case R.id.button_param_shotball://打球
+                break;
+            case R.id.button_param_shotfrisbee://打飞盘
+                break;
+            case R.id.button_param_fly: //只是扔
                 break;
             default:
                 Log.e("button","no case for button click");

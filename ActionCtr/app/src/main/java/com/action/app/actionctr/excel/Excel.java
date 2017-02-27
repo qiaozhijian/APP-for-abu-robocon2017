@@ -102,72 +102,36 @@ public class Excel {
         }
     }
     //用于数据库保存
-    public void storeExcel(Manage database) {
+    public void storeExcel(Manage database,String column,String gun,String state) {
         ArrayList<Manage.dataSt> dataList = new ArrayList<>();
         Label label;
         jxl.write.Number number;
         try {
 
-            file = new File((getExcelDir() + File.separator + filename));
+            file = new File((getExcelDir() + File.separator +column+gun+state+ filename));
             if (!file.exists()) {
                 //新建文件
                 book = Workbook.createWorkbook(file);
                 // 生成工作表，参数0表示是第一页
-                sheet_column1 = book.createSheet("column1", 0);
-                sheet_column2 = book.createSheet("column2", 1);
-                sheet_column3 = book.createSheet("column3", 2);
-                sheet_column4 = book.createSheet("column4", 3);
-                sheet_column5 = book.createSheet("column5", 4);
-                sheet_column6 = book.createSheet("column6", 5);
-                sheet_column7 = book.createSheet("column7", 6);
-                //}
-
-                for( int column = 1 ; column < 8 ; column ++)
-                {
-                    dataList = database.selectAll("column"+String.valueOf( column ));
-                    switch( column )
-                    {
-                        case 1:
-                            sheet_column = sheet_column1;
-                            break;
-                        case 2:
-                            sheet_column = sheet_column2;
-                            break;
-                        case 3:
-                            sheet_column = sheet_column3;
-                            break;
-                        case 4:
-                            sheet_column = sheet_column4;
-                            break;
-                        case 5:
-                            sheet_column = sheet_column5;
-                            break;
-                        case 6:
-                            sheet_column = sheet_column6;
-                            break;
-                        case 7:
-                            sheet_column = sheet_column7;
-                            break;
+                sheet_column = book.createSheet(column+gun+state, 0);
+                dataList = database.selectAll(column,gun,state);
+                if (database.getDataBaseCount( column,gun,state ) != 0) {
+                    for (int i = 0; i < database.getDataBaseCount(column,gun,state); i++) {
+                        number = new jxl.write.Number(0,i,dataList.get(i).roll);// 生成一个保存数字的单元格，必须使用Number的完整包路径，否则有语法歧义。单元格位置是第二列，第一行，值为123
+                        sheet_column.addCell(number);
+                        number = new jxl.write.Number(1,i, dataList.get(i).pitch);// 生成一个保存数字的单元格，必须使用Number的完整包路径，否则有语法歧义。单元格位置是第二列，第一行，值为123
+                        sheet_column.addCell(number);
+                        number = new jxl.write.Number(2,i, dataList.get(i).yaw);// 生成一个保存数字的单元格，必须使用Number的完整包路径，否则有语法歧义。单元格位置是第二列，第一行，值为123
+                        sheet_column.addCell(number);
+                        number = new jxl.write.Number(3,i, dataList.get(i).speed1);// 生成一个保存数字的单元格，必须使用Number的完整包路径，否则有语法歧义。单元格位置是第二列，第一行，值为123
+                        sheet_column.addCell(number);
+                        number = new jxl.write.Number(4,i, dataList.get(i).speed2);// 生成一个保存数字的单元格，必须使用Number的完整包路径，否则有语法歧义。单元格位置是第二列，第一行，值为123
+                        sheet_column.addCell(number);
+                        label = new Label(5, i, dataList.get(i).direction);//在Label对象的构造子中前两个参数坐标(0,0)，第三个参数内容
+                        sheet_column.addCell(label);
+                        label = new Label(6,i, dataList.get(i).date);
+                        sheet_column.addCell(label);
                     }
-                    if (database.getDataBaseCount( column ) != 0) {
-                        for (int i = 0; i < database.getDataBaseCount(column); i++) {
-                            number = new jxl.write.Number(0,i,dataList.get(i).roll);// 生成一个保存数字的单元格，必须使用Number的完整包路径，否则有语法歧义。单元格位置是第二列，第一行，值为123
-                            sheet_column.addCell(number);
-                            number = new jxl.write.Number(1,i, dataList.get(i).pitch);// 生成一个保存数字的单元格，必须使用Number的完整包路径，否则有语法歧义。单元格位置是第二列，第一行，值为123
-                            sheet_column.addCell(number);
-                            number = new jxl.write.Number(2,i, dataList.get(i).yaw);// 生成一个保存数字的单元格，必须使用Number的完整包路径，否则有语法歧义。单元格位置是第二列，第一行，值为123
-                            sheet_column.addCell(number);
-                            number = new jxl.write.Number(3,i, dataList.get(i).speed1);// 生成一个保存数字的单元格，必须使用Number的完整包路径，否则有语法歧义。单元格位置是第二列，第一行，值为123
-                            sheet_column.addCell(number);
-                            number = new jxl.write.Number(4,i, dataList.get(i).speed2);// 生成一个保存数字的单元格，必须使用Number的完整包路径，否则有语法歧义。单元格位置是第二列，第一行，值为123
-                            sheet_column.addCell(number);
-                            label = new Label(5, i, dataList.get(i).direction);//在Label对象的构造子中前两个参数坐标(0,0)，第三个参数内容
-                            sheet_column.addCell(label);
-                            label = new Label(6,i, dataList.get(i).date);
-                            sheet_column.addCell(label);
-                        }
-                    }
-
                 }
 
                 book.write();

@@ -18,6 +18,7 @@ import android.support.v4.widget.ViewDragHelper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -35,7 +36,7 @@ import java.util.ArrayList;
  * Created by 56390 on 2016/12/8.
  */
 
-public class ParamChangeActivity extends BasicActivity implements View.OnClickListener,SeekBar.OnSeekBarChangeListener {
+public class ParamChangeActivity extends BasicActivity implements View.OnClickListener,SeekBar.OnSeekBarChangeListener,View.OnTouchListener {
 
     private DrawerLayout mDrawerLayout;
 
@@ -48,6 +49,10 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private EditText editTextSpeed1;
     private EditText editTextSpeed2;
 
+    private EditText editTextColumnNum;
+    private EditText editTextGunNum;
+
+
     private SeekBar seekBar_pitch;
     private SeekBar seekBar_roll;
     private SeekBar seekBar_yaw;
@@ -56,6 +61,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
     private ProgressDialog progressDialog;
 
+
+    private String gunID;
+    private String columnID;
 
     private float progressToFloat(SeekBar seekBar,int val){
         switch (seekBar.getId()){
@@ -120,13 +128,14 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         sqlManage=new Manage(this);
         bleDataManage=new bleDataProcess(this);
 
-
+        findViewById(R.id.button_param_shot).setOnClickListener(this);//射
+        findViewById(R.id.button_param_shot).setOnTouchListener(this);
 
         findViewById(R.id.button_param_cancel).setOnClickListener(this);
         findViewById(R.id.button_param_save).setOnClickListener(this);
         findViewById(R.id.button_param_change).setOnClickListener(this);
 
-        findViewById(R.id.button_param_shot).setOnClickListener(this);
+
 
         findViewById(R.id.roll_decrease).setOnClickListener(this);
         findViewById(R.id.roll_increase).setOnClickListener(this);
@@ -138,6 +147,13 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         findViewById(R.id.speed1_increase).setOnClickListener(this);
         findViewById(R.id.speed2_decrease).setOnClickListener(this);
         findViewById(R.id.speed2_increase).setOnClickListener(this);
+
+        findViewById(R.id.gun_left).setOnClickListener(this);
+        findViewById(R.id.gun_right).setOnClickListener(this);
+        findViewById(R.id.gun_up).setOnClickListener(this);
+        findViewById(R.id.button_param_shotball).setOnClickListener(this);
+        findViewById(R.id.button_param_shotfrisbee).setOnClickListener(this);
+        findViewById(R.id.button_param_fly).setOnClickListener(this);
 
 
         seekBar_pitch=((SeekBar)findViewById(R.id.progress_pitch));
@@ -170,7 +186,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         editTextSpeed1=(EditText)findViewById(R.id.edit_speed1);
         editTextSpeed2=(EditText)findViewById(R.id.edit_speed2);
 
-        if(!sqlManage.Select(buttonId)){
+        if(!sqlManage.Select(buttonId,"左","扔")){
             sqlManage.roll=0.0f;
             sqlManage.pitch=0.0f;
             sqlManage.yaw=0.0f;
@@ -188,10 +204,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,sqlManage.yaw));
         seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,sqlManage.speed1));
         seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,sqlManage.speed2));
-
-        sqlManage.ward=intent.getStringExtra("gesture_ward");
-        Log.d("paraChange","ward: "+sqlManage.ward);
-        ((TextView)findViewById(R.id.column_ward)).setText("ward: "+sqlManage.ward);
 
         setDrawerLeftEdgeSize(this, mDrawerLayout, 1.0f);
 
@@ -263,7 +275,20 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         });
     }
 
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch(v.getId())
+        {
+            case R.id.button_param_shot:
+                if(event.getAction() == MotionEvent.ACTION_UP){  //发射键按键松开事件
 
+                }
+                break;
+            default:
+                break;
+        }
+        return false;
+    }
     @Override
     public void onClick(View v)
     {
@@ -280,7 +305,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 AlertDialog.Builder dialog= new AlertDialog.Builder(ParamChangeActivity.this);
                 final EditText commentText=new EditText(ParamChangeActivity.this);
                 dialog.setTitle("注意");
-                dialog.setMessage("您是否确认需要将改组参数保存?下面请输入注释");
+                dialog.setMessage("您是否确认需要将改组参数保存到数据库?下面请输入注释");
                 dialog.setView(commentText);
                 dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
@@ -293,7 +318,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         sqlManage.speed2=Integer.parseInt(editTextSpeed2.getText().toString());
 
                         sqlManage.comment=commentText.getText().toString();
-                        sqlManage.Insert(buttonId);
+                        sqlManage.Insert(buttonId, String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()));
                         Toast.makeText(ParamChangeActivity.this, "save ok", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -410,6 +435,132 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             case R.id.speed2_decrease:
                 editText=(EditText)findViewById(R.id.edit_speed2);
                 seekBar=(SeekBar)findViewById(R.id.progress_speed2);
+                break;
+            case R.id.gun_left:
+                ((TextView)findViewById(R.id.gun_num)).setText("左");
+                if(!sqlManage.Select(buttonId,"左",String.valueOf(((TextView)findViewById(R.id.state)).getText()))){
+                    sqlManage.roll=0.0f;
+                    sqlManage.pitch=0.0f;
+                    sqlManage.yaw=0.0f;
+                    sqlManage.speed1=0;
+                    sqlManage.speed2=0;
+                }
+                (editTextRoll).setText(String.valueOf(sqlManage.roll));
+                (editTextPitch).setText(String.valueOf(sqlManage.pitch));
+                (editTextYaw).setText(String.valueOf(sqlManage.yaw));
+                (editTextSpeed1).setText(String.valueOf(sqlManage.speed1));
+                (editTextSpeed2).setText(String.valueOf(sqlManage.speed2));
+
+                seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,sqlManage.pitch));
+                seekBar_roll.setProgress(floatToProgress(seekBar_roll,sqlManage.roll));
+                seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,sqlManage.yaw));
+                seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,sqlManage.speed1));
+                seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,sqlManage.speed2));
+                break;
+            case R.id.gun_up:
+                ((TextView)findViewById(R.id.gun_num)).setText("上");
+                if(!sqlManage.Select(buttonId,"上",String.valueOf(((TextView)findViewById(R.id.state)).getText()))){
+                    sqlManage.roll=0.0f;
+                    sqlManage.pitch=0.0f;
+                    sqlManage.yaw=0.0f;
+                    sqlManage.speed1=0;
+                    sqlManage.speed2=0;
+                }
+                (editTextRoll).setText(String.valueOf(sqlManage.roll));
+                (editTextPitch).setText(String.valueOf(sqlManage.pitch));
+                (editTextYaw).setText(String.valueOf(sqlManage.yaw));
+                (editTextSpeed1).setText(String.valueOf(sqlManage.speed1));
+                (editTextSpeed2).setText(String.valueOf(sqlManage.speed2));
+
+                seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,sqlManage.pitch));
+                seekBar_roll.setProgress(floatToProgress(seekBar_roll,sqlManage.roll));
+                seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,sqlManage.yaw));
+                seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,sqlManage.speed1));
+                seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,sqlManage.speed2));
+                break;
+            case R.id.gun_right:
+                ((TextView)findViewById(R.id.gun_num)).setText("右");
+                if(!sqlManage.Select(buttonId,"右",String.valueOf(((TextView)findViewById(R.id.state)).getText()))){
+                    sqlManage.roll=0.0f;
+                    sqlManage.pitch=0.0f;
+                    sqlManage.yaw=0.0f;
+                    sqlManage.speed1=0;
+                    sqlManage.speed2=0;
+                }
+                (editTextRoll).setText(String.valueOf(sqlManage.roll));
+                (editTextPitch).setText(String.valueOf(sqlManage.pitch));
+                (editTextYaw).setText(String.valueOf(sqlManage.yaw));
+                (editTextSpeed1).setText(String.valueOf(sqlManage.speed1));
+                (editTextSpeed2).setText(String.valueOf(sqlManage.speed2));
+
+                seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,sqlManage.pitch));
+                seekBar_roll.setProgress(floatToProgress(seekBar_roll,sqlManage.roll));
+                seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,sqlManage.yaw));
+                seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,sqlManage.speed1));
+                seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,sqlManage.speed2));
+                break;
+            case R.id.button_param_shotball://打球
+                ((TextView)findViewById(R.id.state)).setText("打球");
+                if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),"打球")){
+                    sqlManage.roll=0.0f;
+                    sqlManage.pitch=0.0f;
+                    sqlManage.yaw=0.0f;
+                    sqlManage.speed1=0;
+                    sqlManage.speed2=0;
+                }
+                (editTextRoll).setText(String.valueOf(sqlManage.roll));
+                (editTextPitch).setText(String.valueOf(sqlManage.pitch));
+                (editTextYaw).setText(String.valueOf(sqlManage.yaw));
+                (editTextSpeed1).setText(String.valueOf(sqlManage.speed1));
+                (editTextSpeed2).setText(String.valueOf(sqlManage.speed2));
+
+                seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,sqlManage.pitch));
+                seekBar_roll.setProgress(floatToProgress(seekBar_roll,sqlManage.roll));
+                seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,sqlManage.yaw));
+                seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,sqlManage.speed1));
+                seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,sqlManage.speed2));
+                break;
+            case R.id.button_param_shotfrisbee://打飞盘
+                ((TextView)findViewById(R.id.state)).setText("打盘");
+                if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),"打盘")){
+                    sqlManage.roll=0.0f;
+                    sqlManage.pitch=0.0f;
+                    sqlManage.yaw=0.0f;
+                    sqlManage.speed1=0;
+                    sqlManage.speed2=0;
+                }
+                (editTextRoll).setText(String.valueOf(sqlManage.roll));
+                (editTextPitch).setText(String.valueOf(sqlManage.pitch));
+                (editTextYaw).setText(String.valueOf(sqlManage.yaw));
+                (editTextSpeed1).setText(String.valueOf(sqlManage.speed1));
+                (editTextSpeed2).setText(String.valueOf(sqlManage.speed2));
+
+                seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,sqlManage.pitch));
+                seekBar_roll.setProgress(floatToProgress(seekBar_roll,sqlManage.roll));
+                seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,sqlManage.yaw));
+                seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,sqlManage.speed1));
+                seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,sqlManage.speed2));
+                break;
+            case R.id.button_param_fly: //只是扔
+                ((TextView)findViewById(R.id.state)).setText("扔");
+                if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),"扔")){
+                    sqlManage.roll=0.0f;
+                    sqlManage.pitch=0.0f;
+                    sqlManage.yaw=0.0f;
+                    sqlManage.speed1=0;
+                    sqlManage.speed2=0;
+                }
+                (editTextRoll).setText(String.valueOf(sqlManage.roll));
+                (editTextPitch).setText(String.valueOf(sqlManage.pitch));
+                (editTextYaw).setText(String.valueOf(sqlManage.yaw));
+                (editTextSpeed1).setText(String.valueOf(sqlManage.speed1));
+                (editTextSpeed2).setText(String.valueOf(sqlManage.speed2));
+
+                seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,sqlManage.pitch));
+                seekBar_roll.setProgress(floatToProgress(seekBar_roll,sqlManage.roll));
+                seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,sqlManage.yaw));
+                seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,sqlManage.speed1));
+                seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,sqlManage.speed2));
                 break;
             default:
                 Log.e("button","no case for button click");

@@ -45,11 +45,11 @@ public class Manage {
         dbHelper.close();
     }
 
-    public void Insert(int num){
+    public void Insert(int num,String gun,String state){
         SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String date=dateFormat.format(new Date(System.currentTimeMillis()));
 
-        String cmd="insert into column"+String.valueOf(num)+" (roll,pitch,yaw,speed1,speed2,direction,save_date,note_comment) ";
+        String cmd="insert into column"+String.valueOf(num)+gun+state+" (roll,pitch,yaw,speed1,speed2,direction,save_date,note_comment) ";
         String data="values("+String.valueOf(roll)+","
                             +String.valueOf(pitch)+","
                             +String.valueOf(yaw)+","
@@ -61,12 +61,12 @@ public class Manage {
         dbwrite.execSQL(cmd+data);
         Log.d("database","insert sql: "+cmd+data);
     }
-    public  int getDataBaseCount(int num){
-        Cursor cursor=dbRead.query("column"+String.valueOf(num),null,null,null,null,null,null);
+    public  int getDataBaseCount(String column,String gun,String state){
+        Cursor cursor=dbRead.query(column+gun+state,null,null,null,null,null,null);
         return(cursor.getCount());
     }
-    public boolean Select(int num){
-        Cursor cursor=dbRead.query("column"+String.valueOf(num),null,null,null,null,null,null);
+    public boolean Select(int num,String gun,String state){
+        Cursor cursor=dbRead.query("column"+String.valueOf(num)+gun+state,null,null,null,null,null,null);
 
         if(cursor.getCount()!=0) {
             cursor.moveToLast();
@@ -93,8 +93,8 @@ public class Manage {
         }
     }
 
-    public ArrayList<dataSt> selectAll(String num){
-        Cursor cursor=dbRead.query(num,null,null,null,null,null,null);
+    public ArrayList<dataSt> selectAll(String num,String gun,String state){
+        Cursor cursor=dbRead.query(num+gun+state,null,null,null,null,null,null);
         ArrayList<dataSt> dataList=new ArrayList<>();
         while (cursor.moveToNext()) {
             dataSt data=new dataSt();
@@ -133,6 +133,7 @@ public class Manage {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
+
             //调用SQLiteDatabase中的execSQL（）执行建表语句。
             String create="create table column";
             String param= "( roll real," +
@@ -144,13 +145,60 @@ public class Manage {
                             "save_date text,"+
                             "note_comment text);";
 
-            db.execSQL(create+"1"+param);
-            db.execSQL(create+"2"+param);
-            db.execSQL(create+"3"+param);
-            db.execSQL(create+"4"+param);
-            db.execSQL(create+"5"+param);
-            db.execSQL(create+"6"+param);
-            db.execSQL(create+"7"+param);
+            for(int i= 1;i< 8 ;i++)
+            {
+                for(int j = 1 ;j<4;j++)
+                {
+                    for(int k=1; k<4;k++)
+                    {
+                        switch(j)
+                        {
+                            case 1:
+                                switch (k)
+                                {
+                                    case 1:
+                                        db.execSQL(create+String.valueOf(i)+"右"+"打球"+param);
+                                        break;
+                                    case 2:
+                                        db.execSQL(create+String.valueOf(i)+"右"+"打盘"+param);
+                                        break;
+                                    case 3:
+                                        db.execSQL(create+String.valueOf(i)+"右"+"扔"+param);
+                                        break;
+                                }
+                                break;
+                            case 2:
+                                switch (k)
+                                {
+                                    case 1:
+                                        db.execSQL(create+String.valueOf(i)+"上"+"打球"+param);
+                                        break;
+                                    case 2:
+                                        db.execSQL(create+String.valueOf(i)+"上"+"打盘"+param);
+                                        break;
+                                    case 3:
+                                        db.execSQL(create+String.valueOf(i)+"上"+"扔"+param);
+                                        break;
+                                }
+                                break;
+                            case 3:
+                                switch (k)
+                                {
+                                    case 1:
+                                        db.execSQL(create+String.valueOf(i)+"左"+"打球"+param);
+                                        break;
+                                    case 2:
+                                        db.execSQL(create+String.valueOf(i)+"左"+"打盘"+param);
+                                        break;
+                                    case 3:
+                                        db.execSQL(create+String.valueOf(i)+"左"+"扔"+param);
+                                        break;
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
 
             Toast.makeText(mContext, "database create", Toast.LENGTH_SHORT).show();
         }

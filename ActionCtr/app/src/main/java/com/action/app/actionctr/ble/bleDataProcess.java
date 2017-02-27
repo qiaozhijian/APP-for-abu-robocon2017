@@ -33,42 +33,40 @@ public class bleDataProcess{
         cpptool=new JniShareUtils();
         text.bindService(bindIntent,connection,text.BIND_AUTO_CREATE);
     }
+    public boolean sendParam(byte id1, byte id2,int value){
+        byte[] sendData=new byte[BleService.bleDataLen];
 
-    public int getBleStatus(){
-        return state.getBleStatus();
-    }
-    public boolean sendParam(byte id,int value){
-        byte[] sendData=new byte[BleService.BleProfile.dataLen];
-
-        if(BleService.BleProfile.dataLen>=9){
+        if(sendData.length>=10){
             sendData[0]='A';
             sendData[1]='C';
             sendData[2]='P';
             sendData[3]='C';
-            sendData[4]=id;
-            sendData[5]=(byte)(value&0xff);
-            sendData[6]=(byte)((value>>8)&0xff);
-            sendData[7]=(byte)((value>>16)&0xff);
-            sendData[8]=(byte)((value>>24)&0xff);
+            sendData[4]=id1;
+            sendData[5]=id2;
+            sendData[6]=(byte)(value&0xff);
+            sendData[7]=(byte)((value>>8)&0xff);
+            sendData[8]=(byte)((value>>16)&0xff);
+            sendData[9]=(byte)((value>>24)&0xff);
             state.send(sendData);
             return true;
         }
         Log.e("Ble","dataSend length err");
         return false;
     }
-    public boolean sendParam(byte id,float value){
-        byte[] sendData=new byte[BleService.BleProfile.dataLen];
+    public boolean sendParam(byte id1, byte id2,float value){
+        byte[] sendData=new byte[BleService.bleDataLen];
         byte[] floatData=cpptool.floatToByte(value);
-        if(BleService.BleProfile.dataLen>=9){
+        if(sendData.length>=10){
             sendData[0]='A';
             sendData[1]='C';
             sendData[2]='P';
             sendData[3]='C';
-            sendData[4]=id;
-            sendData[5]=floatData[0];
-            sendData[6]=floatData[1];
-            sendData[7]=floatData[2];
-            sendData[8]=floatData[3];
+            sendData[4]=id1;
+            sendData[5]=id2;
+            sendData[6]=floatData[0];
+            sendData[7]=floatData[1];
+            sendData[8]=floatData[2];
+            sendData[9]=floatData[3];
             state.send(sendData);
             return true;
         }
@@ -77,9 +75,9 @@ public class bleDataProcess{
     }
     public boolean sendCmd(int num){
 
-        byte[] sendData=new byte[BleService.BleProfile.dataLen];
+        byte[] sendData=new byte[BleService.bleDataLen];
 
-        if(BleService.BleProfile.dataLen>=9){
+        if(sendData.length>=10){
             sendData[0]='A';
             sendData[1]='C';
             sendData[2]='C';
@@ -96,6 +94,12 @@ public class bleDataProcess{
     }
     public Binder getBinder(){
         return state;
+    }
+    public boolean isReadyForData(){
+        return state.isReady();
+    }
+    public int readRssi(){
+        return state.readRssi();
     }
     public void unbind(){
         context.unbindService(connection);

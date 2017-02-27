@@ -1,20 +1,17 @@
 package com.action.app.actionctr;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
-import android.content.Context;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.Toast;
+import android.widget.Button;
+import android.widget.TextView;
+
 
 import com.action.app.actionctr.ble.BleService;
 import com.action.app.actionctr.ble.bleDataProcess;
-import com.action.app.actionctr.wifi.wifiService;
 
 
 /**
@@ -22,89 +19,65 @@ import com.action.app.actionctr.wifi.wifiService;
  */
 
 public class BleConnectActivity extends BasicActivity implements View.OnClickListener {
-    private ProgressBar progressView;
-    private BluetoothAdapter bleAdapter;
-    private BluetoothManager bleManager;
     private bleDataProcess state;
-    Handler handler;
-
+    private boolean isEnding=false;
     @Override
     protected void onCreate(Bundle s) {
         super.onCreate(s);
         setContentView(R.layout.activity_ble_connect);
-        Log.d("ble", "App running");
-
-        progressView=(ProgressBar)findViewById(R.id.ble_connect_progress);
-        progressView.setProgress(0);
-        progressView.setMax(100);
-
-        bleManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        bleAdapter= bleManager.getAdapter();
-
-        if (bleAdapter == null) {
-            Toast.makeText(this, "device do not support bluetooth", Toast.LENGTH_SHORT).show();
-            Log.d("Ble", "device do not support bluetooth");
-            finish();
-        }
-        if (!bleAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent,2);
-        }
-        Log.d("Ble", "ble enable");
-        progressView.setProgress(10);
+        isEnding=false;
+        final TextView text=(TextView)findViewById(R.id.ble_connect_display);
+        text.setText("蓝牙连接中");
+        Button button=(Button)findViewById(R.id.ble_connect_skip);
+        button.setOnClickListener(this);
 
         Intent intentBleService=new Intent(this,BleService.class);
         startService(intentBleService);
 
-
-
         state=new bleDataProcess(this);
-        final Runnable runnable=new Runnable() {
+        final Handler handler=new Handler();
+        Runnable runnable=new Runnable() {
+            private int count=0;
             @Override
             public void run() {
-                Message msg=new Message();
+                String string="蓝牙连接中";
+                count++;
+                for(int i=0;i<count;i++){
+                    string+='.';
+                }
+                text.setText(string);
+                count%=20;
+                boolean check=false;
                 if(state.getBinder()!=null){
-                    msg.what=state.getBleStatus();
-                }
-                else {
-                    msg.what=BleService.BleProfile.BLE_IDLE;
-                }
-                handler.sendMessage(msg);
-                Log.d("Ble","handler running");
-            }
-        };
-
-        handler=new Handler(){
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case BleService.BleProfile.BLE_IDLE:
-                        progressView.setProgress(20);
-                        break;
-                    case BleService.BleProfile.BLE_SCANING:
-                        progressView.setProgress(50);
-                        break;
-                    case BleService.BleProfile.BLE_CONNECTED:
-                        progressView.setProgress(100);
+                    check=state.isReadyForData();
+                    if(check){
+                        Log.d("ble","ble is ready for sendData");
                         Intent intent=new Intent(BleConnectActivity.this,BeginActivity.class);
                         startActivity(intent);
-                        break;
+                        finish();
+                    }
                 }
-                if(msg.what!=BleService.BleProfile.BLE_CONNECTED)
-                    handler.postDelayed(runnable,1000);
-                else
-                    finish();
+                if(!check&&!isEnding){
+                    handler.postDelayed(this,500);
+                }
             }
         };
-        handler.postDelayed(runnable,1000);
+        handler.post(runnable);
     }
 
     @Override
     public void onClick(View v) {
-
+        switch (v.getId()) {
+            case R.id.ble_connect_skip:
+                Intent intent=new Intent(this,BeginActivity.class);
+                startActivity(intent);
+                finish();
+                break;
+        }
     }
     @Override
     public void onDestroy() {
+        isEnding=true;
         super.onDestroy();
         state.unbind();
     }

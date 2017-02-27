@@ -24,6 +24,29 @@
                 android:id="@+id/activity_button"
                 android:layout_alignParentTop="true"
                 android:layout_above="@+id/activity_bar">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_above="@+id/column6"
+                    android:layout_alignLeft="@+id/column1"
+                    android:layout_toLeftOf="@+id/column6">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="蓝牙强度"
+                        android:id="@+id/begin_textview_rssi"/>
+                    <ProgressBar
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+                        android:max="100"
+                        android:progress="0"
+                        android:id="@+id/begin_progressbar_rssi"/>
+                </LinearLayout>
+
                 <Button
                     android:layout_width="@dimen/buttonWidth"
                     android:layout_height="@dimen/buttonHeight"

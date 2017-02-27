@@ -333,22 +333,22 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         if(bleDataManage.checkSendOk()){
                             switch (id) {
                                 case 0:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.roll);
+                                    //bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.roll);
                                     break;
                                 case 1:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.pitch);
+                                    //bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.pitch);
                                     break;
                                 case 2:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.yaw);
+                                    //bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.yaw);
                                     break;
                                 case 3:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.speed1);
+                                    //bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.speed1);
                                     break;
                                 case 4:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.speed2);
+                                    //bleDataManage.sendParam((byte) (id+buttonId*5-5),sqlManage.speed2);
                                     break;
                                 case 5:
-                                    progressDialog.cancel();
+                                    //progressDialog.cancel();
                                     break;
                                 default:
                                     Log.e("change button","onclick run err run err!!!!!");

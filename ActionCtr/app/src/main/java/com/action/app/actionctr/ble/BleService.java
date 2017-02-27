@@ -18,6 +18,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 public class BleService extends Service {
@@ -34,27 +35,23 @@ public class BleService extends Service {
     private BluetoothGatt mBluetoothGatt;
     private BluetoothGattCharacteristic characteristic;
     private BluetoothGattService        gattService;
+    private boolean isReadyForNext=false;
+    private int RssiValue=0;
 
+    public static final int bleDataLen=12;
+    private final String address="90:59:AF:0E:62:A4";
     Handler handler;
 
     private byte[] dataReceive;
     private byte[] dataTrans;
 
-    public interface BleProfile{
-         int BLE_CONNECTED=0;
-         int BLE_SCANING=2;
-         int BLE_IDLE=3;
-         int dataLen=12;
-    }
+
     private myBleBand dataSend=new myBleBand();
     public class myBleBand extends Binder {
-        private int ble_status=BleProfile.BLE_IDLE;
         public void send(byte[] data){
-
-            if(data.length!=BleProfile.dataLen){
+            if(data.length!=bleDataLen){
                 Log.e("version err","length of senddata is not equal to require");
             }
-
             dataTrans=data;
             characteristic.setValue(dataTrans);
             mBluetoothGatt.writeCharacteristic(characteristic);
@@ -72,14 +69,18 @@ public class BleService extends Service {
             };
             handler.postDelayed(runnable,30);
         }
-        public int  getBleStatus() {
-            return ble_status;
-        }
         public boolean checkSendOk(){
             if(Arrays.equals(dataReceive,dataTrans)) {
                 return true;
             }
             return false;
+        }
+        public boolean isReady(){
+            return isReadyForNext;
+        }
+        public int readRssi(){
+            mBluetoothGatt.readRemoteRssi();
+            return RssiValue;
         }
     }
 
@@ -95,30 +96,43 @@ public class BleService extends Service {
         bleManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         bleAdapter= bleManager.getAdapter();
         devicesList=new ArrayList<>();
-
         mGattCallback=new BluetoothGattCallback() {
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                 super.onConnectionStateChange(gatt, status, newState);
                 switch (newState) {
                     case BluetoothProfile.STATE_CONNECTED:
-                        dataSend.ble_status=BleProfile.BLE_CONNECTED;
-                        Log.d("Ble","ble connected");
-                        mBluetoothGatt.discoverServices();
+                        if(gatt.getDevice().getAddress().equals(address)){
+                            Log.d("Ble","ble connected");
+                            isReadyForNext=false;
+                            mBluetoothGatt.discoverServices();
+                        }
+                        else {
+                            Log.d("Ble","ble devicce err");
+                            gatt.disconnect();
+                        }
                         break;
                     case BluetoothProfile.STATE_DISCONNECTED:
-                        dataSend.ble_status=BleProfile.BLE_IDLE;
+                        bleAdapter.startLeScan(mLeScanCallback);
+                        isReadyForNext=false;
                         Log.d("Ble","ble disconnected");
+                        break;
+                    default:
+                        isReadyForNext=false;
                         break;
                 }
             }
             @Override
             public void onServicesDiscovered(BluetoothGatt gatt,int status){
-                if(status==BluetoothGatt.GATT_SUCCESS)
-                    Log.d("Ble","ble gatt success");
-                else
-                    Log.d("Ble","ble gatt fail");
-                Log.d("Ble","onServiceDiscovered: " + status);
+                if(status==BluetoothGatt.GATT_SUCCESS){
+                    Log.d("Ble","ble gatt service success");
+                    isReadyForNext=true;
+                }
+                else {
+                    isReadyForNext=false;
+                    Log.d("Ble","ble gatt service fail");
+                }
+
                 gattService=mBluetoothGatt.getService(UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb"));
                 characteristic=gattService.getCharacteristic(UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb"));
                 mBluetoothGatt.setCharacteristicNotification(characteristic,true);
@@ -126,7 +140,7 @@ public class BleService extends Service {
             @Override
             public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                 String log_out=new String();
-                for (int i=0;i<BleProfile.dataLen;i++){
+                for (int i=0;i<bleDataLen;i++){
                     log_out+=String.valueOf((int)characteristic.getValue()[i])+'\t';
                 }
                 Log.d("Ble","read value: "+log_out);
@@ -136,11 +150,11 @@ public class BleService extends Service {
                 dataReceive=characteristic.getValue();
 
                 String log_out=new String();
-                for (int i=0;i<BleProfile.dataLen;i++){
+                for (int i=0;i<12;i++){
                     log_out+=String.valueOf((int)dataReceive[i])+'\t';
                 }
 
-                if(dataReceive.length!=BleProfile.dataLen){
+                if(dataReceive.length!=bleDataLen){
                     Log.e("version err","length of receivedata is not equal to require");
                 }
                 Log.d("Ble","notify: "+log_out);
@@ -148,10 +162,14 @@ public class BleService extends Service {
             @Override
             public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status){
                 String log_out=new String();
-                for (int i=0;i<BleProfile.dataLen;i++){
+                for (int i=0;i<12;i++){
                     log_out+=String.valueOf((int)characteristic.getValue()[i])+'\t';
                 }
                 Log.d("Ble","write: "+log_out);
+            }
+            @Override
+            public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
+                RssiValue=rssi;
             }
         };
         mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
@@ -162,7 +180,8 @@ public class BleService extends Service {
                     Log.d("Ble", "find device , name= " + device.getName());
                     Log.d("Ble", "device address="+device.getAddress());
 
-                    if(device.getAddress().equals("90:59:AF:0E:62:A4")){
+                    if(device.getAddress().equals(address)){
+                        devicesList.clear();
                         bleAdapter.stopLeScan(mLeScanCallback);
                         mBluetoothGatt=device.connectGatt(BleService.this, false, mGattCallback);
                     }
@@ -170,8 +189,6 @@ public class BleService extends Service {
             }
         };
         bleAdapter.startLeScan(mLeScanCallback);
-        dataSend.ble_status=BleProfile.BLE_SCANING;
-
         handler=new Handler();
     }
     @Override

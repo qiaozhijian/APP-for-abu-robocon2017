@@ -63,7 +63,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             case R.id.progress_yaw:
                 return (val-500)/10.0f;
             case R.id.progress_pitch:
-                return (val+150)/10.0f;
+                return (val-100)/10.0f;
             case R.id.progress_roll:
                 return (val-0)/10.0f;
             case R.id.progress_speed1:
@@ -84,11 +84,12 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     val=50;
                 return Math.round((val+50)*10);
             case R.id.progress_pitch:
-                if(val<15)
-                    val=15;
+                if(val<-10)
+                    val=-10;
                 if(val>40)
                     val=40;
-                return Math.round((val-15)*10);
+               // return Math.round((val-15)*10);
+                return Math.round((val+10)*10);
             case R.id.progress_roll:
                 if(val<-0)
                     val=-0;
@@ -156,7 +157,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         seekBar_speed2=((SeekBar)findViewById(R.id.progress_speed2));
 
         seekBar_yaw.setMax(1000);
-        seekBar_pitch.setMax(250);
+        seekBar_pitch.setMax(500);
         seekBar_roll.setMax(450);
         seekBar_speed1.setMax(350);
         seekBar_speed2.setMax(350);
@@ -291,7 +292,20 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         switch (v.getId())
         {
             case R.id.button_param_shot:
-                bleDataManage.sendCmd(1);
+                byte id=0;
+                switch(String.valueOf(((TextView)findViewById(R.id.gun_num)).getText())){
+                    case "左":
+                        id = 1;
+                        break;
+                    case "右":
+                        id = 2;
+                        break;
+                    case "上":
+                        id = 3;
+                        break;
+                }
+
+                bleDataManage.sendCmd(id);
                 break;
             case R.id.button_param_save:
                 AlertDialog.Builder dialog= new AlertDialog.Builder(ParamChangeActivity.this);

@@ -55,35 +55,35 @@ public class MenuRightFragment extends Fragment implements AdapterView.OnItemCli
         {
             case 0:
                 Log.d("ctrCmd","button1");
-                bleCtr.sendCmd(1);
+             //   bleCtr.sendCmd(1);
                 break;
             case 1:
                 Log.d("ctrCmd","button2");
-                bleCtr.sendCmd(2);
+              //  bleCtr.sendCmd(2);
                 break;
             case 2:
                 Log.d("ctrCmd","button3");
-                bleCtr.sendCmd(3);
+              //  bleCtr.sendCmd(3);
                 break;
             case 3:
                 Log.d("ctrCmd","button4");
-                bleCtr.sendCmd(4);
+            //    bleCtr.sendCmd(4);
                 break;
             case 4:
                 Log.d("ctrCmd","button5");
-                bleCtr.sendCmd(5);
+              //  bleCtr.sendCmd(5);
                 break;
             case 5:
                 Log.d("ctrCmd","button6");
-                bleCtr.sendCmd(6);
+             //   bleCtr.sendCmd(6);
                 break;
             case 6:
                 Log.d("ctrCmd","button7");
-                bleCtr.sendCmd(7);
+             //   bleCtr.sendCmd(7);
                 break;
             case 7:
                 Log.d("ctrCmd","button8");
-                bleCtr.sendCmd(8);
+             //   bleCtr.sendCmd(8);
                 break;
 
         }

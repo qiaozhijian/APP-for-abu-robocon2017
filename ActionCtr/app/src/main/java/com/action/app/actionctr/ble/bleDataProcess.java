@@ -73,7 +73,7 @@ public class bleDataProcess{
         Log.e("Ble","dataSend length err");
         return false;
     }
-    public boolean sendCmd(int num){
+    public boolean sendCmd(byte id){
 
         byte[] sendData=new byte[BleService.bleDataLen];
 
@@ -82,8 +82,8 @@ public class bleDataProcess{
             sendData[1]='C';
             sendData[2]='C';
             sendData[3]='T';
-            sendData[4]=(byte)num;
-            state.send(sendData);
+            sendData[4]=id;
+               state.send(sendData);
             return true;
         }
         Log.e("Ble","dataSend length err");

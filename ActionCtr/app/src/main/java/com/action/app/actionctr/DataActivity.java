@@ -14,6 +14,7 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -35,8 +36,10 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
     private Spinner state_spinner;
     private Spinner gun_spinner;
     private Manage manage;
+    private ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data);
 
@@ -56,16 +59,14 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
         optionSelect.add("column6");
         optionSelect.add("column7");
 
-
-
         ArrayAdapter<String> optionSelectAdapter=new ArrayAdapter<String>(this,R.layout.support_simple_spinner_dropdown_item,optionSelect);
         optionSelectAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         spinner.setAdapter(optionSelectAdapter);
         spinner.setOnItemSelectedListener(this);
 
-
-
         manage=new Manage(this);
+
+
 
     }
     @Override
@@ -109,6 +110,8 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
         }
     }
     boolean database_ok =false;
+    float[] param2set =  new  float[5];
+    String[] state = new String[3];
     @Override//实现两个spiner联动，需要嵌套
     public void onItemSelected(AdapterView<?> adapter, View v,int arg1,long arg2){
         ;
@@ -153,9 +156,46 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
            dataAdapter data_adapter=new dataAdapter(DataActivity.this,R.layout.item_listview_activity_data,data);
            ListView listView=(ListView)findViewById(R.id.list_data_display);
            listView.setAdapter(data_adapter);
+           state[0] = spinner.getSelectedItem().toString();
+           state[1] = gun_spinner.getSelectedItem().toString();
+           state[2] =state_spinner.getSelectedItem().toString();
            Log.d("dataDisplay","display");
-       }
+           listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+               @Override
+               public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+                   Manage.dataSt data = manage.selectOne(state[0],state[1],state[2],position+1);
+                   param2set[0] = data.roll;
+                   param2set[1] = data.pitch;
+                   param2set[2] = data.yaw;
+                   param2set[3] = data.speed1;
+                   param2set[4] = data.speed2;
+                   //我们需要的内容，跳转页面或显示详细信息
+                   Log.d("onItemClick","go to next activity");
+                   AlertDialog.Builder dialog= new AlertDialog.Builder(DataActivity.this);
+                   dialog.setTitle("注意");
+                   dialog.setMessage("您是否确认需要将改组参数导出？");
+                   dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                       @Override
+                       public void onClick(DialogInterface dialogInterface, int i) {
+                           Intent intent;
+                           intent=new Intent(DataActivity.this,ParamChangeActivity.class);
+                           intent.putExtra("param2set",param2set);
+                           intent.putExtra("state2set",state);
+                           startActivity(intent);
+                           finish();
+                       }
+                   });
+                   dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                       @Override
+                       public void onClick(DialogInterface dialogInterface, int i) {
+                       }
+                   });
+                   dialog.show();
+
+               }
+           });
+       }
     }
     public void onNothingSelected(AdapterView<?> adapter){
 
@@ -192,6 +232,9 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
             text[5].setText(data.direction);
             text[6].setText(data.date);
             text[7].setText(data.note);
+
+
+
             return view;
         }
     }

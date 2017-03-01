@@ -538,7 +538,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 break;
             case R.id.gun_up:
                 ((TextView)findViewById(R.id.gun_num)).setText("上");
-            if(param2set!=null && init_state[1].equals("上") && init_state[2].equals(String.valueOf(((TextView)findViewById(R.id.state)).getText())))
+                if(param2set!=null && init_state[1].equals("上") && init_state[2].equals(String.valueOf(((TextView)findViewById(R.id.state)).getText())))
                 {
                     seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
                     seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,param2set[1]));
@@ -564,7 +564,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 break;
             case R.id.gun_right:
                 ((TextView)findViewById(R.id.gun_num)).setText("右");
-        if(param2set!=null && init_state[1].equals("右") && init_state[2].equals(String.valueOf(((TextView)findViewById(R.id.state)).getText())))
+                 if(param2set!=null && init_state[1].equals("右") && init_state[2].equals(String.valueOf(((TextView)findViewById(R.id.state)).getText())))
                 {
                     seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
                     seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,param2set[1]));
@@ -590,17 +590,20 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 break;
             case R.id.button_param_shotball://打球
                 ((TextView)findViewById(R.id.state)).setText("打球");
-        if(param2set!=null && init_state[1].equals(String.valueOf(((TextView)findViewById(R.id.gun_num)))) && init_state[2].equals("打球"))
+                 if(param2set!=null && init_state!=null)
                 {
-                    seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
-                    seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,param2set[1]));
-                    seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,param2set[2]));
-                    seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,param2set[3]));
-                    seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,param2set[4]));
+                    if(init_state[1].equals(String.valueOf(((TextView)findViewById(R.id.gun_num)).getText())) && init_state[2].equals("打球"))
+                    {
+                        seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
+                        seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,param2set[1]));
+                        seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,param2set[2]));
+                        seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,param2set[3]));
+                        seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,param2set[4]));
+                    }
                 }
                 else
                 {
-                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num))),"打球")){
+                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),"打球")){
                         sqlManage.roll=0.0f;
                         sqlManage.pitch=0.0f;
                         sqlManage.yaw=0.0f;
@@ -616,17 +619,20 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 break;
             case R.id.button_param_shotfrisbee://打飞盘
                 ((TextView)findViewById(R.id.state)).setText("打盘");
-        if(param2set!=null && init_state[1].equals(String.valueOf(((TextView)findViewById(R.id.gun_num)))) && init_state[2].equals("打盘"))
+                 if(param2set!=null && init_state!=null)
                 {
-                    seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
-                    seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,param2set[1]));
-                    seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,param2set[2]));
-                    seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,param2set[3]));
-                    seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,param2set[4]));
+                    if( init_state[1].equals(String.valueOf(((TextView)findViewById(R.id.gun_num)).getText())) && init_state[2].equals("打盘"))
+                    {
+                        seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
+                        seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,param2set[1]));
+                        seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,param2set[2]));
+                        seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,param2set[3]));
+                        seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,param2set[4]));
+                    }
                 }
                 else
                 {
-                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num))),"打盘")){
+                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),"打盘")){
                         sqlManage.roll=0.0f;
                         sqlManage.pitch=0.0f;
                         sqlManage.yaw=0.0f;
@@ -642,17 +648,20 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 break;
             case R.id.button_param_fly: //只是扔
                 ((TextView)findViewById(R.id.state)).setText("扔");
-        if(param2set!=null && init_state[1].equals(String.valueOf(((TextView)findViewById(R.id.gun_num)))) && init_state[2].equals("扔"))
+                if(param2set!=null && init_state!=null)
                 {
-                    seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
-                    seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,param2set[1]));
-                    seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,param2set[2]));
-                    seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,param2set[3]));
-                    seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,param2set[4]));
+                    if(init_state[1].equals(String.valueOf(((TextView)findViewById(R.id.gun_num)).getText())) && init_state[2].equals("扔"))
+                    {
+                        seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
+                        seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,param2set[1]));
+                        seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,param2set[2]));
+                        seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,param2set[3]));
+                        seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,param2set[4]));
+                    }
                 }
                 else
                 {
-                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num))),"扔")){
+                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),"扔")){
                         sqlManage.roll=0.0f;
                         sqlManage.pitch=0.0f;
                         sqlManage.yaw=0.0f;

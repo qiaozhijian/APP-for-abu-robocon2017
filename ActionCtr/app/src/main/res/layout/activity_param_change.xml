@@ -149,6 +149,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:layout_weight="1"
+                android:id="@+id/roll_or_district"
                 android:text="翻滚"/>
             <EditText
                 android:layout_width="0dp"

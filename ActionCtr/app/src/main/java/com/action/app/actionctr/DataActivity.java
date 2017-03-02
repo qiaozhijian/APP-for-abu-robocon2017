@@ -35,6 +35,7 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
     private Spinner spinner;
     private Spinner state_spinner;
     private Spinner gun_spinner;
+    private Spinner region_spinner;
     private Manage manage;
     private ListView listView;
     @Override
@@ -117,8 +118,28 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
         ;
         switch(adapter.getId())
         {
-            case R.id.state_select:
+            case R.id.region_select:
                 database_ok = true;
+                break;
+            case R.id.state_select:
+                region_spinner = (Spinner)findViewById(R.id.region_select);//区域的选择
+                if(spinner.getSelectedItem().toString().equals("column7") && gun_spinner.getSelectedItem().toString().equals("上") && state_spinner.getSelectedItem().toString().equals("打盘")) {
+                    List<String> regionoptionSelect=new ArrayList<String>();
+
+                    regionoptionSelect.add("1.0");
+                    regionoptionSelect.add("2.0");
+                    regionoptionSelect.add("3.0");
+                    regionoptionSelect.add("4.0");
+                    regionoptionSelect.add("5.0");
+                    regionoptionSelect.add("6.0");
+                    regionoptionSelect.add("7.0");
+                    ArrayAdapter<String> regionoptionSelectAdapter=new ArrayAdapter<String>(this,R.layout.support_simple_spinner_dropdown_item,regionoptionSelect);
+                    regionoptionSelectAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+                    region_spinner.setAdapter(regionoptionSelectAdapter);
+                    region_spinner.setOnItemSelectedListener(this);
+                }else{
+                    database_ok = true;
+                }
                 break;
             case R.id.gun_select:
                 state_spinner=(Spinner)findViewById(R.id.state_select);//枪的选择
@@ -152,7 +173,11 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
        if(database_ok)
        {
            ArrayList<Manage.dataSt> data;
+           if(spinner.getSelectedItem().toString().equals("column7") && gun_spinner.getSelectedItem().toString().equals("上") && state_spinner.getSelectedItem().toString().equals("打盘")){
+               data=manage.selectColumn(spinner.getSelectedItem().toString(),gun_spinner.getSelectedItem().toString(),state_spinner.getSelectedItem().toString(),region_spinner.getSelectedItem().toString());
+           }else
            data=manage.selectAll(spinner.getSelectedItem().toString(),gun_spinner.getSelectedItem().toString(),state_spinner.getSelectedItem().toString());
+
            dataAdapter data_adapter=new dataAdapter(DataActivity.this,R.layout.item_listview_activity_data,data);
            ListView listView=(ListView)findViewById(R.id.list_data_display);
            listView.setAdapter(data_adapter);

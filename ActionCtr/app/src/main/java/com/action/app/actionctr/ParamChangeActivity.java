@@ -48,6 +48,8 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private int maxRoll=45;
     private int minRoll=0;
     private float stepRoll=0.5f;
+    private int   gain_roll=10;
+
 
     private int maxPitch=40;
     private int minPitch=-10;
@@ -89,7 +91,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             case R.id.progress_pitch:
                 return (val+minPitch*10)/10.0f;
             case R.id.progress_roll:
-                return (val+minRoll*10)/10.0f;
+                return (val+minRoll*gain_roll)/((float)gain_roll);
             case R.id.progress_speed1:
             case R.id.progress_speed2:
                 return (val+minSpeed);
@@ -117,7 +119,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     val=minRoll;
                 if(val>maxRoll)
                     val=maxRoll;
-                return Math.round((val-minRoll)*10);
+                return Math.round((val-minRoll)*gain_roll);
             case R.id.progress_speed1:
             case R.id.progress_speed2:
                 if(val<minSpeed)
@@ -744,15 +746,17 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         String column=((TextView)findViewById(R.id.column_num)).getText().toString();
         if(gunNum.equals("上")&&gunState.equals("打盘")&&column.equals("column: 7")){
             stepRoll=1.0f;
-            maxRoll=districtNum*10;
+            maxRoll=districtNum;
             minRoll=0;
+            gain_roll=1;
             ((TextView)findViewById(R.id.roll_or_district)).setText("区域");
-            ((ProgressBar)findViewById(R.id.progress_roll)).setMax(districtNum*10);
+            ((ProgressBar)findViewById(R.id.progress_roll)).setMax(districtNum);
         }
         else{
             stepRoll=0.5f;
             maxRoll=45;
             minRoll=0;
+            gain_roll=10;
             ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
             ((ProgressBar)findViewById(R.id.progress_roll)).setMax((maxRoll-minRoll)*10);
         }

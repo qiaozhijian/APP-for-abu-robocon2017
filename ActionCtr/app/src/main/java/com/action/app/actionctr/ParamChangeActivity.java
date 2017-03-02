@@ -21,6 +21,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +38,29 @@ import java.util.ArrayList;
  */
 
 public class ParamChangeActivity extends BasicActivity implements View.OnClickListener,SeekBar.OnSeekBarChangeListener,View.OnTouchListener {
+
+    private final int districtNum=7;
+
+    private int maxYaw=50;
+    private int minYaw=-50;
+    private float stepYaw=0.5f;
+
+    private int maxRoll=45;
+    private int minRoll=0;
+    private float stepRoll=0.5f;
+
+    private int maxPitch=40;
+    private int minPitch=-10;
+    private float stepPitch=0.5f;
+
+
+    private int maxSpeed=350;
+    private int minSpeed=0;
+    private float stepSpeed=1.0f;
+
+
+
+
 
     private DrawerLayout mDrawerLayout;
 
@@ -61,15 +85,14 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private float progressToFloat(SeekBar seekBar,int val){
         switch (seekBar.getId()){
             case R.id.progress_yaw:
-                return (val-500)/10.0f;
+                return (val+minYaw*10)/10.0f;
             case R.id.progress_pitch:
-                return (val-100)/10.0f;
+                return (val+minPitch*10)/10.0f;
             case R.id.progress_roll:
-                return (val-0)/10.0f;
+                return (val+minRoll*10)/10.0f;
             case R.id.progress_speed1:
-                return val*10/10.0f;
             case R.id.progress_speed2:
-                return val*10/10.0f;
+                return (val+minSpeed);
             default:
                 Log.e("paramChange","err progressToFloat");
                 return 0.0f;
@@ -78,36 +101,30 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private int floatToProgress(SeekBar seekBar,float val){
         switch (seekBar.getId()){
             case R.id.progress_yaw:
-                if(val<-50)
-                    val=-50;
-                if(val>50)
-                    val=50;
-                return Math.round((val+50)*10);
+                if(val<minYaw)
+                    val=minYaw;
+                if(val>maxYaw)
+                    val=maxYaw;
+                return Math.round((val-minYaw)*10);
             case R.id.progress_pitch:
-                if(val<-10)
-                    val=-10;
-                if(val>40)
-                    val=40;
-               // return Math.round((val-15)*10);
-                return Math.round((val+10)*10);
+                if(val<minPitch)
+                    val=minPitch;
+                if(val>maxPitch)
+                    val=maxPitch;
+                return Math.round((val-minPitch)*10);
             case R.id.progress_roll:
-                if(val<-0)
-                    val=-0;
-                if(val>45)
-                    val=45;
-                return Math.round((val+0)*10);
+                if(val<minRoll)
+                    val=minRoll;
+                if(val>maxRoll)
+                    val=maxRoll;
+                return Math.round((val-minRoll)*10);
             case R.id.progress_speed1:
-                if(val<-0)
-                    val=0;
-                if(val>350)
-                    val=350;
-                return Math.round((val+0));
             case R.id.progress_speed2:
-                if(val<-0)
-                    val=0;
-                if(val>350)
-                    val=350;
-                return Math.round((val+0));
+                if(val<minSpeed)
+                    val=minSpeed;
+                if(val>maxSpeed)
+                    val=maxSpeed;
+                return Math.round((val-minSpeed));
             default:
                 Log.e("paramChange","err floatToProgress");
                 return 0;
@@ -159,11 +176,11 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         seekBar_speed1=((SeekBar)findViewById(R.id.progress_speed1));
         seekBar_speed2=((SeekBar)findViewById(R.id.progress_speed2));
 
-        seekBar_yaw.setMax(1000);
-        seekBar_pitch.setMax(500);
-        seekBar_roll.setMax(450);
-        seekBar_speed1.setMax(350);
-        seekBar_speed2.setMax(350);
+        seekBar_yaw.setMax((maxYaw-minYaw)*10);
+        seekBar_pitch.setMax((maxPitch-minPitch)*10);
+        seekBar_roll.setMax((maxRoll-minRoll)*10);
+        seekBar_speed1.setMax((maxSpeed-minSpeed));
+        seekBar_speed2.setMax((maxSpeed-minSpeed));
 
         seekBar_pitch.setOnSeekBarChangeListener(this);
         seekBar_roll.setOnSeekBarChangeListener(this);
@@ -681,32 +698,39 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 break;
         }
         if(editText!=null&&seekBar!=null){
+            int count=0;
             switch (v.getId())
             {
-                case R.id.pitch_increase:
-                case R.id.roll_increase:
-                case R.id.yaw_increase:
+                case R.id.pitch_increase:   count++;
+                case R.id.pitch_decrease:   count++;
+                case R.id.roll_increase:    count++;
+                case R.id.roll_decrease:    count++;
+                case R.id.yaw_increase:     count++;
+                case R.id.yaw_decrease:     count++;
                     valueF=Float.parseFloat(editText.getText().toString());
-                    valueF+=0.5f;
-                    seekBar.setProgress(floatToProgress(seekBar,valueF));
-                    break;
-                case R.id.pitch_decrease:
-                case R.id.roll_decrease:
-                case R.id.yaw_decrease:
-                    valueF=Float.parseFloat(editText.getText().toString());
-                    valueF-=0.5f;
+                    float stepSize=0.0f;
+                    if(count==1||count==2)
+                        stepSize=stepPitch;
+                    if(count==3||count==4)
+                        stepSize=stepRoll;
+                    if(count==5||count==6)
+                        stepSize=stepYaw;
+                    if(count%2==1)
+                        stepSize=-stepSize;
+
+                        valueF+=stepSize;
                     seekBar.setProgress(floatToProgress(seekBar,valueF));
                     break;
                 case R.id.speed1_increase:
                 case R.id.speed2_increase:
                     valueI=Integer.parseInt(editText.getText().toString());
-                    valueI+=1;
+                    valueI+=stepSpeed;
                     seekBar.setProgress(floatToProgress(seekBar,valueI));
                     break;
                 case R.id.speed1_decrease:
                 case R.id.speed2_decrease:
                     valueI=Integer.parseInt(editText.getText().toString());
-                    valueI-=1;
+                    valueI-=stepSpeed;
                     seekBar.setProgress(floatToProgress(seekBar,valueI));
                     break;
                 default:
@@ -714,6 +738,23 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     finish();
                     break;
             }
+        }
+        String gunNum=((TextView)findViewById(R.id.gun_num)).getText().toString();
+        String gunState=((TextView)findViewById(R.id.state)).getText().toString();
+        String column=((TextView)findViewById(R.id.column_num)).getText().toString();
+        if(gunNum.equals("上")&&gunState.equals("打盘")&&column.equals("column: 7")){
+            stepRoll=1.0f;
+            maxRoll=districtNum*10;
+            minRoll=0;
+            ((TextView)findViewById(R.id.roll_or_district)).setText("区域");
+            ((ProgressBar)findViewById(R.id.progress_roll)).setMax(districtNum*10);
+        }
+        else{
+            stepRoll=0.5f;
+            maxRoll=45;
+            minRoll=0;
+            ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
+            ((ProgressBar)findViewById(R.id.progress_roll)).setMax((maxRoll-minRoll)*10);
         }
 
     }

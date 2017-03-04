@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -126,16 +127,19 @@ public class DebugDataDisplayActivity extends BasicActivity implements View.OnCl
             case R.id.activity_debug_data_save://保存到excel
                 if(!freshFlag) {
                     AlertDialog.Builder dialog = new AlertDialog.Builder(DebugDataDisplayActivity.this);
+                    final EditText commentText=new EditText(DebugDataDisplayActivity.this);
                     dialog.setTitle("注意");
-                    dialog.setMessage("确定保存数据到excel?");
+                    dialog.setMessage("确定保存数据到excel?请输入文件名：");
+                    dialog.setView(commentText);
                     dialog.setCancelable(false);
                     dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
 
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            String date = dateFormat.format(new Date(System.currentTimeMillis()));
-                            Excel data_excel = new Excel("DebugData" + date + ".xls");
+                         //   SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                         //   String date = dateFormat.format(new Date(System.currentTimeMillis()));
+                            String filename = commentText.getText().toString();
+                            Excel data_excel = new Excel(filename+ ".xls");
                             data_excel.storeExcel(debugData);  //  将wifi收到的数据保存到excel
 
                         }

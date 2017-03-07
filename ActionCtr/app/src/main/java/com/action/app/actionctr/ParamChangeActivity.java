@@ -733,15 +733,14 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 case R.id.yaw_decrease:     count++;
                     valueF=Float.parseFloat(editText.getText().toString());
                     float stepSize=0.0f;
-                    if(count==1||count==2)
+                    if(count==5||count==6)
                         stepSize=stepPitch;
                     if(count==3||count==4)
                         stepSize=stepRoll;
-                    if(count==5||count==6)
+                    if(count==1||count==2)
                         stepSize=stepYaw;
                     if(count%2==1)
                         stepSize=-stepSize;
-
                         valueF+=stepSize;
                     seekBar.setProgress(floatToProgress(seekBar,valueF));
                     break;
@@ -790,7 +789,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                      0.5f, 0.5f, 0.5f, stepSpeed);
             ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
         }
-
 
     }
     @Override

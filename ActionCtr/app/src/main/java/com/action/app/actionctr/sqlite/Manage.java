@@ -110,6 +110,24 @@ public class Manage {
         }
         return dataList;
     }
+    public ArrayList<dataSt> selectColumn(String num,String gun,String state,String region){
+
+        Cursor cursor=dbRead.query(num+gun+state,null,"roll=?",new String[]{region},null,null,null);
+        ArrayList<dataSt> dataList=new ArrayList<>();
+        while (cursor.moveToNext()) {
+            dataSt data=new dataSt();
+            data.roll=cursor.getFloat(cursor.getColumnIndex("roll"));
+            data.pitch=cursor.getFloat(cursor.getColumnIndex("pitch"));
+            data.yaw=cursor.getFloat(cursor.getColumnIndex("yaw"));
+            data.speed1=cursor.getInt(cursor.getColumnIndex("speed1"));
+            data.speed2=cursor.getInt(cursor.getColumnIndex("speed2"));
+            data.date=cursor.getString(cursor.getColumnIndex("save_date"));
+            data.direction=cursor.getString(cursor.getColumnIndex("direction"));
+            data.note=cursor.getString(cursor.getColumnIndex("note_comment"));
+            dataList.add(data);
+        }
+        return dataList;
+    }
     public dataSt selectOne(String num,String gun,String state,int position){
         Cursor cursor=dbRead.query(num+gun+state,null,null,null,null,null,null);
         cursor.move(position);

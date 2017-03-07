@@ -32,6 +32,12 @@
         android:layout_weight="1"
         android:layout_alignParentTop="true"
         android:id="@+id/state_select"></Spinner>
+    <Spinner
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_alignParentTop="true"
+        android:id="@+id/region_select"></Spinner>
     </LinearLayout>
     <ListView
         android:layout_width="match_parent"

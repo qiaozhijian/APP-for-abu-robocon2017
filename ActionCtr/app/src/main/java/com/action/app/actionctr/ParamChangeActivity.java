@@ -132,7 +132,31 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 return 0;
         }
     }
+    private void setRange(int maxX,int maxY,int maxZ,int maxS,
+                          int minX,int minY,int minZ,int minS,
+                          float stepX,float stepY,float stepZ,float stepS){
+        maxYaw=maxZ;
+        minYaw=minZ;
+        stepYaw=stepZ;
 
+        maxRoll=maxY;
+        minRoll=minY;
+        stepRoll=stepY;
+
+        maxPitch=maxX;
+        minPitch=minX;
+        stepPitch=stepX;
+
+        maxSpeed=maxS;
+        minSpeed=minS;
+        stepSpeed=stepS;
+
+        seekBar_yaw.setMax((maxYaw-minYaw)*10);
+        seekBar_pitch.setMax((maxPitch-minPitch)*10);
+        seekBar_roll.setMax((maxRoll-minRoll)*gain_roll);
+        seekBar_speed1.setMax((maxSpeed-minSpeed));
+        seekBar_speed2.setMax((maxSpeed-minSpeed));
+    }
     private int buttonId;
     float[] param2set =new float[5];
     String[] init_state = new String[3];
@@ -178,11 +202,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         seekBar_speed1=((SeekBar)findViewById(R.id.progress_speed1));
         seekBar_speed2=((SeekBar)findViewById(R.id.progress_speed2));
 
-        seekBar_yaw.setMax((maxYaw-minYaw)*10);
-        seekBar_pitch.setMax((maxPitch-minPitch)*10);
-        seekBar_roll.setMax((maxRoll-minRoll)*10);
-        seekBar_speed1.setMax((maxSpeed-minSpeed));
-        seekBar_speed2.setMax((maxSpeed-minSpeed));
+        setRange( maxPitch, maxRoll, maxYaw, maxSpeed,
+                  minPitch, minRoll, minYaw, minSpeed,
+                  stepPitch, stepRoll, stepYaw, stepSpeed);
 
         seekBar_pitch.setOnSeekBarChangeListener(this);
         seekBar_roll.setOnSeekBarChangeListener(this);
@@ -744,22 +766,31 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         String gunNum=((TextView)findViewById(R.id.gun_num)).getText().toString();
         String gunState=((TextView)findViewById(R.id.state)).getText().toString();
         String column=((TextView)findViewById(R.id.column_num)).getText().toString();
-        if(gunNum.equals("上")&&gunState.equals("打盘")&&column.equals("column: 7")){
-            stepRoll=1.0f;
-            maxRoll=districtNum;
-            minRoll=0;
-            gain_roll=1;
-            ((TextView)findViewById(R.id.roll_or_district)).setText("区域");
-            ((ProgressBar)findViewById(R.id.progress_roll)).setMax(districtNum);
+        if(gunNum.equals("上")){
+
+            if(gunState.equals("打盘")&&column.equals("column: 7")){
+                gain_roll=1;
+                setRange(  40,    districtNum,    20,  maxSpeed,
+                           -5,              0,   -20,  minSpeed,
+                         0.1f,           1.0f,  0.2f,  stepSpeed);
+                ((TextView)findViewById(R.id.roll_or_district)).setText("区域");
+            }else{
+                gain_roll=10;
+                setRange(  40,    0,   20, maxSpeed,
+                           -5,    0,  -20, minSpeed,
+                         0.1f, 0.0f, 0.2f, stepSpeed);
+                ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
+            }
+            ((ProgressBar)findViewById(R.id.progress_speed2)).setMax(0);
         }
-        else{
-            stepRoll=0.5f;
-            maxRoll=45;
-            minRoll=0;
+        else {
             gain_roll=10;
+            setRange(  40,   45,   50, maxSpeed,
+                      -10,    0,  -50, minSpeed,
+                     0.5f, 0.5f, 0.5f, stepSpeed);
             ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
-            ((ProgressBar)findViewById(R.id.progress_roll)).setMax((maxRoll-minRoll)*10);
         }
+
 
     }
     @Override

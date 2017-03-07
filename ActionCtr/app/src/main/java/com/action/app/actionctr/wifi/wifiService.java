@@ -15,6 +15,7 @@ import android.util.Log;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.ServerSocket;
@@ -45,7 +46,7 @@ public class wifiService extends Service {
     private Thread runnableThread;
     private Thread dataReceiveThread;
 
-    private BufferedReader in;
+    private InputStream in;
 
     private ArrayList<String> wifiDataList;
 
@@ -117,14 +118,39 @@ public class wifiService extends Service {
         dataReceiveRunnable=new Runnable() {
             @Override
             public void run() {
-                while (true) {
-                    String line;
+                try {
+                    in=server.accept().getInputStream();
                     Log.d("wifi","socket start dataReceive");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e){
+                    e.printStackTrace();
+                    Log.e("wifi","Exception： "+Log.getStackTraceString(e));
+                }
+                int count=0;
+                String line=new String("");
+                while (true) {
+                    int    dataRead;
                     try {
-                        in=new BufferedReader(new InputStreamReader(server.accept().getInputStream()));
-                        while ((line=in.readLine())!=null&&!destroyFlag){
-                            wifiDataList.add(line);
-                            //while (!dataReceiveThread.isInterrupted());
+                        if(in.available()>=1){
+                            dataRead=in.read();
+                            if(dataRead>127)
+                                dataRead-=256;
+                            line+=String.valueOf(dataRead);
+                            line+="   ";//空格三个
+
+                            if(dataRead==-100){
+                                count++;
+                            }
+                            else {
+                                count=0;
+                            }
+                            if(count>=4){
+                                wifiDataList.add(line.substring(0,line.length()-7*4));
+                                count=0;
+                                line="";
+                            }
+
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

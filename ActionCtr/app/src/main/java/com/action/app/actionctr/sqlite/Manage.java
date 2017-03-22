@@ -37,7 +37,7 @@ public class Manage {
     public Manage(Context context) {
         Stetho.initializeWithDefaults(context);
         new OkHttpClient.Builder().addNetworkInterceptor(new StethoInterceptor()).build();
-        dbHelper = new MyDatabaseHelper(context,"DataStore.db",null,1);
+        dbHelper = new MyDatabaseHelper(context,"DataStore.db",null,3);
         dbwrite=dbHelper.getWritableDatabase();
         dbRead=dbHelper.getReadableDatabase();
     }
@@ -45,12 +45,20 @@ public class Manage {
         dbHelper.close();
     }
 
-    public void Insert(int num,String gun,String state){
+    public void Insert(int num,String gun,String state,int isOnTheWay){
         SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String date=dateFormat.format(new Date(System.currentTimeMillis()));
-
-        String cmd="insert into column"+String.valueOf(num)+gun+state+" (roll,pitch,yaw,speed1,speed2,direction,save_date,note_comment) ";
-        String data="values("+String.valueOf(roll)+","
+        String cmd;
+        if(isOnTheWay==1) {
+            cmd="insert into onTheWay_column"+String.valueOf(num)+gun+state+" (roll,pitch,yaw,speed1,speed2,direction,save_date,note_comment) ";
+        }
+        else if(isOnTheWay==2){
+            cmd="insert into onTheWay2_column"+String.valueOf(num)+gun+state+" (roll,pitch,yaw,speed1,speed2,direction,save_date,note_comment) ";
+        }
+        else {
+            cmd="insert into column"+String.valueOf(num)+gun+state+" (roll,pitch,yaw,speed1,speed2,direction,save_date,note_comment) ";
+        }
+         String data="values("+String.valueOf(roll)+","
                             +String.valueOf(pitch)+","
                             +String.valueOf(yaw)+","
                             +String.valueOf(speed1)+","
@@ -65,8 +73,17 @@ public class Manage {
         Cursor cursor=dbRead.query(column+gun+state,null,null,null,null,null,null);
         return(cursor.getCount());
     }
-    public boolean Select(int num,String gun,String state){
-        Cursor cursor=dbRead.query("column"+String.valueOf(num)+gun+state,null,null,null,null,null,null);
+    public boolean Select(int num,String gun,String state,int isOnTheWay){
+        Cursor cursor;
+        if(isOnTheWay==1){
+            cursor=dbRead.query("onTheWay_column"+String.valueOf(num)+gun+state,null,null,null,null,null,null);
+        }
+        else if(isOnTheWay==2){
+            cursor=dbRead.query("onTheWay2_column"+String.valueOf(num)+gun+state,null,null,null,null,null,null);
+        }
+        else{
+            cursor=dbRead.query("column"+String.valueOf(num)+gun+state,null,null,null,null,null,null);
+        }
 
         if(cursor.getCount()!=0) {
             cursor.moveToLast();
@@ -92,6 +109,10 @@ public class Manage {
             return false;
         }
     }
+    public boolean Select(int num,String gun,String state){
+        return Select(num,gun,state,0);
+    }
+
 
     public ArrayList<dataSt> selectAll(String num,String gun,String state){
         Cursor cursor=dbRead.query(num+gun+state,null,null,null,null,null,null);
@@ -166,19 +187,18 @@ public class Manage {
             mContext = context;
         }
 
-        @Override
-        public void onCreate(SQLiteDatabase db) {
 
+        private void createTable(String name,SQLiteDatabase db) {
             //调用SQLiteDatabase中的execSQL（）执行建表语句。
-            String create="create table column";
+            String create="create table "+name;
             String param= "( roll real," +
-                            "pitch real," +
-                            "yaw real," +
-                            "speed1 integer," +
-                            "speed2 integer,"+
-                            "direction text,"+
-                            "save_date text,"+
-                            "note_comment text);";
+                    "pitch real," +
+                    "yaw real," +
+                    "speed1 integer," +
+                    "speed2 integer,"+
+                    "direction text,"+
+                    "save_date text,"+
+                    "note_comment text);";
 
             for(int i= 1;i< 8 ;i++)
             {
@@ -234,13 +254,25 @@ public class Manage {
                     }
                 }
             }
+        }
 
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            createTable("column",db);
+            createTable("onTheWay_column",db);
+            createTable("onTheWay2_column",db);
             Toast.makeText(mContext, "database create", Toast.LENGTH_SHORT).show();
         }
 
         @Override  //这里注意，升级数据库的方式等版本确定后
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Toast.makeText(mContext,"database updata",Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext,"database update",Toast.LENGTH_SHORT).show();
+            if(oldVersion==2&&newVersion==3) {
+                createTable("onTheWay2_column",db);
+            }
+
+
         }
     }
 }

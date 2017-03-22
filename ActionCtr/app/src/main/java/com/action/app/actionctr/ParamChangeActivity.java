@@ -101,6 +101,34 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         }
     }
     private int floatToProgress(SeekBar seekBar,float val){
+        String gunNum=((TextView)findViewById(R.id.gun_num)).getText().toString();
+        String gunState=((TextView)findViewById(R.id.state)).getText().toString();
+        String column=((TextView)findViewById(R.id.column_num)).getText().toString();
+        if(gunNum.equals("上")){
+
+            if(gunState.equals("打盘")&&column.equals("column: 7")){
+                gain_roll=1;
+                setRange(  40,    districtNum,    20,  maxSpeed,
+                        -5,              0,   -20,  minSpeed,
+                        0.1f,           1.0f,  0.2f,  stepSpeed);
+                ((TextView)findViewById(R.id.roll_or_district)).setText("区域");
+            }else{
+                gain_roll=10;
+                setRange(  40,    0,   20, maxSpeed,
+                        -5,    0,  -20, minSpeed,
+                        0.1f, 0.0f, 0.2f, stepSpeed);
+                ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
+            }
+            ((ProgressBar)findViewById(R.id.progress_speed2)).setMax(0);
+        }
+        else {
+            gain_roll=10;
+            setRange(  40,   45,   50, maxSpeed,
+                    -10,    0,  -50, minSpeed,
+                    0.5f, 0.5f, 0.5f, stepSpeed);
+            ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
+        }
+
         switch (seekBar.getId()){
             case R.id.progress_yaw:
                 if(val<minYaw)
@@ -169,7 +197,8 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
 
         findViewById(R.id.button_param_shot).setOnClickListener(this);//射
-        findViewById(R.id.button_param_shot).setOnTouchListener(this);
+        findViewById(R.id.button_param_next_step).setOnTouchListener(this);
+        findViewById(R.id.button_param_mode_change).setOnTouchListener(this);
 
         findViewById(R.id.button_param_cancel).setOnClickListener(this);
         findViewById(R.id.button_param_save).setOnClickListener(this);
@@ -191,6 +220,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         findViewById(R.id.gun_left).setOnClickListener(this);
         findViewById(R.id.gun_right).setOnClickListener(this);
         findViewById(R.id.gun_up).setOnClickListener(this);
+        findViewById(R.id.gun_onTheWay).setOnClickListener(this);
         findViewById(R.id.button_param_shotball).setOnClickListener(this);
         findViewById(R.id.button_param_shotfrisbee).setOnClickListener(this);
         findViewById(R.id.button_param_fly).setOnClickListener(this);
@@ -218,7 +248,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         {
             Log.d("paraChange","buttonId: "+String.valueOf(buttonId));
             ((TextView)findViewById(R.id.column_num)).setText("column: "+String.valueOf(buttonId));
-            if(!sqlManage.Select(buttonId,"左","扔")){
+            if(!sqlManage.Select(buttonId,"左","扔",0)){
                 sqlManage.roll=0.0f;
                 sqlManage.pitch=0.0f;
                 sqlManage.yaw=0.0f;
@@ -245,7 +275,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         init_state = intent.getStringArrayExtra("state2set");
         if(param2set!=null)
         {
-
             seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
             seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,param2set[1]));
             seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,param2set[2]));
@@ -266,6 +295,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             ((TextView)findViewById(R.id.column_num)).setText(init_state[0]);
             ((TextView)findViewById(R.id.gun_num)).setText(init_state[1]);
             ((TextView)findViewById(R.id.state)).setText(init_state[2]);
+            ((TextView)findViewById(R.id.column_onTheWay)).setText(init_state[3]);
             switch(init_state[0])
             {
                 case "column7":id++;
@@ -391,6 +421,13 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
                 bleDataManage.sendCmd(id);
                 break;
+            case R.id.button_param_mode_change:
+                bleDataManage.sendCmd((byte)4);
+                break;
+            case R.id.button_param_next_step:
+                bleDataManage.sendCmd((byte)5);
+                break;
+
             case R.id.button_param_save:
                 AlertDialog.Builder dialog= new AlertDialog.Builder(ParamChangeActivity.this);
                 final EditText commentText=new EditText(ParamChangeActivity.this);
@@ -401,6 +438,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
 
+
                         sqlManage.roll=Float.parseFloat(editTextRoll.getText().toString());
                         sqlManage.pitch=Float.parseFloat(editTextPitch.getText().toString());
                         sqlManage.yaw=Float.parseFloat(editTextYaw.getText().toString());
@@ -408,7 +446,15 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         sqlManage.speed2=Integer.parseInt(editTextSpeed2.getText().toString());
 
                         sqlManage.comment=commentText.getText().toString();
-                        sqlManage.Insert(buttonId, String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()));
+
+                        int inOntheWay=0;
+                        if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：左")) {
+                            inOntheWay=1;
+                        }
+                        else if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：右")) {
+                            inOntheWay=2;
+                        }
+                        sqlManage.Insert(buttonId, String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()),inOntheWay);
                         Toast.makeText(ParamChangeActivity.this, "save ok", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -469,6 +515,16 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                                 id2+=2;
                                 break;
                         }
+                        int inOntheWay=0;
+                        if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：左")) {
+                            inOntheWay=1;
+                        }
+                        else if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：右")) {
+                            inOntheWay=2;
+                        }
+                        id2=(byte)(id2+inOntheWay*80);
+
+
                         if(bleDataManage.checkSendOk()){
                             switch (id) {
                                 case 0:
@@ -562,7 +618,14 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 }
                 else
                 {
-                    if(!sqlManage.Select(buttonId,"左",String.valueOf(((TextView)findViewById(R.id.state)).getText()))){
+                    int inOntheWay=0;
+                    if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：左")) {
+                        inOntheWay=1;
+                    }
+                    else if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：右")) {
+                        inOntheWay=2;
+                    }
+                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()),inOntheWay)){
                         sqlManage.roll=0.0f;
                         sqlManage.pitch=0.0f;
                         sqlManage.yaw=0.0f;
@@ -589,7 +652,14 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 }
                 else
                 {
-                    if(!sqlManage.Select(buttonId,"上",String.valueOf(((TextView)findViewById(R.id.state)).getText()))){
+                    int inOntheWay=0;
+                    if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：左")) {
+                        inOntheWay=1;
+                    }
+                    else if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：右")) {
+                        inOntheWay=2;
+                    }
+                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()),inOntheWay)){
                         sqlManage.roll=0.0f;
                         sqlManage.pitch=0.0f;
                         sqlManage.yaw=0.0f;
@@ -615,7 +685,14 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 }
                 else
                 {
-                    if(!sqlManage.Select(buttonId,"右",String.valueOf(((TextView)findViewById(R.id.state)).getText()))){
+                    int inOntheWay=0;
+                    if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：左")) {
+                        inOntheWay=1;
+                    }
+                    else if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：右")) {
+                        inOntheWay=2;
+                    }
+                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()),inOntheWay)){
                         sqlManage.roll=0.0f;
                         sqlManage.pitch=0.0f;
                         sqlManage.yaw=0.0f;
@@ -629,6 +706,48 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,sqlManage.speed2));
                 }
                 break;
+            case R.id.gun_onTheWay: {
+                if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("中间")){
+                    ((TextView)findViewById(R.id.column_onTheWay)).setText("途中：左");
+                }
+                else if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：左")){
+                    ((TextView)findViewById(R.id.column_onTheWay)).setText("途中：右");
+                }
+                else {
+                    ((TextView)findViewById(R.id.column_onTheWay)).setText("中间");
+                }
+                if(param2set!=null && init_state[1].equals( ((TextView)findViewById(R.id.gun_num)).getText()) && init_state[2].equals(String.valueOf(((TextView)findViewById(R.id.state)).getText())))
+                {
+                    seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
+                    seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,param2set[1]));
+                    seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,param2set[2]));
+                    seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,param2set[3]));
+                    seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,param2set[4]));
+                }
+                else
+                {
+                    int inOntheWay=0;
+                    if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：左")) {
+                        inOntheWay=1;
+                    }
+                    else if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：右")) {
+                        inOntheWay=2;
+                    }
+                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()),inOntheWay)){
+                        sqlManage.roll=0.0f;
+                        sqlManage.pitch=0.0f;
+                        sqlManage.yaw=0.0f;
+                        sqlManage.speed1=0;
+                        sqlManage.speed2=0;
+                    }
+                    seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,sqlManage.pitch));
+                    seekBar_roll.setProgress(floatToProgress(seekBar_roll,sqlManage.roll));
+                    seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,sqlManage.yaw));
+                    seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,sqlManage.speed1));
+                    seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,sqlManage.speed2));
+                }
+                break;
+            }
             case R.id.button_param_shotball://打球
                 ((TextView)findViewById(R.id.state)).setText("打球");
                  if(param2set!=null && init_state!=null)
@@ -644,7 +763,14 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 }
                 else
                 {
-                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),"打球")){
+                    int inOntheWay=0;
+                    if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：左")) {
+                        inOntheWay=1;
+                    }
+                    else if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：右")) {
+                        inOntheWay=2;
+                    }
+                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()),inOntheWay)){
                         sqlManage.roll=0.0f;
                         sqlManage.pitch=0.0f;
                         sqlManage.yaw=0.0f;
@@ -673,7 +799,14 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 }
                 else
                 {
-                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),"打盘")){
+                    int inOntheWay=0;
+                    if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：左")) {
+                        inOntheWay=1;
+                    }
+                    else if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：右")) {
+                        inOntheWay=2;
+                    }
+                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()),inOntheWay)){
                         sqlManage.roll=0.0f;
                         sqlManage.pitch=0.0f;
                         sqlManage.yaw=0.0f;
@@ -702,7 +835,14 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 }
                 else
                 {
-                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),"扔")){
+                    int inOntheWay=0;
+                    if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：左")) {
+                        inOntheWay=1;
+                    }
+                    else if(String.valueOf(((TextView)findViewById(R.id.column_onTheWay)).getText()).equals("途中：右")) {
+                        inOntheWay=2;
+                    }
+                    if(!sqlManage.Select(buttonId,String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()),inOntheWay)){
                         sqlManage.roll=0.0f;
                         sqlManage.pitch=0.0f;
                         sqlManage.yaw=0.0f;
@@ -761,33 +901,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     finish();
                     break;
             }
-        }
-        String gunNum=((TextView)findViewById(R.id.gun_num)).getText().toString();
-        String gunState=((TextView)findViewById(R.id.state)).getText().toString();
-        String column=((TextView)findViewById(R.id.column_num)).getText().toString();
-        if(gunNum.equals("上")){
-
-            if(gunState.equals("打盘")&&column.equals("column: 7")){
-                gain_roll=1;
-                setRange(  40,    districtNum,    20,  maxSpeed,
-                           -5,              0,   -20,  minSpeed,
-                         0.1f,           1.0f,  0.2f,  stepSpeed);
-                ((TextView)findViewById(R.id.roll_or_district)).setText("区域");
-            }else{
-                gain_roll=10;
-                setRange(  40,    0,   20, maxSpeed,
-                           -5,    0,  -20, minSpeed,
-                         0.1f, 0.0f, 0.2f, stepSpeed);
-                ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
-            }
-            ((ProgressBar)findViewById(R.id.progress_speed2)).setMax(0);
-        }
-        else {
-            gain_roll=10;
-            setRange(  40,   45,   50, maxSpeed,
-                      -10,    0,  -50, minSpeed,
-                     0.5f, 0.5f, 0.5f, stepSpeed);
-            ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
         }
 
     }

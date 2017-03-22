@@ -34,6 +34,12 @@
                 android:layout_weight="1"
                 android:id="@+id/gun_right"
                 android:text="枪.右"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/gun_onTheWay"
+                android:text="位置"/>
             <TextView
                 android:layout_width="0dp"
                 android:id="@+id/gun_num"
@@ -57,6 +63,13 @@
                 android:gravity="center"
                 android:layout_weight="1"
                 android:text="Column："/>
+            <TextView
+                android:layout_width="0dp"
+                android:id="@+id/column_onTheWay"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:text="中间"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -259,6 +272,20 @@
                 android:gravity="center"
                 android:text="打盘"
                 android:id="@+id/button_param_shotfrisbee"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="下一步"
+                android:id="@+id/button_param_next_step"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="手自动切换"
+                android:id="@+id/button_param_mode_change"/>
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

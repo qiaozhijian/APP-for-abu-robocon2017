@@ -36,6 +36,7 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
     private Spinner state_spinner;
     private Spinner gun_spinner;
     private Spinner region_spinner;
+    private Spinner onTheWay_spinner;
     private Manage manage;
     private ListView listView;
     @Override
@@ -112,20 +113,30 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
     }
     boolean database_ok =false;
     float[] param2set =  new  float[5];
-    String[] state = new String[3];
+    String[] state = new String[4];
     @Override//实现两个spiner联动，需要嵌套
     public void onItemSelected(AdapterView<?> adapter, View v,int arg1,long arg2){
-        ;
         switch(adapter.getId())
         {
             case R.id.region_select:
                 database_ok = true;
                 break;
+            case R.id.option_select:
+                onTheWay_spinner = (Spinner)findViewById(R.id.option_onTheWay);//位置的选择
+                List<String> onTheWaySelect=new ArrayList<String>();
+                onTheWaySelect.add("中间");
+                onTheWaySelect.add("途中：左");
+                onTheWaySelect.add("途中：右");
+                ArrayAdapter<String> onTheWaySelectAdapter=new ArrayAdapter<String>(this,R.layout.support_simple_spinner_dropdown_item,onTheWaySelect);
+                onTheWaySelectAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+                onTheWay_spinner.setAdapter(onTheWaySelectAdapter);
+                onTheWay_spinner.setOnItemSelectedListener(this);
+                break;
             case R.id.state_select:
                 region_spinner = (Spinner)findViewById(R.id.region_select);//区域的选择
                 if(spinner.getSelectedItem().toString().equals("column7") && gun_spinner.getSelectedItem().toString().equals("上") && state_spinner.getSelectedItem().toString().equals("打盘")) {
                     List<String> regionoptionSelect=new ArrayList<String>();
-
+                    regionoptionSelect.add("0.0");
                     regionoptionSelect.add("1.0");
                     regionoptionSelect.add("2.0");
                     regionoptionSelect.add("3.0");
@@ -155,7 +166,7 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
 
                 //gun_spinner.getSelectedItem().toString();
                 break;
-            case R.id.option_select:
+            case R.id.option_onTheWay:
                 gun_spinner=(Spinner)findViewById(R.id.gun_select);//枪的选择
                 List<String> gunoptionSelect=new ArrayList<String>();
                 gunoptionSelect.add("左");
@@ -172,11 +183,24 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
         }
        if(database_ok)
        {
+           String add="";
+           if(onTheWay_spinner!=null){
+               if(onTheWay_spinner.getSelectedItem().toString().equals("途中：左"))
+               {
+                   add="onTheWay_";
+               }
+               else if(onTheWay_spinner.getSelectedItem().toString().equals("途中：右"))
+               {
+                   add="onTheWay2_";
+               }
+           }
+
            ArrayList<Manage.dataSt> data;
            if(spinner.getSelectedItem().toString().equals("column7") && gun_spinner.getSelectedItem().toString().equals("上") && state_spinner.getSelectedItem().toString().equals("打盘")){
-               data=manage.selectColumn(spinner.getSelectedItem().toString(),gun_spinner.getSelectedItem().toString(),state_spinner.getSelectedItem().toString(),region_spinner.getSelectedItem().toString());
-           }else
-           data=manage.selectAll(spinner.getSelectedItem().toString(),gun_spinner.getSelectedItem().toString(),state_spinner.getSelectedItem().toString());
+               data=manage.selectColumn(add+spinner.getSelectedItem().toString(),gun_spinner.getSelectedItem().toString(),state_spinner.getSelectedItem().toString(),region_spinner.getSelectedItem().toString());
+           }else{
+               data=manage.selectAll(add+(spinner.getSelectedItem().toString()),gun_spinner.getSelectedItem().toString(),state_spinner.getSelectedItem().toString());
+           }
 
            dataAdapter data_adapter=new dataAdapter(DataActivity.this,R.layout.item_listview_activity_data,data);
            ListView listView=(ListView)findViewById(R.id.list_data_display);
@@ -184,12 +208,24 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
            state[0] = spinner.getSelectedItem().toString();
            state[1] = gun_spinner.getSelectedItem().toString();
            state[2] =state_spinner.getSelectedItem().toString();
+           state[3] =onTheWay_spinner.getSelectedItem().toString();
            Log.d("dataDisplay","display");
            listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
                @Override
                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                   Manage.dataSt data = manage.selectOne(state[0],state[1],state[2],position+1);
+                   String add="";
+                   if(state[3].equals("途中：左"))
+                   {
+                       add="onTheWay_";
+                   }
+                   if(state[3].equals("途中：右"))
+                   {
+                       add="onTheWay2_";
+                   }
+
+
+                   Manage.dataSt data = manage.selectOne(add+state[0],state[1],state[2],position+1);
                    param2set[0] = data.roll;
                    param2set[1] = data.pitch;
                    param2set[2] = data.yaw;

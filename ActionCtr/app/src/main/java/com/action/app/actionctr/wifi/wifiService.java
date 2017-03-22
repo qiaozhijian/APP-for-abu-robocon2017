@@ -35,10 +35,10 @@ public class wifiService extends Service {
     private wifiBroadcastReceiver broadcastReceiver;
     private IntentFilter intentFilter;
 
-    private final int port=8086;
+    private final int port=8080;
 
-    private final String SSID="ATK-ESP8266";
-    private final String presharedKey="12345678";
+    private final String SSID="ESP8266EX";
+    private final String presharedKey="2017champion";
     private ServerSocket server;
 
     private Runnable runnable;

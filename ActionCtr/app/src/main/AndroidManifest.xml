@@ -32,16 +32,16 @@
         <activity
             android:name=".BleConnectActivity"
             android:screenOrientation="landscape">
-
-        </activity>
-        <activity
-            android:name=".BeginActivity"
-            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
+        </activity>
+        <activity
+            android:name=".BeginActivity"
+            android:screenOrientation="landscape"></activity>
+        <activity android:name=".humanSensorActivity"
+                  android:screenOrientation="landscape">
         </activity>
         <activity
             android:name=".ParamChangeActivity"
@@ -51,7 +51,8 @@
             android:name=".DataActivity"
             android:screenOrientation="landscape" />
         <activity android:name=".CtrActivity" />
-        <activity android:name=".DebugDataDisplayActivity"
+        <activity
+            android:name=".DebugDataDisplayActivity"
             android:screenOrientation="landscape" />
 
         <service
@@ -62,8 +63,6 @@
             android:name=".wifi.wifiService"
             android:enabled="true"
             android:exported="true" />
-
-
     </application>
 
 </manifest>

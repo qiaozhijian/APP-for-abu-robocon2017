@@ -127,8 +127,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:id="@+id/go_to_ctr_activity"
-                    android:text="控制"/>
+                    android:id="@+id/go_to_human_activity"
+                    android:text="人形传感器"/>
                 <Button
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

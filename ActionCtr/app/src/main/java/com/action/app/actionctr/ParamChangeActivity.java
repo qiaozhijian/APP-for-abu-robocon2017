@@ -46,7 +46,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private float stepYaw=0.5f;
 
     private int maxRoll=45;
-    private int minRoll=0;
+    private int minRoll=-45;
     private float stepRoll=0.5f;
     private int   gain_roll=10;
 
@@ -124,7 +124,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         else {
             gain_roll=10;
             setRange(  40,   45,   50, maxSpeed,
-                    -10,    0,  -50, minSpeed,
+                    -10,    -45,  -50, minSpeed,
                     0.5f, 0.5f, 0.5f, stepSpeed);
             ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
         }
@@ -197,8 +197,8 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
 
         findViewById(R.id.button_param_shot).setOnClickListener(this);//射
-        findViewById(R.id.button_param_next_step).setOnTouchListener(this);
-        findViewById(R.id.button_param_mode_change).setOnTouchListener(this);
+        findViewById(R.id.button_param_next_step).setOnClickListener(this);
+        findViewById(R.id.button_param_mode_change).setOnClickListener(this);
 
         findViewById(R.id.button_param_cancel).setOnClickListener(this);
         findViewById(R.id.button_param_save).setOnClickListener(this);
@@ -716,7 +716,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 else {
                     ((TextView)findViewById(R.id.column_onTheWay)).setText("中间");
                 }
-                if(param2set!=null && init_state[1].equals( ((TextView)findViewById(R.id.gun_num)).getText()) && init_state[2].equals(String.valueOf(((TextView)findViewById(R.id.state)).getText())))
+                if(param2set!=null && init_state[1].equals(String.valueOf(((TextView)findViewById(R.id.gun_num)).getText())) && init_state[2].equals(String.valueOf(((TextView)findViewById(R.id.state)).getText())))
                 {
                     seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
                     seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,param2set[1]));

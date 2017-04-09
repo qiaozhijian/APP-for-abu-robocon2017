@@ -72,9 +72,14 @@ public class humanSensorActivity extends BasicActivity implements CompoundButton
                 temp1*=2;
                 temp2*=2;
             }
-            toggleButtonsBallList.get(i).setChecked((((state_ball%temp2)/temp1)==1));
-            toggleButtonsFrisbeeList.get(i).setChecked((((state_frisbee%temp2)/temp1)==1));
-
+            if((((state_ball%temp2)/temp1)==1)) {
+                toggleButtonsBallList.get(i).setChecked(true);
+                toggleButtonsBallList.get(i).setBackgroundColor(Color.parseColor("#6495ED"));
+            }
+            if((((state_frisbee%temp2)/temp1)==1)) {
+                toggleButtonsFrisbeeList.get(i).setChecked(true);
+                toggleButtonsFrisbeeList.get(i).setBackgroundColor(Color.parseColor("#6495ED"));
+            }
             toggleButtonsBallList.get(i).setOnCheckedChangeListener(this);
             toggleButtonsFrisbeeList.get(i).setOnCheckedChangeListener(this);
         }
@@ -105,8 +110,6 @@ public class humanSensorActivity extends BasicActivity implements CompoundButton
         else {
             buttonView.setBackgroundColor(Color.parseColor("#969696"));
         }
-
-
         for(int i=toggleButtonsBallList.size()-1;i>=0;i--) {
             state_ball=(byte) (state_ball*2);
             state_frisbee=(byte) (state_frisbee*2);
@@ -114,7 +117,6 @@ public class humanSensorActivity extends BasicActivity implements CompoundButton
             if(toggleButton.isChecked()){
                 state_ball+=(byte) 1;
             }
-
             toggleButton=toggleButtonsFrisbeeList.get(i);
             if(toggleButton.isChecked()){
                 state_frisbee+=(byte) 1;

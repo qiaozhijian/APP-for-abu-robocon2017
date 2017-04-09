@@ -20,11 +20,11 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_begin);
         isEnding=false;
-//        Intent intentWifiService=new Intent(this,wifiService.class);
-//        startService(intentWifiService);
+        Intent intentWifiService=new Intent(this,wifiService.class);
+        startService(intentWifiService);
 
         findViewById(R.id.go_to_data_activity).setOnClickListener(this);
-        findViewById(R.id.go_to_ctr_activity).setOnClickListener(this);
+        findViewById(R.id.go_to_human_activity).setOnClickListener(this);
         findViewById(R.id.go_to_debug_data_activity).setOnClickListener(this);
 
         findViewById(R.id.column1).setOnClickListener(this);
@@ -81,8 +81,8 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
         Intent intent;
         int countForColumn=0;
         switch (v.getId()){
-            case R.id.go_to_ctr_activity:
-                intent=new Intent(BeginActivity.this,CtrActivity.class);
+            case R.id.go_to_human_activity:
+                intent=new Intent(BeginActivity.this,humanSensorActivity.class);
                 startActivity(intent);
                 finish();
                 break;

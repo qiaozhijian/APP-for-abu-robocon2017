@@ -2,6 +2,7 @@ package com.action.app.actionctr;
 
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -25,6 +26,11 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
     protected void onCreate(Bundle s) {
         super.onCreate(s);
         setContentView(R.layout.activity_ble_connect);
+
+        SharedPreferences.Editor dataSt=getSharedPreferences("data",MODE_PRIVATE).edit();
+        dataSt.clear();
+        dataSt.commit();
+
         isEnding=false;
         final TextView text=(TextView)findViewById(R.id.ble_connect_display);
         text.setText("蓝牙连接中");

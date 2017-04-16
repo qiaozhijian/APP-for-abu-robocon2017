@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -20,6 +21,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
@@ -81,7 +83,36 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private SeekBar seekBar_speed1;
     private SeekBar seekBar_speed2;
 
+    private ArrayList<Button>   gunList=new ArrayList<>();
+    private ArrayList<Button>   buttonParamList=new ArrayList<>();
+
     private ProgressDialog progressDialog;
+
+
+    private void checkButtonColor()
+    {
+        for (Button button:gunList) {
+            TextView textView=((TextView)findViewById(R.id.gun_num));
+            if(button.getText().equals("枪."+textView.getText().toString())) {
+                button.setTextColor(Color.parseColor("#6495ED"));
+            }
+            else
+            {
+                button.setTextColor(Color.parseColor("#000000"));
+            }
+        }
+        for (Button button:buttonParamList) {
+            TextView textView=((TextView)findViewById(R.id.state));
+            if(button.getText().equals(textView.getText().toString())) {
+                button.setTextColor(Color.parseColor("#6495ED"));
+            }
+            else
+            {
+                button.setTextColor(Color.parseColor("#000000"));
+            }
+        }
+    }
+
 
 
     private float progressToFloat(SeekBar seekBar,int val){
@@ -106,7 +137,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         String column=((TextView)findViewById(R.id.column_num)).getText().toString();
         if(gunNum.equals("上")){
 
-            if(gunState.equals("打盘")&&column.equals("column: 7")){
+            if(gunState.equals("打盘")&&column.equals("column7")){
                 gain_roll=1;
                 setRange(  40,    districtNum,    20,  maxSpeed,
                         -5,              0,   -20,  minSpeed,
@@ -218,12 +249,20 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         findViewById(R.id.speed2_increase).setOnClickListener(this);
 
         findViewById(R.id.gun_left).setOnClickListener(this);
+        gunList.add((Button)findViewById(R.id.gun_left));
         findViewById(R.id.gun_right).setOnClickListener(this);
+        gunList.add((Button)findViewById(R.id.gun_right));
         findViewById(R.id.gun_up).setOnClickListener(this);
+        gunList.add((Button)findViewById(R.id.gun_up));
+
         findViewById(R.id.gun_onTheWay).setOnClickListener(this);
+
         findViewById(R.id.button_param_shotball).setOnClickListener(this);
+        buttonParamList.add((Button)findViewById(R.id.button_param_shotball));
         findViewById(R.id.button_param_shotfrisbee).setOnClickListener(this);
+        buttonParamList.add((Button)findViewById(R.id.button_param_shotfrisbee));
         findViewById(R.id.button_param_fly).setOnClickListener(this);
+        buttonParamList.add((Button)findViewById(R.id.button_param_fly));
 
 
         seekBar_pitch=((SeekBar)findViewById(R.id.progress_pitch));
@@ -247,7 +286,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         if(buttonId!=0)
         {
             Log.d("paraChange","buttonId: "+String.valueOf(buttonId));
-            ((TextView)findViewById(R.id.column_num)).setText("column: "+String.valueOf(buttonId));
+            ((TextView)findViewById(R.id.column_num)).setText("column"+String.valueOf(buttonId));
             if(!sqlManage.Select(buttonId,"左","扔",0)){
                 sqlManage.roll=0.0f;
                 sqlManage.pitch=0.0f;
@@ -273,22 +312,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
         param2set = intent.getFloatArrayExtra("param2set");
         init_state = intent.getStringArrayExtra("state2set");
-        if(param2set!=null)
-        {
-            seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
-            seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,param2set[1]));
-            seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,param2set[2]));
-            seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,param2set[3]));
-            seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,param2set[4]));
-        }
-        else
-        {
-            seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,sqlManage.pitch));
-            seekBar_roll.setProgress(floatToProgress(seekBar_roll,sqlManage.roll));
-            seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,sqlManage.yaw));
-            seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,sqlManage.speed1));
-            seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,sqlManage.speed2));
-        }
+
         if(init_state!= null)
         {
             int id = 0;
@@ -309,13 +333,59 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     break;
             }
 
+            String gunNum=init_state[1];
+            String gunState=init_state[2];
+            String column=init_state[0];
+            if(gunNum.equals("上")){
+                if(gunState.equals("打盘")&&column.equals("column7")){
+                    gain_roll=1;
+                    setRange(  40,    districtNum,    20,  maxSpeed,
+                            -5,              0,   -20,  minSpeed,
+                            0.1f,           1.0f,  0.2f,  stepSpeed);
+                    ((TextView)findViewById(R.id.roll_or_district)).setText("区域");
+                }else{
+                    gain_roll=10;
+                    setRange(  40,    0,   20, maxSpeed,
+                            -5,    0,  -20, minSpeed,
+                            0.1f, 0.0f, 0.2f, stepSpeed);
+                    ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
+                }
+                ((ProgressBar)findViewById(R.id.progress_speed2)).setMax(0);
+            }
+            else {
+                gain_roll=10;
+                setRange(  40,   45,   50, maxSpeed,
+                        -10,    -45,  -50, minSpeed,
+                        0.5f, 0.5f, 0.5f, stepSpeed);
+                ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
+            }
+
         }
+
+        if(param2set!=null)
+        {
+            seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
+            seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,param2set[1]));
+            seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,param2set[2]));
+            seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,param2set[3]));
+            seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,param2set[4]));
+        }
+        else
+        {
+            seekBar_pitch.setProgress(floatToProgress(seekBar_pitch,sqlManage.pitch));
+            seekBar_roll.setProgress(floatToProgress(seekBar_roll,sqlManage.roll));
+            seekBar_yaw.setProgress(floatToProgress(seekBar_yaw,sqlManage.yaw));
+            seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,sqlManage.speed1));
+            seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,sqlManage.speed2));
+        }
+
 
 
         setDrawerLeftEdgeSize(this, mDrawerLayout, 1.0f);
 
         initView();
         initEvents();
+        checkButtonColor();
     }
      /**
      2  * 抽屉滑动范围控制
@@ -902,7 +972,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     break;
             }
         }
-
+        checkButtonColor();
     }
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress,

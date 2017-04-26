@@ -39,7 +39,7 @@ public class BleService extends Service {
     private int RssiValue=0;
 
     public static final int bleDataLen=12;
-    private final String address="90:59:AF:0E:62:A4";
+    private final String address="90:59:AF:0E:62:A4";   //98:7B:F3:60:C7:01 //90:59:AF:0E:62:A4
     Handler handler;
 
     private byte[] dataReceive;
@@ -73,6 +73,18 @@ public class BleService extends Service {
             if(Arrays.equals(dataReceive,dataTrans)) {
                 return true;
             }
+            if(dataReceive!=null&&dataTrans!=null) {
+                int i;
+                for(i=0;i<10;i++) {
+                   if(dataReceive[i]!=dataTrans[i])
+                       break;
+                }
+                if(i==10) {
+                    Log.e("ble","communicate unstable");
+                    return true;
+                }
+            }
+
             return false;
         }
         public boolean isReady(){

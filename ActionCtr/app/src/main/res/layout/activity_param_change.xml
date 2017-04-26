@@ -12,65 +12,7 @@
         android:layout_alignParentTop="true"
         android:orientation="vertical"
         android:layout_above="@+id/ok_cancel_choose">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:id="@+id/gun_left"
-                android:text="枪.左"/>
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:id="@+id/gun_up"
-                android:text="枪.上"/>
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:id="@+id/gun_right"
-                android:text="枪.右"/>
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:id="@+id/gun_onTheWay"
-                android:text="位置"/>
-            <TextView
-                android:layout_width="0dp"
-                android:id="@+id/gun_num"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:inputType="text"
-                android:layout_weight="1"
-                android:text="左"/>
-            <TextView
-                android:layout_width="0dp"
-                android:id="@+id/state"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:inputType="text"
-                android:layout_weight="1"
-                android:text="扔"/>
-            <TextView
-                android:layout_width="0dp"
-                android:id="@+id/column_num"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:layout_weight="1"
-                android:text="Column："/>
-            <TextView
-                android:layout_width="0dp"
-                android:id="@+id/column_onTheWay"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:layout_weight="1"
-                android:text="中间"/>
-        </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -253,6 +195,65 @@
             android:layout_weight="1">
             <Button
                 android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/gun_left"
+                android:text="枪.左"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/gun_up"
+                android:text="枪.上"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/gun_right"
+                android:text="枪.右"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/gun_onTheWay"
+                android:text="位置"/>
+            <TextView
+                android:layout_width="0dp"
+                android:id="@+id/gun_num"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:inputType="text"
+                android:layout_weight="1"
+                android:text="左"/>
+            <TextView
+                android:layout_width="0dp"
+                android:id="@+id/state"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:inputType="text"
+                android:layout_weight="1"
+                android:text="扔"/>
+            <TextView
+                android:layout_width="0dp"
+                android:id="@+id/column_num"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:text="Column："/>
+            <TextView
+                android:layout_width="0dp"
+                android:id="@+id/column_onTheWay"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:text="中间"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+            <Button
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
@@ -279,12 +280,13 @@
                 android:gravity="center"
                 android:text="下一步"
                 android:id="@+id/button_param_next_step"/>
-            <Button
+            <ToggleButton
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="手自动切换"
+                android:textOff="自动"
+                android:textOn="手动"
                 android:id="@+id/button_param_mode_change"/>
             <Button
                 android:layout_width="0dp"

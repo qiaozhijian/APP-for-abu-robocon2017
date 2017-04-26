@@ -22,9 +22,11 @@ public class bleDataProcess{
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             state=(BleService.myBleBand)iBinder;
+            Log.d("bleDataProcess","Service Connected");
         }
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            Log.e("bleDataProcess","Service disconnected");
         }
     };
     public bleDataProcess(Context text){
@@ -47,7 +49,8 @@ public class bleDataProcess{
             sendData[7]=(byte)((value>>8)&0xff);
             sendData[8]=(byte)((value>>16)&0xff);
             sendData[9]=(byte)((value>>24)&0xff);
-            state.send(sendData);
+            if(state!=null)
+                state.send(sendData);
             return true;
         }
         Log.e("Ble","dataSend length err");
@@ -67,7 +70,8 @@ public class bleDataProcess{
             sendData[7]=floatData[1];
             sendData[8]=floatData[2];
             sendData[9]=floatData[3];
-            state.send(sendData);
+            if(state!=null)
+                state.send(sendData);
             return true;
         }
         Log.e("Ble","dataSend length err");
@@ -83,7 +87,8 @@ public class bleDataProcess{
             sendData[2]='C';
             sendData[3]='T';
             sendData[4]=id;
-               state.send(sendData);
+            if(state!=null)
+                state.send(sendData);
             return true;
         }
         Log.e("Ble","dataSend length err");
@@ -100,7 +105,8 @@ public class bleDataProcess{
             sendData[3]='T';
             sendData[4]=state1;
             sendData[5]=state2;
-            state.send(sendData);
+            if(state!=null)
+                state.send(sendData);
             return true;
         }
         Log.e("Ble","dataSend length err");

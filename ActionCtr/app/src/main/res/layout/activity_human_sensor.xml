@@ -10,230 +10,287 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.action.app.actionctr.humanSensorActivity">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="4"
         android:orientation="horizontal">
-        <ToggleButton
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="match_parent"
-            android:textOff="有球"
-            android:textOn="没球"
-            android:background="#969696"
-            android:id="@+id/human_sensor_ball_is1"/>
-        <TextView
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_ball_is1"
+                    android:text="1球"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_frisbee_is1"
+                    android:text="1盘"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_column1"
+                    android:text="柱子1"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@android:drawable/picture_frame" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_ball_is2"
+                    android:text="2球"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_frisbee_is2"
+                    android:text="2盘"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_column2"
+                    android:text="柱子2"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@android:drawable/picture_frame" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_ball_is3"
+                    android:text="3球"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_frisbee_is3"
+                    android:text="3盘"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_column3"
+                    android:text="柱子3"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@android:drawable/picture_frame" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_ball_is7"
+                    android:text="7球"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_frisbee_is7"
+                    android:text="7盘"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_column7"
+                    android:text="柱子7"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@android:drawable/picture_frame" />
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="1"/>
-        <ToggleButton
-            android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:textOff="没盘"
-            android:textOn="有盘"
-            android:background="#969696"
-            android:id="@+id/human_sensor_frisbee_is1" />
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_column4"
+                    android:text="柱子4"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@android:drawable/picture_frame" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_ball_is4"
+                    android:text="4球"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_frisbee_is4"
+                    android:text="4盘"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_column5"
+                    android:text="柱子5"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@android:drawable/picture_frame" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_ball_is5"
+                    android:text="5球"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_frisbee_is5"
+                    android:text="5盘"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_column6"
+                    android:text="柱子6"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@android:drawable/picture_frame" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_ball_is6"
+                    android:text="6球"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="match_parent"
+                    android:id="@+id/human_sensor_frisbee_is6"
+                    android:text="6盘"
+                    android:textStyle="bold"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/common_google_signin_btn_text_light_pressed" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+                <ToggleButton
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textOn="上枪防御"
+                    android:textOff="上枪进攻"
+                    android:id="@+id/human_sensor_top_gun_mode"
+                    android:checked="false"
+                    android:background="@drawable/common_plus_signin_btn_text_light" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.1"/>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
-        <ToggleButton
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:textOff="有球"
-            android:textOn="没球"
-            android:background="#969696"
-            android:id="@+id/human_sensor_ball_is2" />
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="2"/>
-        <ToggleButton
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:textOff="没盘"
-            android:textOn="有盘"
-            android:background="#969696"
-            android:id="@+id/human_sensor_frisbee_is2" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.1"/>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
-        <ToggleButton
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:textOff="有球"
-            android:textOn="没球"
-            android:background="#969696"
-            android:id="@+id/human_sensor_ball_is3" />
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="3"/>
-        <ToggleButton
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:textOff="没盘"
-            android:textOn="有盘"
-            android:background="#969696"
-            android:id="@+id/human_sensor_frisbee_is3" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.1"/>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
-        <ToggleButton
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:textOff="有球"
-            android:textOn="没球"
-            android:background="#969696"
-            android:id="@+id/human_sensor_ball_is4" />
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="4"/>
-        <ToggleButton
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:textOff="没盘"
-            android:textOn="有盘"
-            android:background="#969696"
-            android:id="@+id/human_sensor_frisbee_is4" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.1"/>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
-        <ToggleButton
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:textOff="有球"
-            android:textOn="没球"
-            android:background="#969696"
-            android:id="@+id/human_sensor_ball_is5" />
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="5"/>
-        <ToggleButton
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:textOff="没盘"
-            android:textOn="有盘"
-            android:background="#969696"
-            android:id="@+id/human_sensor_frisbee_is5" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.1"/>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
-        <ToggleButton
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:textOff="有球"
-            android:textOn="没球"
-            android:background="#969696"
-            android:id="@+id/human_sensor_ball_is6" />
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="6"/>
-        <ToggleButton
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:textOff="没盘"
-            android:textOn="有盘"
-            android:background="#969696"
-            android:id="@+id/human_sensor_frisbee_is6" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.1"/>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
-        <ToggleButton
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:textOff="有球"
-            android:textOn="没球"
-            android:background="#969696"
-            android:id="@+id/human_sensor_ball_is7" />
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="7"/>
-        <ToggleButton
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:textOff="没盘"
-            android:textOn="有盘"
-            android:background="#969696"
-            android:id="@+id/human_sensor_frisbee_is7" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.1"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -242,10 +299,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="返回"
-            android:id="@+id/human_sensor_cancel"/>
+            android:id="@+id/human_sensor_cancel"
+            android:background="@android:drawable/picture_frame" />
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.1"/>
 </LinearLayout>

@@ -18,11 +18,12 @@ import com.action.app.actionctr.ble.bleDataProcess;
 import java.util.ArrayList;
 import java.util.List;
 
-public class humanSensorActivity extends BasicActivity implements CompoundButton.OnCheckedChangeListener {
+public class humanSensorActivity extends BasicActivity implements View.OnClickListener,CompoundButton.OnCheckedChangeListener {
 
 
-    private ArrayList<ToggleButton> toggleButtonsBallList=new ArrayList<>();
-    private ArrayList<ToggleButton> toggleButtonsFrisbeeList=new ArrayList<>();
+    private ArrayList<Button> buttonsBallList=new ArrayList<>();
+    private ArrayList<Button> buttonsFrisbeeList=new ArrayList<>();
+    private ArrayList<Button> buttonsColumnList=new ArrayList<>();
 
     private bleDataProcess bleDataManage;
 
@@ -37,52 +38,50 @@ public class humanSensorActivity extends BasicActivity implements CompoundButton
 
         bleDataManage=new bleDataProcess(this);
 
-        toggleButtonsBallList.add((ToggleButton)findViewById(R.id.human_sensor_ball_is1));
-        toggleButtonsFrisbeeList.add((ToggleButton)findViewById(R.id.human_sensor_frisbee_is1));
+        ((ToggleButton)findViewById(R.id.human_sensor_top_gun_mode)).setOnCheckedChangeListener(this);
+        
 
-        toggleButtonsBallList.add((ToggleButton)findViewById(R.id.human_sensor_ball_is2));
-        toggleButtonsFrisbeeList.add((ToggleButton)findViewById(R.id.human_sensor_frisbee_is2));
 
-        toggleButtonsBallList.add((ToggleButton)findViewById(R.id.human_sensor_ball_is3));
-        toggleButtonsFrisbeeList.add((ToggleButton)findViewById(R.id.human_sensor_frisbee_is3));
+        buttonsBallList.add((Button) findViewById(R.id.human_sensor_ball_is1));
+        buttonsFrisbeeList.add((Button)findViewById(R.id.human_sensor_frisbee_is1));
 
-        toggleButtonsBallList.add((ToggleButton)findViewById(R.id.human_sensor_ball_is4));
-        toggleButtonsFrisbeeList.add((ToggleButton)findViewById(R.id.human_sensor_frisbee_is4));
+        buttonsBallList.add((Button)findViewById(R.id.human_sensor_ball_is2));
+        buttonsFrisbeeList.add((Button)findViewById(R.id.human_sensor_frisbee_is2));
 
-        toggleButtonsBallList.add((ToggleButton)findViewById(R.id.human_sensor_ball_is5));
-        toggleButtonsFrisbeeList.add((ToggleButton)findViewById(R.id.human_sensor_frisbee_is5));
+        buttonsBallList.add((Button)findViewById(R.id.human_sensor_ball_is3));
+        buttonsFrisbeeList.add((Button)findViewById(R.id.human_sensor_frisbee_is3));
 
-        toggleButtonsBallList.add((ToggleButton)findViewById(R.id.human_sensor_ball_is6));
-        toggleButtonsFrisbeeList.add((ToggleButton)findViewById(R.id.human_sensor_frisbee_is6));
+        buttonsBallList.add((Button)findViewById(R.id.human_sensor_ball_is4));
+        buttonsFrisbeeList.add((Button)findViewById(R.id.human_sensor_frisbee_is4));
 
-        toggleButtonsBallList.add((ToggleButton)findViewById(R.id.human_sensor_ball_is7));
-        toggleButtonsFrisbeeList.add((ToggleButton)findViewById(R.id.human_sensor_frisbee_is7));
+        buttonsBallList.add((Button)findViewById(R.id.human_sensor_ball_is5));
+        buttonsFrisbeeList.add((Button)findViewById(R.id.human_sensor_frisbee_is5));
 
-        SharedPreferences dataSt=getSharedPreferences("data",MODE_PRIVATE);
+        buttonsBallList.add((Button)findViewById(R.id.human_sensor_ball_is6));
+        buttonsFrisbeeList.add((Button)findViewById(R.id.human_sensor_frisbee_is6));
 
-        state_ball=(byte) dataSt.getInt("state_ball",0);
-        state_frisbee=(byte) dataSt.getInt("state_frisbee",0);
+        buttonsBallList.add((Button)findViewById(R.id.human_sensor_ball_is7));
+        buttonsFrisbeeList.add((Button)findViewById(R.id.human_sensor_frisbee_is7));
 
-        for(int i=0;i<toggleButtonsBallList.size();i++)
-        {
-            int temp1=1;
-            int temp2=2;
-            for(int j=0;j<i;j++)
-            {
-                temp1*=2;
-                temp2*=2;
-            }
-            if((((state_ball%temp2)/temp1)==1)) {
-                toggleButtonsBallList.get(i).setChecked(true);
-                toggleButtonsBallList.get(i).setBackgroundColor(Color.parseColor("#6495ED"));
-            }
-            if((((state_frisbee%temp2)/temp1)==1)) {
-                toggleButtonsFrisbeeList.get(i).setChecked(true);
-                toggleButtonsFrisbeeList.get(i).setBackgroundColor(Color.parseColor("#6495ED"));
-            }
-            toggleButtonsBallList.get(i).setOnCheckedChangeListener(this);
-            toggleButtonsFrisbeeList.get(i).setOnCheckedChangeListener(this);
+        buttonsColumnList.add((Button)findViewById(R.id.human_sensor_column1));
+        buttonsColumnList.add((Button)findViewById(R.id.human_sensor_column2));
+        buttonsColumnList.add((Button)findViewById(R.id.human_sensor_column3));
+        buttonsColumnList.add((Button)findViewById(R.id.human_sensor_column4));
+        buttonsColumnList.add((Button)findViewById(R.id.human_sensor_column5));
+        buttonsColumnList.add((Button)findViewById(R.id.human_sensor_column6));
+        buttonsColumnList.add((Button)findViewById(R.id.human_sensor_column7));
+
+        for(Button obj:buttonsColumnList){
+            obj.setOnClickListener(this);
         }
+
+        for (Button obj:buttonsFrisbeeList) {
+            obj.setOnClickListener(this);
+        }
+        for (Button obj:buttonsBallList) {
+            obj.setOnClickListener(this);
+        }
+
         (findViewById(R.id.human_sensor_cancel)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -99,30 +98,39 @@ public class humanSensorActivity extends BasicActivity implements CompoundButton
         });
     }
     @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        state_ball=0;
-        state_frisbee=0;
+    public void onClick(View v) {
+        for (int i=0;i<buttonsBallList.size();i++) {
+            Button b=buttonsBallList.get(i);
+            if(b.getId()==v.getId()){
+                //Log.d("humanSensor","send"+String.valueOf(10+i));
+                bleDataManage.sendCmd((byte)(10+i));
+            }
+        }
+        for (int i=0;i<buttonsFrisbeeList.size();i++) {
+            Button b=buttonsFrisbeeList.get(i);
+            if(b.getId()==v.getId()){
+                //Log.d("humanSensor","send"+String.valueOf(20+i));
+                bleDataManage.sendCmd((byte)(20+i));
+            }
+        }
+        for(int i=0;i<buttonsColumnList.size();i++){
+            Button b=buttonsColumnList.get(i);
+            if(b.getId()==v.getId()){
+                Intent intent;
+                intent=new Intent(this,ParamChangeActivity.class);
+                intent.putExtra("button_id",i+1);
+                startActivity(intent);
+                finish();
+            }
+        }
+    }
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
+        if(isChecked)
+            bleDataManage.sendCmd((byte)30);
+        else
+            bleDataManage.sendCmd((byte)31);
 
-        ColorDrawable colorDrawable= (ColorDrawable) buttonView.getBackground();
-        if(colorDrawable.getColor()==Color.parseColor("#969696")) {
-            buttonView.setBackgroundColor(Color.parseColor("#6495ED"));
-        }
-        else {
-            buttonView.setBackgroundColor(Color.parseColor("#969696"));
-        }
-        for(int i=toggleButtonsBallList.size()-1;i>=0;i--) {
-            state_ball=(byte) (state_ball*2);
-            state_frisbee=(byte) (state_frisbee*2);
-            ToggleButton toggleButton=toggleButtonsBallList.get(i);
-            if(toggleButton.isChecked()){
-                state_ball+=(byte) 1;
-            }
-            toggleButton=toggleButtonsFrisbeeList.get(i);
-            if(toggleButton.isChecked()){
-                state_frisbee+=(byte) 1;
-            }
-            bleDataManage.sendState(state_ball,state_frisbee);
-        }
     }
     @Override
     public void onDestroy() {

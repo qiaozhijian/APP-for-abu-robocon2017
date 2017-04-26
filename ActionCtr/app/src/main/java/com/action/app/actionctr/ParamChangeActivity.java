@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Color;
@@ -22,11 +23,13 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.action.app.actionctr.ble.bleDataProcess;
 import com.action.app.actionctr.sqlite.Manage;
@@ -34,12 +37,13 @@ import com.action.app.actionctr.MenuRightFragment;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by 56390 on 2016/12/8.
  */
 
-public class ParamChangeActivity extends BasicActivity implements View.OnClickListener,SeekBar.OnSeekBarChangeListener,View.OnTouchListener {
+public class ParamChangeActivity extends BasicActivity implements View.OnClickListener,SeekBar.OnSeekBarChangeListener,View.OnTouchListener,CompoundButton.OnCheckedChangeListener {
 
     private final int districtNum=7;
 
@@ -54,7 +58,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
 
     private int maxPitch=40;
-    private int minPitch=-10;
+    private int minPitch=7;
     private float stepPitch=0.5f;
 
 
@@ -155,7 +159,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         else {
             gain_roll=10;
             setRange(  40,   45,   50, maxSpeed,
-                    -10,    -45,  -50, minSpeed,
+                    7,    -45,  -50, minSpeed,
                     0.5f, 0.5f, 0.5f, stepSpeed);
             ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
         }
@@ -228,8 +232,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
 
         findViewById(R.id.button_param_shot).setOnClickListener(this);//射
-        findViewById(R.id.button_param_next_step).setOnClickListener(this);
-        findViewById(R.id.button_param_mode_change).setOnClickListener(this);
+        ((ToggleButton)findViewById(R.id.button_param_mode_change)).setOnCheckedChangeListener(this);
 
         findViewById(R.id.button_param_cancel).setOnClickListener(this);
         findViewById(R.id.button_param_save).setOnClickListener(this);
@@ -312,12 +315,20 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
         param2set = intent.getFloatArrayExtra("param2set");
         init_state = intent.getStringArrayExtra("state2set");
+        ((ToggleButton)findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data",MODE_PRIVATE).getBoolean("gun_mode_left",false));
 
         if(init_state!= null)
         {
             int id = 0;
             ((TextView)findViewById(R.id.column_num)).setText(init_state[0]);
             ((TextView)findViewById(R.id.gun_num)).setText(init_state[1]);
+            if(init_state[1].equals("右")){
+                ((ToggleButton)findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data",MODE_PRIVATE).getBoolean("gun_mode_right",false));
+            }
+            if(init_state[1].equals("上")){
+                ((ToggleButton)findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data",MODE_PRIVATE).getBoolean("gun_mode_top",false));
+            }
+
             ((TextView)findViewById(R.id.state)).setText(init_state[2]);
             ((TextView)findViewById(R.id.column_onTheWay)).setText(init_state[3]);
             switch(init_state[0])
@@ -355,7 +366,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             else {
                 gain_roll=10;
                 setRange(  40,   45,   50, maxSpeed,
-                        -10,    -45,  -50, minSpeed,
+                        7,    -45,  -50, minSpeed,
                         0.5f, 0.5f, 0.5f, stepSpeed);
                 ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
             }
@@ -378,7 +389,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             seekBar_speed1.setProgress(floatToProgress(seekBar_speed1,sqlManage.speed1));
             seekBar_speed2.setProgress(floatToProgress(seekBar_speed2,sqlManage.speed2));
         }
-
 
 
         setDrawerLeftEdgeSize(this, mDrawerLayout, 1.0f);
@@ -491,12 +501,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
                 bleDataManage.sendCmd(id);
                 break;
-            case R.id.button_param_mode_change:
-                bleDataManage.sendCmd((byte)4);
-                break;
-            case R.id.button_param_next_step:
-                bleDataManage.sendCmd((byte)5);
-                break;
 
             case R.id.button_param_save:
                 AlertDialog.Builder dialog= new AlertDialog.Builder(ParamChangeActivity.this);
@@ -595,7 +599,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         id2=(byte)(id2+inOntheWay*80);
 
 
-                        if(bleDataManage.checkSendOk()){
+                        if(bleDataManage.checkSendOk()&&bleDataManage.getBinder()!=null){
                             switch (id) {
                                 case 0:
                                     bleDataManage.sendParam((byte) (id+buttonId*5-5),id2,sqlManage.roll);
@@ -677,7 +681,10 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 seekBar=(SeekBar)findViewById(R.id.progress_speed2);
                 break;
             case R.id.gun_left:
-                ((TextView)findViewById(R.id.gun_num)).setText("左");;
+                ((TextView)findViewById(R.id.gun_num)).setText("左");
+
+                ((ToggleButton)findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data",MODE_PRIVATE).getBoolean("gun_mode_left",false));
+
                 if(param2set!=null && init_state[1] .equals("左" ) && init_state[2].equals(String.valueOf(((TextView)findViewById(R.id.state)).getText())) )
                 {
                     seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
@@ -712,6 +719,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 break;
             case R.id.gun_up:
                 ((TextView)findViewById(R.id.gun_num)).setText("上");
+
+                ((ToggleButton)findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data",MODE_PRIVATE).getBoolean("gun_mode_top",false));
+
                 if(param2set!=null && init_state[1].equals("上") && init_state[2].equals(String.valueOf(((TextView)findViewById(R.id.state)).getText())))
                 {
                     seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
@@ -745,6 +755,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 break;
             case R.id.gun_right:
                 ((TextView)findViewById(R.id.gun_num)).setText("右");
+
+                 ((ToggleButton)findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data",MODE_PRIVATE).getBoolean("gun_mode_right",false));
+
                  if(param2set!=null && init_state[1].equals("右") && init_state[2].equals(String.valueOf(((TextView)findViewById(R.id.state)).getText())))
                 {
                     seekBar_roll.setProgress(floatToProgress(seekBar_roll,param2set[0]));
@@ -1000,6 +1013,38 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     }
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
+    }
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
+        int gunId=3;
+        switch(String.valueOf(((TextView)findViewById(R.id.gun_num)).getText())){
+            case "左":
+                gunId += 1;
+                break;
+            case "右":
+                gunId += 2;
+                break;
+            case "上":
+                gunId += 3;
+                break;
+        }
+        boolean[] gun_mode=new boolean[3];
+        SharedPreferences dataSt=getSharedPreferences("data",MODE_PRIVATE);
+        gun_mode[0]=dataSt.getBoolean("gun_mode_left",false);
+        gun_mode[1]=dataSt.getBoolean("gun_mode_right",false);
+        gun_mode[2]=dataSt.getBoolean("gun_mode_top",false);
+        gun_mode[gunId-4]=isChecked;
+        if(isChecked){
+            gunId+=3;
+        }
+        bleDataManage.sendCmd((byte)(gunId));
+
+        SharedPreferences.Editor editor=getSharedPreferences("data",MODE_PRIVATE).edit();
+        editor.putBoolean("gun_mode_left",gun_mode[0]);
+        editor.putBoolean("gun_mode_right",gun_mode[1]);
+        editor.putBoolean("gun_mode_top",gun_mode[2]);
+        editor.commit();
+
     }
     @Override
     public void onDestroy(){

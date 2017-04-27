@@ -39,7 +39,8 @@
         </activity>
         <activity
             android:name=".BeginActivity"
-            android:screenOrientation="landscape"></activity>
+            android:screenOrientation="landscape">
+        </activity>
         <activity android:name=".humanSensorActivity"
                   android:screenOrientation="landscape">
         </activity>

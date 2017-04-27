@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Parcelable;
 import android.util.Log;
@@ -18,13 +19,13 @@ import java.util.List;
 
 public class wifiBroadcastReceiver extends BroadcastReceiver {
     private WifiManager manager;
-    private final String SSID;
-    private final String prekey;
     private boolean status=false;
-    wifiBroadcastReceiver(WifiManager wifiManager,String ssid,String key){
+    wifiBroadcastReceiver(WifiManager wifiManager){
         manager=wifiManager;
-        SSID=ssid;
-        prekey =key;
+        if(manager.getConnectionInfo()!=null)
+        {
+            status=true;
+        }
     }
 
     public boolean checkOk(){
@@ -35,15 +36,12 @@ public class wifiBroadcastReceiver extends BroadcastReceiver {
         if(intent.getAction().equals(WifiManager.WIFI_STATE_CHANGED_ACTION)){
             switch (manager.getWifiState()) {
                 case WifiManager.WIFI_STATE_ENABLED:
-                    manager.startScan();
-                    Log.d("wifi","wifi state change -> enabled");
-                    if(manager.getConnectionInfo().getSSID().equals("\""+SSID+"\"")){
+                    if(manager.getConnectionInfo().getSSID()!=null){
                         status=true;
                         Log.d("wifi","wifi has connected");
                     }
                     break;
                 case WifiManager.WIFI_STATE_DISABLED:
-                    manager.setWifiEnabled(true);
                     status=false;
                     Log.d("wifi","wifi state change -> disabled");
                     break;
@@ -64,7 +62,7 @@ public class wifiBroadcastReceiver extends BroadcastReceiver {
                 NetworkInfo.State state=((NetworkInfo)parcelable).getState();
                 switch (state){
                     case CONNECTED:
-                        if(manager.getConnectionInfo().getSSID().equals("\""+SSID+"\"")){
+                        if(manager.getConnectionInfo()!=null){
                             Log.d("wifi","wifi connected");
                             status=true;
                         }
@@ -88,43 +86,6 @@ public class wifiBroadcastReceiver extends BroadcastReceiver {
                         Log.d("wifi","wifi connecting");
                         break;
                 }
-            }
-        }
-        if(!status){
-            if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)){
-                List<ScanResult> scanResultList=manager.getScanResults();
-                if(!scanResultList.isEmpty()&&scanResultList!=null)
-                    for (ScanResult device:scanResultList){
-                        Log.d("wifi","scan result SSID:"+device.SSID);
-                        if(device.SSID.equals(SSID)&&(!manager.getConnectionInfo().getSSID().equals("\""+SSID+"\""))){
-                            List<WifiConfiguration> wifiConfigurationList;
-                            wifiConfigurationList=manager.getConfiguredNetworks();
-                            int wifiId;
-                            boolean check=false;
-                            for (WifiConfiguration config:wifiConfigurationList){
-                                if(config.SSID.equals("\""+device.SSID+"\"")){
-                                    check=true;
-                                    wifiId=config.networkId;
-                                    manager.enableNetwork(wifiId,true);
-                                    Log.d("wifi","serch ok");
-                                    Log.d("wifi","try to connect");
-                                    break;
-                                }
-                            }
-                            if(!check){
-                                WifiConfiguration configuration=new WifiConfiguration();
-                                configuration.SSID="\""+device.SSID+"\"";
-                                configuration.preSharedKey="\""+ prekey +"\"";
-                                configuration.status=WifiConfiguration.Status.ENABLED;
-                                Log.d("wifi","there is no configure for device");
-                                Log.d("wifi","try to init configuration");
-                                wifiId=manager.addNetwork(configuration);
-                                manager.enableNetwork(wifiId,true);
-                                Log.d("wifi","try to connect");
-                            }
-                            break;
-                        }
-                    }
             }
         }
 

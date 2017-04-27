@@ -1,5 +1,7 @@
 package com.action.app.actionctr.ble;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -14,7 +16,11 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import com.action.app.actionctr.BeginActivity;
+import com.action.app.actionctr.BleConnectActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,7 +68,6 @@ public class BleService extends Service {
                     if(!checkSendOk()) {
                         characteristic.setValue(dataTrans);
                         mBluetoothGatt.writeCharacteristic(characteristic);
-                        Log.w("Ble","communication with mcu may not be stable");
                         handler.postDelayed(this,30);
                     }
                 }
@@ -84,15 +89,19 @@ public class BleService extends Service {
                     return true;
                 }
             }
-
             return false;
         }
         public boolean isReady(){
             return isReadyForNext;
         }
         public int readRssi(){
-            mBluetoothGatt.readRemoteRssi();
-            return RssiValue;
+            if(isReadyForNext) {
+                mBluetoothGatt.readRemoteRssi();
+                return RssiValue;
+            }
+            else{
+                return 0;
+            }
         }
     }
 
@@ -103,6 +112,18 @@ public class BleService extends Service {
     @Override
     public void onCreate(){
         super.onCreate();
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setSmallIcon(android.R.drawable.btn_dialog);
+        builder.setContentTitle("ActionCtrBle");
+        builder.setContentText("为了保证Ble的长期不被系统干掉");
+        Intent intent = new Intent(this, BeginActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(pendingIntent);
+        Notification notification = builder.build();
+        startForeground(1, notification);
+
+
         Log.d("Ble","Ble Service onCreate");
 
         bleManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -125,6 +146,7 @@ public class BleService extends Service {
                         }
                         break;
                     case BluetoothProfile.STATE_DISCONNECTED:
+                        gatt.close();
                         bleAdapter.startLeScan(mLeScanCallback);
                         isReadyForNext=false;
                         Log.d("Ble","ble disconnected");
@@ -200,12 +222,34 @@ public class BleService extends Service {
                 }
             }
         };
-        bleAdapter.startLeScan(mLeScanCallback);
+        List<BluetoothDevice> list=bleManager.getConnectedDevices(BluetoothProfile.GATT);
+        if(list.size()==0){
+            bleAdapter.startLeScan(mLeScanCallback);
+        }
+        else {
+            mBluetoothGatt=null;
+            BluetoothGatt temp;
+            for (BluetoothDevice device:list) {
+                temp=device.connectGatt(BleService.this, false, mGattCallback);
+                if(device.getAddress().equals(address)){
+                    temp.discoverServices();
+                    mBluetoothGatt=temp;
+                }
+                else{
+                    //连续执行两条的目的是使上面不会进入断开连接的回调
+                    temp.disconnect();
+                    temp.close();
+                }
+                if(mBluetoothGatt==null) {
+                    bleAdapter.startLeScan(mLeScanCallback);
+                }
+            }
+        }
+
         handler=new Handler();
     }
     @Override
     public int onStartCommand(Intent intent,int flags,int startId){
-
         Log.d("Ble","Ble Service onStartCommand");
         return super.onStartCommand(intent,flags,startId);
     }
@@ -213,5 +257,7 @@ public class BleService extends Service {
     public void onDestroy(){
         Log.d("Ble","Ble Service onDestroy");
         super.onDestroy();
+        if(mBluetoothGatt!=null)
+            mBluetoothGatt.close();
     }
 }

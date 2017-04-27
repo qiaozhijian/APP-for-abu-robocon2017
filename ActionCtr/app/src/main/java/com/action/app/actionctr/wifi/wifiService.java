@@ -1,28 +1,27 @@
 package com.action.app.actionctr.wifi;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
-import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationCompatExtras;
 import android.util.Log;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
+
+import com.action.app.actionctr.BeginActivity;
+import com.action.app.actionctr.BleConnectActivity;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by 56390 on 2017/1/15.
@@ -36,15 +35,10 @@ public class wifiService extends Service {
     private IntentFilter intentFilter;
 
     private final int port=8080;
-
-    private final String SSID="ESP8266EX";
-    private final String presharedKey="2017champion";
     private ServerSocket server;
 
     private Runnable runnable;
     private Runnable dataReceiveRunnable;
-    private Thread runnableThread;
-    private Thread dataReceiveThread;
 
     private InputStream in;
 
@@ -65,23 +59,32 @@ public class wifiService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setSmallIcon(android.R.drawable.btn_dialog);
+        builder.setContentTitle("ActionCtrWifi");
+        builder.setContentText("为了保证wifi的长期不被系统干掉");
+        Intent intent = new Intent(this, BeginActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(pendingIntent);
+        Notification notification = builder.build();
+        startForeground(2, notification);
+
         destroyFlag=false;
         Log.d("wifi","wifi service start onCreate");
         wifiDataList=new ArrayList<String>();
         wifiManager=(WifiManager) getSystemService(Context.WIFI_SERVICE);
-        broadcastReceiver=new wifiBroadcastReceiver(wifiManager,SSID,presharedKey);
+        broadcastReceiver=new wifiBroadcastReceiver(wifiManager);
         intentFilter=new IntentFilter();
         intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         registerReceiver(broadcastReceiver,intentFilter);
 
-        if(!wifiManager.isWifiEnabled()){
-            wifiManager.setWifiEnabled(true);
-        }
-        else if(!wifiManager.getConnectionInfo().getSSID().equals("\""+SSID+"\"")){
-            wifiManager.setWifiEnabled(false);
-        }
+//        if(!wifiManager.isWifiEnabled()){
+//            wifiManager.setWifiEnabled(true);
+//        }
 
         runnable=new Runnable() {
             @Override
@@ -98,7 +101,7 @@ public class wifiService extends Service {
                     server=new ServerSocket(port);
                     server.setSoTimeout(3000);
                     Log.d("wifi","socket connect successfully");
-                    dataReceiveThread.start();
+                    new Thread(dataReceiveRunnable).start();
                 }catch (UnknownHostException e) {
                     Log.e("wifi","socket init unknownhost err");
                     e.printStackTrace();
@@ -112,7 +115,6 @@ public class wifiService extends Service {
                     e.printStackTrace();
                     Log.e("wifi","Exception: "+Log.getStackTraceString(e));
                 }
-
             }
         };
         dataReceiveRunnable=new Runnable() {
@@ -129,7 +131,7 @@ public class wifiService extends Service {
                 }
                 int count=0;
                 String line=new String("");
-                while (true) {
+                while (!destroyFlag&&broadcastReceiver.checkOk()&&in!=null) {
                     int    dataRead;
                     try {
                         if(in.available()>=1){
@@ -138,7 +140,6 @@ public class wifiService extends Service {
                                 dataRead-=256;
                             line+=String.valueOf(dataRead);
                             line+="   ";//空格三个
-
                             if(dataRead==-100){
                                 count++;
                             }
@@ -150,31 +151,31 @@ public class wifiService extends Service {
                                 count=0;
                                 line="";
                             }
-
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (Exception e){
+                    }  catch (Exception e){
                         e.printStackTrace();
                         Log.e("wifi","Exception： "+Log.getStackTraceString(e));
                     }
-                    if (destroyFlag){
-                        try {
-                            Log.d("wifi","data receive thread destroy");
-                            in.close();
-                            server.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                }
+                try {
+                    Log.d("wifi","data receive thread destroy or disconnect");
+                    if(in!=null){
+                        in.close();
+                    }
+                    if(server!=null){
+                        server.close();
                         Log.d("wifi","dataReceiveThread close successfully");
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
+                if((!broadcastReceiver.checkOk()&&!destroyFlag)||in==null){
+                    new Thread(runnable).start();
                 }
             }
         };
-        runnableThread=new Thread(runnable);
-        dataReceiveThread=new Thread(dataReceiveRunnable);
-        runnableThread.start();
+        new Thread(runnable).start();
     }
 
     @Override

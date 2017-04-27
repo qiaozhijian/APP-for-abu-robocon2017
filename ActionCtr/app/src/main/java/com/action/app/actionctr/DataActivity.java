@@ -51,8 +51,6 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
         spinner=(Spinner)findViewById(R.id.option_select);//柱子的选择
         List<String> optionSelect=new ArrayList<String>();
 
-
-
         optionSelect.add("column1");
         optionSelect.add("column2");
         optionSelect.add("column3");
@@ -67,9 +65,6 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
         spinner.setOnItemSelectedListener(this);
 
         manage=new Manage(this);
-
-
-
     }
     @Override
     public void onDestroy(){
@@ -224,8 +219,8 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
                        add="onTheWay2_";
                    }
 
-
-                   Manage.dataSt data = manage.selectOne(add+state[0],state[1],state[2],position+1);
+                   final String addCopy=add;
+                   final Manage.dataSt data = manage.selectOne(add+state[0],state[1],state[2],position+1);
                    param2set[0] = data.roll;
                    param2set[1] = data.pitch;
                    param2set[2] = data.yaw;
@@ -235,8 +230,9 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
                    Log.d("onItemClick","go to next activity");
                    AlertDialog.Builder dialog= new AlertDialog.Builder(DataActivity.this);
                    dialog.setTitle("注意");
-                   dialog.setMessage("您是否确认需要将改组参数导出？");
-                   dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                   dialog.setCancelable(true);
+                   dialog.setMessage("您是否确认需要将改组参数导出或者删除？如果不需要，请点击空白区域");
+                   dialog.setPositiveButton("导出", new DialogInterface.OnClickListener() {
                        @Override
                        public void onClick(DialogInterface dialogInterface, int i) {
                            Intent intent;
@@ -247,9 +243,23 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
                            finish();
                        }
                    });
-                   dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                   dialog.setNegativeButton("删除", new DialogInterface.OnClickListener() {
                        @Override
                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                           AlertDialog.Builder dialog= new AlertDialog.Builder(DataActivity.this);
+                           dialog.setTitle("注意");
+                           dialog.setPositiveButton("删除", new DialogInterface.OnClickListener() {
+                               @Override
+                               public void onClick(DialogInterface dialogInterface, int i) {
+                                   Intent intent;
+                                   intent=new Intent(DataActivity.this,DataActivity.class);
+                                   manage.deleteOne(addCopy+state[0],state[1],state[2],data.date);
+                                   startActivity(intent);
+                                   finish();
+                               }
+                           });
+                           dialog.show();
                        }
                    });
                    dialog.show();

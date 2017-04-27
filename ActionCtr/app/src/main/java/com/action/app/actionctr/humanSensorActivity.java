@@ -9,8 +9,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.ToggleButton;
 
 import com.action.app.actionctr.ble.bleDataProcess;
@@ -31,6 +33,23 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
     private byte state_ball=0;
     private byte state_frisbee=0;
 
+    private ArrayList<Button> getAllButton(ViewGroup group)
+    {
+        ArrayList<Button> arrayList=new ArrayList<>();
+        for (int i=0;i<group.getChildCount();i++) {
+            View v=group.getChildAt(i);
+            if(v instanceof Button){
+                arrayList.add((Button) v);
+            }
+            else if(v instanceof ViewGroup)
+            {
+                arrayList.addAll(getAllButton((ViewGroup) v));
+            }
+        }
+        return  arrayList;
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +59,6 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
 
         ((ToggleButton)findViewById(R.id.human_sensor_top_gun_mode)).setOnCheckedChangeListener(this);
         
-
 
         buttonsBallList.add((Button) findViewById(R.id.human_sensor_ball_is1));
         buttonsFrisbeeList.add((Button)findViewById(R.id.human_sensor_frisbee_is1));
@@ -96,6 +114,25 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                 finish();
             }
         });
+
+
+//        LinearLayout layout=(LinearLayout)findViewById(R.id.human_sensor_linearLayout_function_button);
+//        ArrayList<Button> list;
+//        list=getAllButton(layout);
+//        Button[] ll=new Button[7];
+//        for (Button b:list) {
+//            //b.setBackgroundColor(Color.parseColor("#969696"));
+//            Log.d("humanSensor",String.valueOf(b.getText().subSequence(0,2)));
+//            if(String.valueOf(b.getText().subSequence(0,2)).equals("柱子"))
+//            {
+//                int i=Integer.parseInt(String.valueOf(b.getText().charAt(2)));
+//                ll[i-1]=b;
+//                Log.d("humanSensor","is： "+String.valueOf(i));
+//            }
+//        }
+//        for (Button b:ll) {
+//            b.setBackgroundColor(Color.parseColor("#969696"));
+//        }
     }
     @Override
     public void onClick(View v) {

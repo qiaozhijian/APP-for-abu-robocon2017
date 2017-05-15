@@ -129,26 +129,15 @@ public class wifiService extends Service {
                     e.printStackTrace();
                     Log.e("wifi","Exception： "+Log.getStackTraceString(e));
                 }
-                int count=0;
                 String line=new String("");
                 while (!destroyFlag&&broadcastReceiver.checkOk()&&in!=null) {
-                    int    dataRead;
+                    char    dataRead;
                     try {
                         if(in.available()>=1){
-                            dataRead=in.read();
-                            if(dataRead>127)
-                                dataRead-=256;
-                            line+=String.valueOf(dataRead);
-                            line+="   ";//空格三个
-                            if(dataRead==-100){
-                                count++;
-                            }
-                            else {
-                                count=0;
-                            }
-                            if(count>=4){
-                                wifiDataList.add(line.substring(0,line.length()-7*4));
-                                count=0;
+                            dataRead=(char)in.read();
+                            line+=dataRead;
+                            if(dataRead=='\n'){
+                                wifiDataList.add(line.substring(0,line.length()-1));
                                 line="";
                             }
                         }

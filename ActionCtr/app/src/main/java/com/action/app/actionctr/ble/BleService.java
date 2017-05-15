@@ -46,7 +46,9 @@ public class BleService extends Service {
 
     public static final int bleDataLen=12;
     private final String address="90:59:AF:0E:62:A4";   //98:7B:F3:60:C7:01 //90:59:AF:0E:62:A4
-    Handler handler;
+    private Handler handler;
+
+
 
     private byte[] dataReceive;
     private byte[] dataTrans;
@@ -245,8 +247,25 @@ public class BleService extends Service {
                 }
             }
         }
-
         handler=new Handler();
+
+        //下面的代码用于发送心跳包
+        final Handler handlerHeartBeat=new Handler();
+        Runnable runnable=new Runnable() {
+            @Override
+            public void run() {
+                if(isReadyForNext){
+                    byte[] heartBeat=new byte[bleDataLen];
+                    heartBeat[0]='A';
+                    heartBeat[1]='C';
+                    heartBeat[2]='H';
+                    heartBeat[3]='B';
+                    dataSend.send(heartBeat);
+                }
+                handlerHeartBeat.postDelayed(this,500);
+            }
+        };
+        handlerHeartBeat.postDelayed(runnable,100);
     }
     @Override
     public int onStartCommand(Intent intent,int flags,int startId){

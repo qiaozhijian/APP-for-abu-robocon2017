@@ -11,8 +11,10 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -22,6 +24,7 @@ import android.util.Log;
 import com.action.app.actionctr.BeginActivity;
 import com.action.app.actionctr.BleConnectActivity;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,9 +48,37 @@ public class BleService extends Service {
     private int RssiValue=0;
 
     public static final int bleDataLen=12;
-    private final String address="90:59:AF:0E:62:A4";   //98:7B:F3:60:C7:01 //90:59:AF:0E:62:A4
+    private final String address="F4:5E:AB:B9:59:77";   //98:7B:F3:60:C7:01 //90:59:AF:0E:62:A4
     private Handler handler;
 
+    private BroadcastReceiver broadcastReceive = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(BluetoothDevice.ACTION_PAIRING_REQUEST)) {
+                    Log.d("Ble","paring request is comming!");
+                    abortBroadcast();
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    try {
+                        Method method = device.getClass().getDeclaredMethod("setPasskey", new Class[]{int.class});
+                        Boolean returnValue = (Boolean) method.invoke(device, new Object[]{0});
+                        Log.d("Ble","pairing is ok? : "+String.valueOf(returnValue));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                //          int pairingType=intent.getIntExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,BluetoothDevice.ERROR);
+//                    if(device.setPin(String.valueOf("000000").getBytes())) {
+//                        Log.d("Ble","setPin Ok");
+//                    }
+//                    if(pairingType==BluetoothDevice.PAIRING_VARIANT_PIN) {
+//                        Log.d("Ble","need pin");
+//                    }
+//                    else {
+//                        Log.d("Ble","pairingType: "+String.valueOf(pairingType));
+//                    }
+            }
+        }
+    };
 
 
     private byte[] dataReceive;
@@ -114,6 +145,7 @@ public class BleService extends Service {
     @Override
     public void onCreate(){
         super.onCreate();
+        Log.d("Ble","Ble Service onCreate");
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(android.R.drawable.btn_dialog);
@@ -126,7 +158,11 @@ public class BleService extends Service {
         startForeground(1, notification);
 
 
-        Log.d("Ble","Ble Service onCreate");
+        IntentFilter filter = new IntentFilter("android.bluetooth.adapter.action.STATE_CHANGED");
+        filter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        filter.setPriority(Integer.MAX_VALUE);
+        registerReceiver(broadcastReceive, filter);
 
         bleManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         bleAdapter= bleManager.getAdapter();
@@ -260,7 +296,7 @@ public class BleService extends Service {
                     heartBeat[1]='C';
                     heartBeat[2]='H';
                     heartBeat[3]='B';
-                    dataSend.send(heartBeat);
+                    //dataSend.send(heartBeat);
                 }
                 handlerHeartBeat.postDelayed(this,500);
             }

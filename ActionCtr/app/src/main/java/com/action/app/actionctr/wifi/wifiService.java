@@ -178,5 +178,6 @@ public class wifiService extends Service {
         unregisterReceiver(broadcastReceiver);
         destroyFlag=true;
         super.onDestroy();
+
     }
 }

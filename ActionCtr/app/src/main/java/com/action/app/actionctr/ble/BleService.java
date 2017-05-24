@@ -24,6 +24,7 @@ import android.util.Log;
 import com.action.app.actionctr.BeginActivity;
 import com.action.app.actionctr.BleConnectActivity;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,70 +44,50 @@ public class BleService extends Service {
     private BluetoothGattCallback mGattCallback;
     private BluetoothGatt mBluetoothGatt;
     private BluetoothGattCharacteristic characteristic;
+    private BluetoothGattCharacteristic characteristicHeartBeats;
     private BluetoothGattService        gattService;
     private boolean isReadyForNext=false;
+    private int heartBeatsCount=0;
     private int RssiValue=0;
 
     public static final int bleDataLen=12;
-    private final String address="F4:5E:AB:B9:59:77";   //98:7B:F3:60:C7:01 //90:59:AF:0E:62:A4
+    //private final String address="90:59:AF:0E:60:1F";//"90:59:AF:0E:60:1F";   //98:7B:F3:60:C7:01 //90:59:AF:0E:62:A4
+    private final int[] addressBase={0xA1,0xB3,0xA3,0x37,0x97,0x45};
+
     private Handler handler;
-
-    private BroadcastReceiver broadcastReceive = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals(BluetoothDevice.ACTION_PAIRING_REQUEST)) {
-                    Log.d("Ble","paring request is comming!");
-                    abortBroadcast();
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    try {
-                        Method method = device.getClass().getDeclaredMethod("setPasskey", new Class[]{int.class});
-                        Boolean returnValue = (Boolean) method.invoke(device, new Object[]{0});
-                        Log.d("Ble","pairing is ok? : "+String.valueOf(returnValue));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                //          int pairingType=intent.getIntExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,BluetoothDevice.ERROR);
-//                    if(device.setPin(String.valueOf("000000").getBytes())) {
-//                        Log.d("Ble","setPin Ok");
-//                    }
-//                    if(pairingType==BluetoothDevice.PAIRING_VARIANT_PIN) {
-//                        Log.d("Ble","need pin");
-//                    }
-//                    else {
-//                        Log.d("Ble","pairingType: "+String.valueOf(pairingType));
-//                    }
-            }
-        }
-    };
-
-
     private byte[] dataReceive;
     private byte[] dataTrans;
+
+    private boolean isDestroy=false;
 
 
     private myBleBand dataSend=new myBleBand();
     public class myBleBand extends Binder {
         public void send(byte[] data){
-            if(data.length!=bleDataLen){
-                Log.e("version err","length of senddata is not equal to require");
-            }
-            dataTrans=data;
-            characteristic.setValue(dataTrans);
-            mBluetoothGatt.writeCharacteristic(characteristic);
-
-            final Runnable runnable=new Runnable() {
-                @Override
-                public void run() {
-                    if(!checkSendOk()) {
-                        characteristic.setValue(dataTrans);
-                        mBluetoothGatt.writeCharacteristic(characteristic);
-                        handler.postDelayed(this,30);
-                    }
+            if(!isDestroy)
+            {
+                if(data.length!=bleDataLen){
+                    Log.e("version err","length of senddata is not equal to require");
                 }
-            };
-            handler.postDelayed(runnable,30);
+                final Runnable runnable=new Runnable() {
+                    @Override
+                    public void run() {
+                        if(!checkSendOk()&&!isDestroy) {
+                            characteristic.setValue(dataTrans);
+                            mBluetoothGatt.writeCharacteristic(characteristic);
+                            handler.postDelayed(this,100);
+                        }
+                    }
+                };
+                if(checkSendOk()) {
+                    handler.postDelayed(runnable, 50);
+                }
+                dataTrans=data;
+                characteristic.setValue(dataTrans);
+                mBluetoothGatt.writeCharacteristic(characteristic);
+            }
         }
+
         public boolean checkSendOk(){
             if(Arrays.equals(dataReceive,dataTrans)) {
                 return true;
@@ -122,6 +103,10 @@ public class BleService extends Service {
                     return true;
                 }
             }
+            if(dataReceive==null&&dataTrans==null)
+            {
+                return true;
+            }
             return false;
         }
         public boolean isReady(){
@@ -136,6 +121,69 @@ public class BleService extends Service {
                 return 0;
             }
         }
+    }
+    public boolean checkAddress(String address)
+    {
+        int[] addressInt=new int[6];
+        for(int i=0;i<6;i++) {
+            addressInt[i]=Integer.parseInt(address.substring(i*3,i*3+2),16);
+        }
+        for(int i=1;i<5;i++) {
+            if((addressInt[i]-addressInt[i+1])!=(addressBase[i]-addressBase[i+1])){
+                return false;
+            }
+        }
+        return true;
+    }
+    private void checkConnectedDevice()
+    {
+        final Runnable runnable=new Runnable() {
+            @Override
+            public void run() {
+                Log.d("Ble","checkConnectedDevice");
+                if(bleManager!=null) {
+                    List<BluetoothDevice>list=bleManager.getConnectedDevices(BluetoothProfile.GATT);
+                    BluetoothGatt temp;
+                    if(list.size()==0){
+                        bleAdapter.stopLeScan(mLeScanCallback);
+                        bleAdapter.startLeScan(mLeScanCallback);
+                    }
+                    else{
+                        Log.d("Ble","check connnected device exist");
+                        for (BluetoothDevice device:list) {
+                            temp=device.connectGatt(BleService.this, false, mGattCallback);
+                            if(checkAddress(device.getAddress())){
+                                temp.discoverServices();
+                                mBluetoothGatt=temp;
+                            }
+                            else{
+                                //连续执行两条的目的是使上面不会进入断开连接的回调
+                                temp.disconnect();
+                                temp.close();
+                            }
+                            if(mBluetoothGatt==null) {
+                                bleAdapter.startLeScan(mLeScanCallback);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        if(!bleAdapter.isEnabled()) {
+            bleAdapter.enable();
+        }
+//        else{
+//            bleAdapter.disable();
+//            new Handler().postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    bleAdapter.enable();
+//                }
+//            },500);
+//        }
+        Handler handler=new Handler();
+        if(!isDestroy)
+            handler.postDelayed(runnable,1500);
     }
 
     @Override
@@ -158,23 +206,21 @@ public class BleService extends Service {
         startForeground(1, notification);
 
 
-        IntentFilter filter = new IntentFilter("android.bluetooth.adapter.action.STATE_CHANGED");
-        filter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
-        filter.addAction(BluetoothDevice.ACTION_FOUND);
-        filter.setPriority(Integer.MAX_VALUE);
-        registerReceiver(broadcastReceive, filter);
-
         bleManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         bleAdapter= bleManager.getAdapter();
+
         devicesList=new ArrayList<>();
         mGattCallback=new BluetoothGattCallback() {
+            int countForConnected=0;
+            int countForDisconnected=0;
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                 super.onConnectionStateChange(gatt, status, newState);
                 switch (newState) {
                     case BluetoothProfile.STATE_CONNECTED:
-                        if(gatt.getDevice().getAddress().equals(address)){
-                            Log.d("Ble","ble connected");
+                        if(checkAddress(gatt.getDevice().getAddress())){
+                            countForConnected++;
+                            Log.d("Ble","ble connected"+String.valueOf(countForConnected));
                             isReadyForNext=false;
                             mBluetoothGatt.discoverServices();
                         }
@@ -184,13 +230,15 @@ public class BleService extends Service {
                         }
                         break;
                     case BluetoothProfile.STATE_DISCONNECTED:
+                        countForDisconnected++;
                         gatt.close();
                         bleAdapter.startLeScan(mLeScanCallback);
                         isReadyForNext=false;
-                        Log.d("Ble","ble disconnected");
+                        Log.e("Ble","ble disconnected"+String.valueOf(countForDisconnected));
                         break;
                     default:
                         isReadyForNext=false;
+                        Log.d("Ble","unknow status: "+String.valueOf(status)+"  "+String.valueOf(newState));
                         break;
                 }
             }
@@ -199,15 +247,16 @@ public class BleService extends Service {
                 if(status==BluetoothGatt.GATT_SUCCESS){
                     Log.d("Ble","ble gatt service success");
                     isReadyForNext=true;
+                    gattService=mBluetoothGatt.getService(UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb"));
+                    characteristic=gattService.getCharacteristic(UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb"));
+                    characteristicHeartBeats=gattService.getCharacteristic(UUID.fromString("0000fff7-0000-1000-8000-00805f9b34fb"));
+                    mBluetoothGatt.setCharacteristicNotification(characteristic,true);
                 }
                 else {
                     isReadyForNext=false;
-                    Log.d("Ble","ble gatt service fail");
+                    Log.d("Ble","ble gatt service fail "+String.valueOf(status));
+                    gatt.disconnect();
                 }
-
-                gattService=mBluetoothGatt.getService(UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb"));
-                characteristic=gattService.getCharacteristic(UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb"));
-                mBluetoothGatt.setCharacteristicNotification(characteristic,true);
             }
             @Override
             public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
@@ -219,13 +268,16 @@ public class BleService extends Service {
             }
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic){
-                dataReceive=characteristic.getValue();
-
+                byte[] temp;
+                temp=characteristic.getValue();
+                if(temp[0]=='A'&&temp[1]=='C'&&temp[2]=='H'&&temp[3]=='B'){
+                }
+                else
+                    dataReceive=temp;
                 String log_out=new String();
                 for (int i=0;i<12;i++){
-                    log_out+=String.valueOf((int)dataReceive[i])+'\t';
+                    log_out+=String.valueOf((int)temp[i])+'\t';
                 }
-
                 if(dataReceive.length!=bleDataLen){
                     Log.e("version err","length of receivedata is not equal to require");
                 }
@@ -238,6 +290,7 @@ public class BleService extends Service {
                     log_out+=String.valueOf((int)characteristic.getValue()[i])+'\t';
                 }
                 Log.d("Ble","write: "+log_out);
+                heartBeatsCount++;
             }
             @Override
             public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
@@ -251,43 +304,26 @@ public class BleService extends Service {
                     devicesList.add(device);
                     Log.d("Ble", "find device , name= " + device.getName());
                     Log.d("Ble", "device address="+device.getAddress());
-
-                    if(device.getAddress().equals(address)){
+                    if(checkAddress(device.getAddress())){
                         devicesList.clear();
                         bleAdapter.stopLeScan(mLeScanCallback);
+                        Log.d("Ble","start connect");
+                        if(mBluetoothGatt!=null) {
+                            mBluetoothGatt.disconnect();
+                            mBluetoothGatt.close();
+                        }
                         mBluetoothGatt=device.connectGatt(BleService.this, false, mGattCallback);
                     }
                 }
             }
         };
-        List<BluetoothDevice> list=bleManager.getConnectedDevices(BluetoothProfile.GATT);
-        if(list.size()==0){
-            bleAdapter.startLeScan(mLeScanCallback);
-        }
-        else {
-            mBluetoothGatt=null;
-            BluetoothGatt temp;
-            for (BluetoothDevice device:list) {
-                temp=device.connectGatt(BleService.this, false, mGattCallback);
-                if(device.getAddress().equals(address)){
-                    temp.discoverServices();
-                    mBluetoothGatt=temp;
-                }
-                else{
-                    //连续执行两条的目的是使上面不会进入断开连接的回调
-                    temp.disconnect();
-                    temp.close();
-                }
-                if(mBluetoothGatt==null) {
-                    bleAdapter.startLeScan(mLeScanCallback);
-                }
-            }
-        }
+        checkConnectedDevice();
         handler=new Handler();
 
         //下面的代码用于发送心跳包
         final Handler handlerHeartBeat=new Handler();
         Runnable runnable=new Runnable() {
+            int count=0;
             @Override
             public void run() {
                 if(isReadyForNext){
@@ -296,12 +332,24 @@ public class BleService extends Service {
                     heartBeat[1]='C';
                     heartBeat[2]='H';
                     heartBeat[3]='B';
-                    //dataSend.send(heartBeat);
+                    characteristicHeartBeats.setValue(heartBeat);
+                    if(!mBluetoothGatt.writeCharacteristic(characteristicHeartBeats)){
+                        //mBluetoothGatt.disconnect();
+                        Log.e("Ble","heartbeats err");
+                        count++;
+                        if(count>=10)
+                            mBluetoothGatt.disconnect();
+                    }
+                    else{
+                        count=0;
+                    }
                 }
-                handlerHeartBeat.postDelayed(this,500);
+                if(!isDestroy)
+                    handlerHeartBeat.postDelayed(this,500);
             }
         };
-        handlerHeartBeat.postDelayed(runnable,100);
+        if(!isDestroy)
+            handlerHeartBeat.postDelayed(runnable,500);
     }
     @Override
     public int onStartCommand(Intent intent,int flags,int startId){
@@ -312,7 +360,13 @@ public class BleService extends Service {
     public void onDestroy(){
         Log.d("Ble","Ble Service onDestroy");
         super.onDestroy();
+        if(bleAdapter.isEnabled())
+            bleAdapter.disable();
+        isDestroy=true;
         if(mBluetoothGatt!=null)
+        {
+            mBluetoothGatt.disconnect();
             mBluetoothGatt.close();
+        }
     }
 }

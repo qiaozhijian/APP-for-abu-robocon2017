@@ -144,13 +144,13 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             if(gunState.equals("打盘")&&column.equals("column7")){
                 gain_roll=1;
                 setRange(  40,    districtNum,    20,  maxSpeed,
-                        -5,              0,   -20,  minSpeed,
+                        -10,              0,   -20,  minSpeed,
                         0.1f,           1.0f,  0.2f,  stepSpeed);
                 ((TextView)findViewById(R.id.roll_or_district)).setText("区域");
             }else{
                 gain_roll=10;
                 setRange(  40,    0,   20, maxSpeed,
-                        -5,    0,  -20, minSpeed,
+                        -10,    0,  -20, minSpeed,
                         0.1f, 0.0f, 0.2f, stepSpeed);
                 ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
             }
@@ -351,13 +351,13 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 if(gunState.equals("打盘")&&column.equals("column7")){
                     gain_roll=1;
                     setRange(  40,    districtNum,    20,  maxSpeed,
-                            -5,              0,   -20,  minSpeed,
+                            -10,              0,   -20,  minSpeed,
                             0.1f,           1.0f,  0.2f,  stepSpeed);
                     ((TextView)findViewById(R.id.roll_or_district)).setText("区域");
                 }else{
                     gain_roll=10;
                     setRange(  40,    0,   20, maxSpeed,
-                            -5,    0,  -20, minSpeed,
+                            -10,    0,  -20, minSpeed,
                             0.1f, 0.0f, 0.2f, stepSpeed);
                     ((TextView)findViewById(R.id.roll_or_district)).setText("翻滚");
                 }

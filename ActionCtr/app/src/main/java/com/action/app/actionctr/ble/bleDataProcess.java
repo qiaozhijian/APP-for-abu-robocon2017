@@ -121,6 +121,7 @@ public class bleDataProcess{
     public boolean isReadyForData(){
         return state.isReady();
     }
+    public byte[] getMCUinfo(){return state.getHeartBeats();}
     public int readRssi(){
         return state.readRssi();
     }

@@ -176,97 +176,101 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
             default:
                 break;
         }
-       if(database_ok)
-       {
-           String add="";
-           if(onTheWay_spinner!=null){
-               if(onTheWay_spinner.getSelectedItem().toString().equals("途中：左"))
-               {
-                   add="onTheWay_";
-               }
-               else if(onTheWay_spinner.getSelectedItem().toString().equals("途中：右"))
-               {
-                   add="onTheWay2_";
-               }
-           }
+        if(database_ok) {
+            String add = "";
+            if (onTheWay_spinner != null) {
+                if (onTheWay_spinner.getSelectedItem().toString().equals("途中：左")) {
+                    add = "onTheWay_";
+                } else if (onTheWay_spinner.getSelectedItem().toString().equals("途中：右")) {
+                    add = "onTheWay2_";
+                }
+            }
+            try {
+                ArrayList<Manage.dataSt> data;
+                if (spinner.getSelectedItem().toString().equals("column7") && gun_spinner.getSelectedItem().toString().equals("上") && state_spinner.getSelectedItem().toString().equals("打盘")) {
+                    data = manage.selectColumn(add + spinner.getSelectedItem().toString(), gun_spinner.getSelectedItem().toString(), state_spinner.getSelectedItem().toString(), region_spinner.getSelectedItem().toString());
+                } else {
+                    data = manage.selectAll(add + (spinner.getSelectedItem().toString()), gun_spinner.getSelectedItem().toString(), state_spinner.getSelectedItem().toString());
+                }
 
-           ArrayList<Manage.dataSt> data;
-           if(spinner.getSelectedItem().toString().equals("column7") && gun_spinner.getSelectedItem().toString().equals("上") && state_spinner.getSelectedItem().toString().equals("打盘")){
-               data=manage.selectColumn(add+spinner.getSelectedItem().toString(),gun_spinner.getSelectedItem().toString(),state_spinner.getSelectedItem().toString(),region_spinner.getSelectedItem().toString());
-           }else{
-               data=manage.selectAll(add+(spinner.getSelectedItem().toString()),gun_spinner.getSelectedItem().toString(),state_spinner.getSelectedItem().toString());
-           }
+                dataAdapter data_adapter = new dataAdapter(DataActivity.this, R.layout.item_listview_activity_data, data);
+                ListView listView = (ListView) findViewById(R.id.list_data_display);
+                listView.setAdapter(data_adapter);
+                state[0] = spinner.getSelectedItem().toString();
+                state[1] = gun_spinner.getSelectedItem().toString();
+                state[2] = state_spinner.getSelectedItem().toString();
+                state[3] = onTheWay_spinner.getSelectedItem().toString();
+                Log.d("dataDisplay", "display");
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-           dataAdapter data_adapter=new dataAdapter(DataActivity.this,R.layout.item_listview_activity_data,data);
-           ListView listView=(ListView)findViewById(R.id.list_data_display);
-           listView.setAdapter(data_adapter);
-           state[0] = spinner.getSelectedItem().toString();
-           state[1] = gun_spinner.getSelectedItem().toString();
-           state[2] =state_spinner.getSelectedItem().toString();
-           state[3] =onTheWay_spinner.getSelectedItem().toString();
-           Log.d("dataDisplay","display");
-           listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-               @Override
-               public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        String add = "";
+                        if (state[3].equals("途中：左")) {
+                            add = "onTheWay_";
+                        }
+                        if (state[3].equals("途中：右")) {
+                            add = "onTheWay2_";
+                        }
 
-                   String add="";
-                   if(state[3].equals("途中：左"))
-                   {
-                       add="onTheWay_";
-                   }
-                   if(state[3].equals("途中：右"))
-                   {
-                       add="onTheWay2_";
-                   }
+                        final String addCopy = add;
+                        final Manage.dataSt data;
+                        if(state[1].equals("上")&&state[0].equals("column7")&&state[2].equals("打盘")) {
+                            data = manage.selectOne(add + state[0], state[1], state[2], position + 1,Float.parseFloat(region_spinner.getSelectedItem().toString()));
+                        }
+                        else{
+                            data = manage.selectOne(add + state[0], state[1], state[2], position + 1);
+                        }
 
-                   final String addCopy=add;
-                   final Manage.dataSt data = manage.selectOne(add+state[0],state[1],state[2],position+1);
-                   param2set[0] = data.roll;
-                   param2set[1] = data.pitch;
-                   param2set[2] = data.yaw;
-                   param2set[3] = data.speed1;
-                   param2set[4] = data.speed2;
-                   //我们需要的内容，跳转页面或显示详细信息
-                   Log.d("onItemClick","go to next activity");
-                   AlertDialog.Builder dialog= new AlertDialog.Builder(DataActivity.this);
-                   dialog.setTitle("注意");
-                   dialog.setCancelable(true);
-                   dialog.setMessage("您是否确认需要将改组参数导出或者删除？如果不需要，请点击空白区域");
-                   dialog.setPositiveButton("导出", new DialogInterface.OnClickListener() {
-                       @Override
-                       public void onClick(DialogInterface dialogInterface, int i) {
-                           Intent intent;
-                           intent=new Intent(DataActivity.this,ParamChangeActivity.class);
-                           intent.putExtra("param2set",param2set);
-                           intent.putExtra("state2set",state);
-                           startActivity(intent);
-                           finish();
-                       }
-                   });
-                   dialog.setNegativeButton("删除", new DialogInterface.OnClickListener() {
-                       @Override
-                       public void onClick(DialogInterface dialogInterface, int i) {
+                        param2set[0] = data.roll;
+                        param2set[1] = data.pitch;
+                        param2set[2] = data.yaw;
+                        param2set[3] = data.speed1;
+                        param2set[4] = data.speed2;
+                        //我们需要的内容，跳转页面或显示详细信息
+                        Log.d("onItemClick", "go to next activity");
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(DataActivity.this);
+                        dialog.setTitle("注意");
+                        dialog.setCancelable(true);
+                        dialog.setMessage("您是否确认需要将改组参数导出或者删除？如果不需要，请点击空白区域");
+                        dialog.setPositiveButton("导出", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                Intent intent;
+                                intent = new Intent(DataActivity.this, ParamChangeActivity.class);
+                                intent.putExtra("param2set", param2set);
+                                intent.putExtra("state2set", state);
+                                startActivity(intent);
+                                finish();
+                            }
+                        });
+                        dialog.setNegativeButton("删除", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
 
-                           AlertDialog.Builder dialog= new AlertDialog.Builder(DataActivity.this);
-                           dialog.setTitle("注意");
-                           dialog.setPositiveButton("删除", new DialogInterface.OnClickListener() {
-                               @Override
-                               public void onClick(DialogInterface dialogInterface, int i) {
-                                   Intent intent;
-                                   intent=new Intent(DataActivity.this,DataActivity.class);
-                                   manage.deleteOne(addCopy+state[0],state[1],state[2],data.date);
-                                   startActivity(intent);
-                                   finish();
-                               }
-                           });
-                           dialog.show();
-                       }
-                   });
-                   dialog.show();
+                                AlertDialog.Builder dialog = new AlertDialog.Builder(DataActivity.this);
+                                dialog.setTitle("注意");
+                                dialog.setPositiveButton("删除", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        Intent intent;
+                                        intent = new Intent(DataActivity.this, DataActivity.class);
+                                        manage.deleteOne(addCopy + state[0], state[1], state[2], data.date);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                });
+                                dialog.show();
+                            }
+                        });
+                        dialog.show();
 
-               }
-           });
-       }
+                    }
+                });
+            } catch (Exception e) {
+                Log.e("Data",e.getMessage());
+            }
+        }
     }
     public void onNothingSelected(AdapterView<?> adapter){
 

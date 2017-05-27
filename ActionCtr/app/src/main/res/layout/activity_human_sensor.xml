@@ -362,7 +362,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:text="防守0"
-            android:textSize="50sp" />
+            android:textSize="80sp" />
 
         <Button
             android:layout_width="wrap_content"
@@ -370,7 +370,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:text="防守1"
-            android:textSize="50sp" />
+            android:textSize="80sp" />
 
         <Button
             android:layout_width="wrap_content"
@@ -378,7 +378,7 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:text="防守2"
-            android:textSize="50sp" />
+            android:textSize="80sp" />
 
         <Button
             android:layout_width="wrap_content"
@@ -386,7 +386,7 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:text="防守3"
-            android:textSize="50sp" />
+            android:textSize="80sp" />
 
         <Button
             android:layout_width="wrap_content"
@@ -394,7 +394,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:text="防守4"
-            android:textSize="50sp" />
+            android:textSize="80sp" />
 
         <Button
             android:layout_width="wrap_content"
@@ -402,8 +402,24 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:text="防守5"
-            android:textSize="50sp" />
+            android:textSize="80sp" />
 
+        <Button
+            android:id="@+id/human_sensor_defend_shot7frisbee"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:text="射7盘"
+            android:textSize="80sp" />
+        <Button
+            android:id="@+id/human_sensor_defend_shot6frisbee"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="射6盘"
+            android:textSize="80sp" />
         <Button
             android:id="@+id/human_sensor_defend_cancel"
             android:layout_width="wrap_content"

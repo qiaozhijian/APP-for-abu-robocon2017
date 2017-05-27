@@ -163,6 +163,29 @@ public class Manage {
         data.note=cursor.getString(cursor.getColumnIndex("note_comment"));
         return data;
     }
+    public dataSt selectOne(String num,String gun,String state,int position,float region){
+        Cursor cursor=dbRead.query(num+gun+state,null,null,null,null,null,null);
+        cursor.moveToFirst();
+        for(int i=1;;) {
+            if(cursor.getFloat(cursor.getColumnIndex("roll"))==region) {
+                i++;
+            }
+            if(i<=position)
+                cursor.moveToNext();
+            else
+                break;
+        }
+        dataSt data=new dataSt();
+        data.roll=cursor.getFloat(cursor.getColumnIndex("roll"));
+        data.pitch=cursor.getFloat(cursor.getColumnIndex("pitch"));
+        data.yaw=cursor.getFloat(cursor.getColumnIndex("yaw"));
+        data.speed1=cursor.getInt(cursor.getColumnIndex("speed1"));
+        data.speed2=cursor.getInt(cursor.getColumnIndex("speed2"));
+        data.date=cursor.getString(cursor.getColumnIndex("save_date"));
+        data.direction=cursor.getString(cursor.getColumnIndex("direction"));
+        data.note=cursor.getString(cursor.getColumnIndex("note_comment"));
+        return data;
+    }
     public void deleteOne(String num,String gun,String state,String date){
         String table=num+gun+state;
         dbwrite.execSQL("delete from "+table+" where save_date="+"'"+date+"'");

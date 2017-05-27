@@ -2,13 +2,16 @@ package com.action.app.actionctr;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ToggleButton;
 
+import com.action.app.actionctr.ble.BleService;
 import com.action.app.actionctr.ble.bleDataProcess;
 
 import java.util.ArrayList;
@@ -32,6 +36,50 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
     private ArrayList<Button> buttonsDefendList=new ArrayList<>();
 
     private bleDataProcess bleDataManage;
+
+    private boolean isDestroy=false;
+
+    private void changeColorByMCU(final Context context)
+    {
+        final Handler handler=new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (bleDataManage.getBinder() != null) {
+                    final byte[] info = bleDataManage.getMCUinfo();
+                    if (info != null) {
+                        Log.d("humanSensor","check heartbeats info");
+                        if (info.length == BleService.bleDataLen) {
+                            int ballInfo = info[BleService.bleDataLen - 2];
+                            int frisbeeInfo = info[BleService.bleDataLen - 1];
+                            for (int i = 0; i < 7; i++) {
+                                int checkFrisbee = frisbeeInfo % 2;
+                                int checkBall = ballInfo % 2;
+                                Resources r = context.getResources();
+                                if (checkFrisbee == 1) {
+                                    buttonsFrisbeeList.get(i).setBackground(r.getDrawable(R.drawable.common_plus_signin_btn_text_dark));
+                                } else {
+                                    buttonsFrisbeeList.get(i).setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light_pressed));
+                                }
+                                if (checkBall == 1) {
+                                    buttonsBallList.get(i).setBackground(r.getDrawable(R.drawable.common_plus_signin_btn_text_dark));
+                                } else {
+                                    buttonsBallList.get(i).setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light_pressed));
+                                }
+                                ballInfo /= 2;
+                                frisbeeInfo /= 2;
+                            }
+                        } else {
+                            Log.e("humanSensor", "请检查代码，心跳包长度不正常： "+String.valueOf(info.length));
+                        }
+                    }
+                }
+                if (!isDestroy) {
+                    handler.postDelayed(this, 170);
+                }
+            }
+        }, 300);
+    }
 
 
     private ArrayList<Button> getAllButton(ViewGroup group)
@@ -85,6 +133,7 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                 buttonsDefendList.set(index,b);
             }
         }
+        changeColorByMCU(this);
     }
     @Override
     public void onClick(final View v) {
@@ -100,6 +149,12 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
             if(b.getText().equals(((Button)v).getText())){
                 Log.d("humanSensor","send"+String.valueOf(20+i));
                 bleDataManage.sendCmd((byte)(20+i));
+            }
+            if(v.getId()==R.id.human_sensor_defend_shot6frisbee) {
+                bleDataManage.sendCmd((byte)(20+5));
+            }
+            else if(v.getId()==R.id.human_sensor_defend_shot7frisbee){
+                bleDataManage.sendCmd((byte)(20+6));
             }
         }
         for(int i=0;i<buttonsColumnList.size();i++){
@@ -178,6 +233,7 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
 
     @Override
     public void onDestroy() {
+        isDestroy=true;
         super.onDestroy();
         bleDataManage.unbind();
     }

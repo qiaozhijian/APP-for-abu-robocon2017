@@ -19,7 +19,9 @@ import com.action.app.actionctr.BleConnectActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
@@ -41,10 +43,12 @@ public class wifiService extends Service {
     private Runnable dataReceiveRunnable;
 
     private InputStream in;
-
+    static  private OutputStream outputStream=null;
     private ArrayList<String> wifiDataList;
 
     private boolean destroyFlag=false;
+
+    static public OutputStream getOutputStream(){return outputStream;}
 
     public class wifiServiceBinder extends Binder{
         public ArrayList<String> getWifiStringDataList(){
@@ -74,7 +78,7 @@ public class wifiService extends Service {
         destroyFlag=false;
         Log.d("wifi","wifi service start onCreate");
         wifiDataList=new ArrayList<String>();
-        wifiManager=(WifiManager) getSystemService(Context.WIFI_SERVICE);
+        wifiManager=(WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         broadcastReceiver=new wifiBroadcastReceiver(wifiManager);
         intentFilter=new IntentFilter();
         intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
@@ -120,8 +124,11 @@ public class wifiService extends Service {
         dataReceiveRunnable=new Runnable() {
             @Override
             public void run() {
+                Socket socket=new Socket();
                 try {
-                    in=server.accept().getInputStream();
+                    socket=server.accept();
+                    in=socket.getInputStream();
+                    outputStream=socket.getOutputStream();
                     Log.d("wifi","socket start dataReceive");
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -151,9 +158,17 @@ public class wifiService extends Service {
                     if(in!=null){
                         in.close();
                     }
+                    if(outputStream!=null) {
+                        outputStream.close();
+                        outputStream=null;
+                    }
                     if(server!=null){
                         server.close();
                         Log.d("wifi","dataReceiveThread close successfully");
+                    }
+                    if(socket!=null) {
+                        socket.close();
+                        Log.d("wifi","socket close successfully");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

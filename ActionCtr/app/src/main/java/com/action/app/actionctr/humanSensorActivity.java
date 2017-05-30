@@ -82,21 +82,7 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
     }
 
 
-    private ArrayList<Button> getAllButton(ViewGroup group)
-    {
-        ArrayList<Button> arrayList=new ArrayList<>();
-        for (int i=0;i<group.getChildCount();i++) {
-            View v=group.getChildAt(i);
-            if(v instanceof Button){
-                arrayList.add((Button) v);
-            }
-            else if(v instanceof ViewGroup)
-            {
-                arrayList.addAll(getAllButton((ViewGroup) v));
-            }
-        }
-        return  arrayList;
-    }
+
 
 
     @Override
@@ -113,7 +99,7 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
         }
 
         RelativeLayout layout=(RelativeLayout)findViewById(R.id.activity_human_sensor);
-        ArrayList<Button> list=getAllButton(layout);
+        ArrayList<Button> list=myTool.getAllButton(layout);
         for (Button b:list) {
             b.setOnClickListener(this);
             if(String.valueOf(b.getText().subSequence(0,2)).equals("柱子")) {

@@ -109,6 +109,16 @@ public class Manage {
             return false;
         }
     }
+    public boolean setZero(){
+        roll=0.0f;
+        pitch=0.0f;
+        yaw=0.0f;
+        speed1=0;
+        speed2=0;
+        ward="";
+        comment="";
+        return true;
+    }
     public boolean Select(int num,String gun,String state){
         return Select(num,gun,state,0);
     }
@@ -164,27 +174,40 @@ public class Manage {
         return data;
     }
     public dataSt selectOne(String num,String gun,String state,int position,float region){
-        Cursor cursor=dbRead.query(num+gun+state,null,null,null,null,null,null);
-        cursor.moveToFirst();
-        for(int i=1;;) {
-            if(cursor.getFloat(cursor.getColumnIndex("roll"))==region) {
-                i++;
+        try {
+            Cursor cursor=dbRead.query(num+gun+state,null,null,null,null,null,null);
+            cursor.moveToFirst();
+            for(int i=1;;) {
+                if(cursor.getFloat(cursor.getColumnIndex("roll"))==region) {
+                    i++;
+                }
+                if(i<=position)
+                    cursor.moveToNext();
+                else
+                    break;
             }
-            if(i<=position)
-                cursor.moveToNext();
-            else
-                break;
+            dataSt data=new dataSt();
+            data.roll=cursor.getFloat(cursor.getColumnIndex("roll"));
+            data.pitch=cursor.getFloat(cursor.getColumnIndex("pitch"));
+            data.yaw=cursor.getFloat(cursor.getColumnIndex("yaw"));
+            data.speed1=cursor.getInt(cursor.getColumnIndex("speed1"));
+            data.speed2=cursor.getInt(cursor.getColumnIndex("speed2"));
+            data.date=cursor.getString(cursor.getColumnIndex("save_date"));
+            data.direction=cursor.getString(cursor.getColumnIndex("direction"));
+            data.note=cursor.getString(cursor.getColumnIndex("note_comment"));
+            roll=data.roll;
+            pitch=data.pitch;
+            yaw=data.yaw;
+            speed1=data.speed1;
+            speed2=data.speed2;
+            comment=data.note;
+            return data;
         }
-        dataSt data=new dataSt();
-        data.roll=cursor.getFloat(cursor.getColumnIndex("roll"));
-        data.pitch=cursor.getFloat(cursor.getColumnIndex("pitch"));
-        data.yaw=cursor.getFloat(cursor.getColumnIndex("yaw"));
-        data.speed1=cursor.getInt(cursor.getColumnIndex("speed1"));
-        data.speed2=cursor.getInt(cursor.getColumnIndex("speed2"));
-        data.date=cursor.getString(cursor.getColumnIndex("save_date"));
-        data.direction=cursor.getString(cursor.getColumnIndex("direction"));
-        data.note=cursor.getString(cursor.getColumnIndex("note_comment"));
-        return data;
+        catch (Exception e){
+            dataSt data=new dataSt();
+            return data;
+        }
+
     }
     public void deleteOne(String num,String gun,String state,String date){
         String table=num+gun+state;

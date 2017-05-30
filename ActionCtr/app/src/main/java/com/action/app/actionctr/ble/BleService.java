@@ -48,7 +48,7 @@ public class BleService extends Service {
 
     public static final int bleDataLen=12;
     private final String address="F4:5E:AB:B9:59:77";//这个参数是车上用的平板 1号
- //   private final String address="F4:5E:AB:B9:58:80";//2号 白色平板
+//    private final String address="F4:5E:AB:B9:58:80";//2号 白色平板
 //    private final String address="F4:5E:AB:B9:5A:03";// //3号
     private Handler handler;
 
@@ -320,11 +320,11 @@ public class BleService extends Service {
                     if(errCount>=15) {
                         Log.e("Ble","HeartBeats disconnect");
                         isReadyForNext=false;
-                        //mBluetoothGatt.disconnect();
+                        mBluetoothGatt.disconnect();
                         errCount=0;
                     }
                 }
-                handlerHeartBeat.postDelayed(this,200);
+                handlerHeartBeat.postDelayed(this,300);
             }
         };
         handlerHeartBeat.postDelayed(runnable,3000);

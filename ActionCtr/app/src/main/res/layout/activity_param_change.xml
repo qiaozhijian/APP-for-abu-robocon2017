@@ -1,18 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/activity_param_change"
-    >
-
-    <LinearLayout
+<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:orientation="vertical"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/activity_param_change"
         android:layout_above="@+id/ok_cancel_choose">
 
+        <LinearLayout
+            android:id="@+id/param_change_select_column"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="柱子1" />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="柱子2" />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="柱子3" />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="柱子4" />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="柱子5" />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="柱子6" />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="柱子7" />
+        </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -322,16 +366,4 @@
                 android:id="@+id/button_param_cancel"
                 android:text="取消"/>
         </LinearLayout>
-    </LinearLayout>
-
-
-
-    <fragment
-        android:id="@+id/id_right_menu"
-        android:name="com.action.app.actionctr.MenuRightFragment"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_gravity="right"
-        android:tag="RIGHT" />
-
-</android.support.v4.widget.DrawerLayout>
+</LinearLayout>

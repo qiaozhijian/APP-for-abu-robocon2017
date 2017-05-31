@@ -136,12 +136,13 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                 Log.d("humanSensor","send"+String.valueOf(20+i));
                 bleDataManage.sendCmd((byte)(20+i));
             }
-            if(v.getId()==R.id.human_sensor_defend_shot6frisbee) {
-                bleDataManage.sendCmd((byte)(20+5));
-            }
-            else if(v.getId()==R.id.human_sensor_defend_shot7frisbee){
-                bleDataManage.sendCmd((byte)(20+6));
-            }
+        }
+        //射6和射7
+        if(v.getId()==R.id.human_sensor_defend_shot6frisbee) {
+            bleDataManage.sendCmd((byte)(20+5));
+        }
+        else if(v.getId()==R.id.human_sensor_defend_shot7frisbee){
+            bleDataManage.sendCmd((byte)(20+6));
         }
         for(int i=0;i<buttonsColumnList.size();i++){
             Button b=buttonsColumnList.get(i);

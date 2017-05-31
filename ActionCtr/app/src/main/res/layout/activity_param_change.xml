@@ -258,7 +258,7 @@
             <Button
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_weight="0"
                 android:id="@+id/gun_onTheWay"
                 android:text="位置"/>
             <TextView
@@ -296,51 +296,56 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
+
             <Button
+                android:id="@+id/button_param_fly"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="扔"
-                android:id="@+id/button_param_fly"/>
+                android:text="扔" />
+
             <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="打球"
-            android:id="@+id/button_param_shotball"/>
-            <Button
+                android:id="@+id/button_param_shotball"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="打盘"
-                android:id="@+id/button_param_shotfrisbee"/>
+                android:text="打球" />
+
             <Button
+                android:id="@+id/button_param_shotfrisbee"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="下一步"
-                android:id="@+id/button_param_next_step"/>
+                android:text="打盘" />
+
+            <Button
+                android:id="@+id/button_param_next_step"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:gravity="center"
+                android:text="下一步" />
+
             <ToggleButton
+                android:id="@+id/button_param_mode_change"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:textOff="自动"
-                android:textOn="手动"
-                android:id="@+id/button_param_mode_change"/>
+                android:textOn="手动" />
+
             <Button
+                android:id="@+id/button_param_shot"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="2"
-                android:textStyle="bold"
-                android:textSize="40sp"
                 android:gravity="center"
                 android:text="射"
-                android:id="@+id/button_param_shot"/>
+                android:textStyle="bold" />
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -351,8 +356,8 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:id="@+id/button_param_change"
-                android:text="改变"/>
+                android:id="@+id/button_param_cancel"
+                android:text="取消"/>
             <Button
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -363,7 +368,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:id="@+id/button_param_cancel"
-                android:text="取消"/>
+                android:id="@+id/button_param_change"
+                android:text="改变"/>
         </LinearLayout>
 </LinearLayout>

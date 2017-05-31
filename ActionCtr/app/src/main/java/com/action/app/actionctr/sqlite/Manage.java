@@ -173,6 +173,31 @@ public class Manage {
         data.note=cursor.getString(cursor.getColumnIndex("note_comment"));
         return data;
     }
+    public boolean select(String num,String gun,String state,float region){
+        try {
+            Cursor cursor=dbRead.query(num+gun+state,null,null,null,null,null,null);
+            cursor.moveToLast();
+            while (true){
+                if(cursor.getFloat(cursor.getColumnIndex("roll"))==region) {
+                    break;
+                }
+                else{
+                    cursor.moveToPrevious();
+                }
+            }
+            roll=cursor.getFloat(cursor.getColumnIndex("roll"));
+            pitch=cursor.getFloat(cursor.getColumnIndex("pitch"));
+            yaw=cursor.getFloat(cursor.getColumnIndex("yaw"));
+            speed1=cursor.getInt(cursor.getColumnIndex("speed1"));
+            speed2=cursor.getInt(cursor.getColumnIndex("speed2"));
+            ward=cursor.getString(cursor.getColumnIndex("direction"));
+            comment=cursor.getString(cursor.getColumnIndex("note_comment"));
+            return true;
+        }
+        catch (Exception e){
+            return false;
+        }
+    }
     public dataSt selectOne(String num,String gun,String state,int position,float region){
         try {
             Cursor cursor=dbRead.query(num+gun+state,null,null,null,null,null,null);

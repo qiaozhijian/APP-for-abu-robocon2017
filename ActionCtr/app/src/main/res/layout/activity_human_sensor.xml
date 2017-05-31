@@ -350,10 +350,10 @@
     </LinearLayout>
 
     <RelativeLayout
+        android:id="@+id/human_sensor_defend_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="100dp"
-        android:id="@+id/human_sensor_defend_layout"
+        android:layout_margin="50dp"
         android:visibility="invisible">
 
         <Button
@@ -362,15 +362,15 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:text="防守0"
-            android:textSize="80sp" />
+            android:textSize="40sp" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
             android:text="防守1"
-            android:textSize="80sp" />
+            android:textSize="40sp" />
 
         <Button
             android:layout_width="wrap_content"
@@ -378,15 +378,15 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:text="防守2"
-            android:textSize="80sp" />
+            android:textSize="40sp" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             android:text="防守3"
-            android:textSize="80sp" />
+            android:textSize="40sp" />
 
         <Button
             android:layout_width="wrap_content"
@@ -394,37 +394,40 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:text="防守4"
-            android:textSize="80sp" />
+            android:textSize="40sp" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
             android:text="防守5"
-            android:textSize="80sp" />
+            android:textSize="40sp" />
 
         <Button
             android:id="@+id/human_sensor_defend_shot7frisbee"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
             android:text="射7盘"
-            android:textSize="80sp" />
+            android:textSize="40sp" />
+
         <Button
             android:id="@+id/human_sensor_defend_shot6frisbee"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
             android:text="射6盘"
-            android:textSize="80sp" />
+            android:textSize="40sp" />
+
         <Button
             android:id="@+id/human_sensor_defend_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
             android:text="取消"
             android:textSize="50sp" />
     </RelativeLayout>

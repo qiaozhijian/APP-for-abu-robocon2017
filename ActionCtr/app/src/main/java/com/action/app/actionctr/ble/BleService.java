@@ -11,6 +11,9 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -34,10 +37,13 @@ public class BleService extends Service {
         System.loadLibrary("native-lib");
     }
 
+    private boolean isSending=false;
+
+
     private BluetoothManager bleManager;
     private BluetoothAdapter bleAdapter;
     private ArrayList<BluetoothDevice> devicesList;
-    private BluetoothAdapter.LeScanCallback mLeScanCallback;
+    private ScanCallback mLeScanCallback;
     private BluetoothGattCallback mGattCallback;
     private BluetoothGatt mBluetoothGatt;
     private BluetoothGattCharacteristic characteristic;
@@ -47,9 +53,9 @@ public class BleService extends Service {
     private int RssiValue=0;
 
     public static final int bleDataLen=12;
-    private final String address="F4:5E:AB:B9:59:77";//这个参数是车上用的平板 1号
+//    private final String address="F4:5E:AB:B9:59:77";//这个参数是车上用的平板 1号
 //    private final String address="F4:5E:AB:B9:58:80";//2号 白色平板
-//    private final String address="F4:5E:AB:B9:5A:03";// //3号
+    private final String address="F4:5E:AB:B9:5A:03";// //3号
     private Handler handler;
 
     private byte[] dataReceive;
@@ -58,12 +64,25 @@ public class BleService extends Service {
 
     private int HBcount=0;
 
+    private void wifiSend(byte[] data){
+        OutputStream out=wifiService.getOutputStream();
+        if(out!=null) {
+                try {
+                out.write(data);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e("wifi", "ble Exception: " + Log.getStackTraceString(e));
+            }
+        }
+    }
+
     private myBleBand dataSend=new myBleBand();
     public class myBleBand extends Binder {
         byte count=0;
         boolean isBusy=false;
         Handler handler=new Handler();
         public void send(byte[] data){
+            isSending=true;
             if(data.length!=bleDataLen){
                 Log.e("version err","length of senddata is not equal to require");
             }
@@ -77,15 +96,7 @@ public class BleService extends Service {
                 characteristic.setValue(dataTrans);
                 mBluetoothGatt.writeCharacteristic(characteristic);
             }
-            OutputStream out=wifiService.getOutputStream();
-            if(out!=null) {
-                try {
-                    out.write(dataTrans);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Log.e("wifi", "ble Exception: " + Log.getStackTraceString(e));
-                }
-            }
+            wifiSend(dataTrans);
 
             final Runnable runnable=new Runnable() {
                 @Override
@@ -105,6 +116,7 @@ public class BleService extends Service {
             };
             if(!isBusy)
                 handler.postDelayed(runnable,100);
+            isSending=false;
         }
         public byte[] getHeartBeats() {
             return dataHeartBeats;
@@ -171,6 +183,12 @@ public class BleService extends Service {
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                 super.onConnectionStateChange(gatt, status, newState);
+                if(status==BluetoothGatt.GATT_SUCCESS){
+                    Log.d("Ble","connectionStateChange gatt success");
+                }
+                else {
+                    Log.e("Ble","connectionStateChange gatt fail");
+                }
                 switch (newState) {
                     case BluetoothProfile.STATE_CONNECTED:
                         if(gatt.getDevice().getAddress().equals(address)){
@@ -184,8 +202,9 @@ public class BleService extends Service {
                         }
                         break;
                     case BluetoothProfile.STATE_DISCONNECTED:
-                        gatt.close();
-                        bleAdapter.startLeScan(mLeScanCallback);
+                        if(gatt!=null)
+                            gatt.close();
+                        bleAdapter.getBluetoothLeScanner().startScan(mLeScanCallback);
                         isReadyForNext=false;
                         Log.d("Ble","ble disconnected");
                         break;
@@ -254,9 +273,11 @@ public class BleService extends Service {
                 RssiValue=rssi;
             }
         };
-        mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
+        mLeScanCallback = new ScanCallback() {
             @Override
-            public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
+            public void onScanResult(int callbackType, ScanResult result) {
+                super.onScanResult(callbackType, result);
+                BluetoothDevice device=result.getDevice();
                 if (!devicesList.contains(device)) {
                     devicesList.add(device);
                     Log.d("Ble", "find device , name= " + device.getName());
@@ -264,35 +285,13 @@ public class BleService extends Service {
 
                     if(device.getAddress().equals(address)){
                         devicesList.clear();
-                        bleAdapter.stopLeScan(mLeScanCallback);
+                        bleAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
                         mBluetoothGatt=device.connectGatt(BleService.this, false, mGattCallback);
                     }
                 }
             }
         };
-        List<BluetoothDevice> list=bleManager.getConnectedDevices(BluetoothProfile.GATT);
-        if(list.size()==0){
-            bleAdapter.startLeScan(mLeScanCallback);
-        }
-        else {
-            mBluetoothGatt=null;
-            BluetoothGatt temp;
-            for (BluetoothDevice device:list) {
-                temp=device.connectGatt(BleService.this, false, mGattCallback);
-                if(device.getAddress().equals(address)){
-                    temp.discoverServices();
-                    mBluetoothGatt=temp;
-                }
-                else{
-                    //连续执行两条的目的是使上面不会进入断开连接的回调
-                    temp.disconnect();
-                    temp.close();
-                }
-                if(mBluetoothGatt==null) {
-                    bleAdapter.startLeScan(mLeScanCallback);
-                }
-            }
-        }
+        bleAdapter.getBluetoothLeScanner().startScan(mLeScanCallback);
         handler=new Handler();
 
         //下面的代码用于发送心跳包
@@ -302,12 +301,15 @@ public class BleService extends Service {
             private int lastHBcount=0;
             @Override
             public void run() {
+                byte[] heartBeat=new byte[bleDataLen];
+                heartBeat[0]='A';
+                heartBeat[1]='C';
+                heartBeat[2]='H';
+                heartBeat[3]='B';
+                if(!isSending){
+                    wifiSend(heartBeat);
+                }
                 if(isReadyForNext){
-                    byte[] heartBeat=new byte[bleDataLen];
-                    heartBeat[0]='A';
-                    heartBeat[1]='C';
-                    heartBeat[2]='H';
-                    heartBeat[3]='B';
                     if(characteristicHB!=null) {
                         characteristicHB.setValue(heartBeat);
                         mBluetoothGatt.writeCharacteristic(characteristicHB);

@@ -755,7 +755,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         if(textView.getText().equals("区域"))
                         {
                             float region=Float.parseFloat(((TextView)findViewById(R.id.edit_roll)).getText().toString());
-                            sqlManage.selectOne("column"+String.valueOf(buttonId),String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()),1,region);
+                            sqlManage.select("column"+String.valueOf(buttonId),String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()),region);
                             setProgressAll(sqlManage);
                         }
                     }

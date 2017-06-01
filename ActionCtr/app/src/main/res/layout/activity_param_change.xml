@@ -5,8 +5,7 @@
         android:layout_alignParentTop="true"
         android:orientation="vertical"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/activity_param_change"
-        android:layout_above="@+id/ok_cancel_choose">
+        android:id="@+id/activity_param_change">
 
         <LinearLayout
             android:id="@+id/param_change_select_column"
@@ -57,42 +56,49 @@
                 android:layout_weight="1"
                 android:text="柱子7" />
         </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:id="@+id/yaw_decrease"
-                android:text="-" />
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:id="@+id/yaw_increase"
-                android:text="+"/>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:layout_weight="1"
-                android:text="航向"/>
-            <EditText
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:id="@+id/edit_yaw"/>
-            <SeekBar
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="2"
-                android:id="@+id/progress_yaw"/>
-        </LinearLayout>
-        <LinearLayout
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
+            android:id="@+id/yaw_decrease"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="-" />
+
+        <Button
+            android:id="@+id/yaw_increase"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="+" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="航向" />
+
+        <EditText
+            android:id="@+id/edit_yaw"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:inputType="numberDecimal" />
+
+        <SeekBar
+            android:id="@+id/progress_yaw"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2" />
+    </LinearLayout>
+
+    <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">

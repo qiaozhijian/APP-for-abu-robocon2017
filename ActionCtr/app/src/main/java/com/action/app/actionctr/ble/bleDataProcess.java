@@ -18,6 +18,7 @@ public class bleDataProcess{
     private JniShareUtils cpptool;
     private BleService.myBleBand state;
     private Context context;
+
     private ServiceConnection connection=new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -29,12 +30,14 @@ public class bleDataProcess{
             Log.e("bleDataProcess","Service disconnected");
         }
     };
+
     public bleDataProcess(Context text){
         Intent bindIntent=new Intent(text,BleService.class);
         context=text;
         cpptool=new JniShareUtils();
         text.bindService(bindIntent,connection,text.BIND_AUTO_CREATE);
     }
+
     public boolean sendParam(byte id1, byte id2,int value){
         byte[] sendData=new byte[BleService.bleDataLen];
 

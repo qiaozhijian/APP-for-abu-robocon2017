@@ -5,8 +5,7 @@
         android:layout_alignParentTop="true"
         android:orientation="vertical"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/activity_param_change"
-        android:layout_above="@+id/ok_cancel_choose">
+        android:id="@+id/activity_param_change">
 
         <LinearLayout
             android:id="@+id/param_change_select_column"
@@ -79,13 +78,14 @@
                 android:gravity="center"
                 android:layout_weight="1"
                 android:text="航向"/>
+
             <EditText
+                android:id="@+id/edit_yaw"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:gravity="center"
                 android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:id="@+id/edit_yaw"/>
+                android:gravity="center"
+                android:inputType="numberSigned|numberDecimal" />
             <SeekBar
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -114,13 +114,14 @@
                 android:gravity="center"
                 android:layout_weight="1"
                 android:text="俯仰"/>
+
             <EditText
+                android:id="@+id/edit_pitch"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:gravity="center"
                 android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:id="@+id/edit_pitch"/>
+                android:gravity="center"
+                android:inputType="numberSigned|numberDecimal" />
             <SeekBar
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -150,13 +151,14 @@
                 android:layout_weight="1"
                 android:id="@+id/roll_or_district"
                 android:text="翻滚"/>
+
             <EditText
+                android:id="@+id/edit_roll"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:gravity="center"
                 android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:id="@+id/edit_roll"/>
+                android:gravity="center"
+                android:inputType="numberSigned|numberDecimal" />
             <SeekBar
                 android:layout_width="0dp"
                 android:layout_height="match_parent"

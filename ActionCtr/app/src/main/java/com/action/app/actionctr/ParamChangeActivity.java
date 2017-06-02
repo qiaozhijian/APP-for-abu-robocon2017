@@ -233,6 +233,16 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         sqlManage.speed1=Integer.parseInt(editTextSpeed1.getText().toString());
         sqlManage.speed2=Integer.parseInt(editTextSpeed2.getText().toString());
     }
+    private void updateByRegion(){
+        TextView textView=(TextView)findViewById(R.id.roll_or_district);
+        if(textView.getText().equals("区域"))
+        {
+            float region=Float.parseFloat(((TextView)findViewById(R.id.edit_roll)).getText().toString());
+            if(sqlManage.select("column"+String.valueOf(buttonId),String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()),region)){
+                setProgressAll(sqlManage);
+            }
+        }
+    }
 
 
     private int buttonId;
@@ -751,13 +761,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         valueF+=stepSize;
                     seekBar.setProgress(floatToProgress(seekBar,valueF));
                     if(seekBar.getId()==R.id.progress_roll){
-                        TextView textView=(TextView)findViewById(R.id.roll_or_district);
-                        if(textView.getText().equals("区域"))
-                        {
-                            float region=Float.parseFloat(((TextView)findViewById(R.id.edit_roll)).getText().toString());
-                            sqlManage.select("column"+String.valueOf(buttonId),String.valueOf(((TextView)findViewById(R.id.gun_num)).getText()),String.valueOf(((TextView)findViewById(R.id.state)).getText()),region);
-                            setProgressAll(sqlManage);
-                        }
+                        updateByRegion();
                     }
                     break;
                 case R.id.speed1_increase:
@@ -788,6 +792,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 editTextPitch.setText(String.valueOf(progressToFloat(seekBar,progress)));
                 break;
             case R.id.progress_roll:
+                if(fromUser){
+                    updateByRegion();
+                }
                 editTextRoll.setText(String.valueOf(progressToFloat(seekBar,progress)));
                 break;
             case R.id.progress_yaw:

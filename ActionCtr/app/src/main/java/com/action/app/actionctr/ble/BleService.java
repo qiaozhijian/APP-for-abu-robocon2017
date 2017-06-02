@@ -42,8 +42,6 @@ public class BleService extends Service {
 
     private BluetoothManager bleManager;
     private BluetoothAdapter bleAdapter;
-    private ArrayList<BluetoothDevice> devicesList;
-    private ScanCallback mLeScanCallback;
     private BluetoothGattCallback mGattCallback;
     private BluetoothGatt mBluetoothGatt;
     private BluetoothGattCharacteristic characteristic;
@@ -53,10 +51,9 @@ public class BleService extends Service {
     private int RssiValue=0;
 
     public static final int bleDataLen=12;
-//    private final String address="F4:5E:AB:B9:59:77";//这个参数是车上用的平板 1号
+    private final String address="F4:5E:AB:B9:59:77";//这个参数是车上用的平板 1号
 //    private final String address="F4:5E:AB:B9:58:80";//2号 白色平板
-    private final String address="F4:5E:AB:B9:5A:03";// //3号
-    private Handler handler;
+//    private final String address="F4:5E:AB:B9:5A:03";// //3号
 
     private byte[] dataReceive;
     private byte[] dataTrans;
@@ -163,7 +160,7 @@ public class BleService extends Service {
     public void onCreate(){
         super.onCreate();
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(android.R.drawable.btn_dialog);
         builder.setContentTitle("ActionCtrBle");
         builder.setContentText("为了保证Ble的长期不被系统干掉");
@@ -178,39 +175,41 @@ public class BleService extends Service {
 
         bleManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         bleAdapter= bleManager.getAdapter();
-        devicesList=new ArrayList<>();
         mGattCallback=new BluetoothGattCallback() {
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                 super.onConnectionStateChange(gatt, status, newState);
                 if(status==BluetoothGatt.GATT_SUCCESS){
                     Log.d("Ble","connectionStateChange gatt success");
+
+                    switch (newState) {
+                        case BluetoothProfile.STATE_CONNECTED:
+                            if(gatt.getDevice().getAddress().equals(address)){
+                                Log.d("Ble","ble connected");
+                                isReadyForNext=false;
+                                mBluetoothGatt.discoverServices();
+                            }
+                            else {
+                                Log.d("Ble","ble devicce err");
+                                gatt.disconnect();
+                            }
+                            break;
+                        case BluetoothProfile.STATE_DISCONNECTED:
+                            mBluetoothGatt.connect();
+                            isReadyForNext=false;
+                            Log.d("Ble","ble disconnected");
+                            break;
+                        default:
+                            mBluetoothGatt.connect();
+                            Log.e("Ble","Unknown state");
+                            isReadyForNext=false;
+                            break;
+                    }
                 }
                 else {
+                    if(gatt.connect())
+                        Log.d("Ble","reconnect");
                     Log.e("Ble","connectionStateChange gatt fail");
-                }
-                switch (newState) {
-                    case BluetoothProfile.STATE_CONNECTED:
-                        if(gatt.getDevice().getAddress().equals(address)){
-                            Log.d("Ble","ble connected");
-                            isReadyForNext=false;
-                            mBluetoothGatt.discoverServices();
-                        }
-                        else {
-                            Log.d("Ble","ble devicce err");
-                            gatt.disconnect();
-                        }
-                        break;
-                    case BluetoothProfile.STATE_DISCONNECTED:
-                        if(gatt!=null)
-                            gatt.close();
-                        bleAdapter.getBluetoothLeScanner().startScan(mLeScanCallback);
-                        isReadyForNext=false;
-                        Log.d("Ble","ble disconnected");
-                        break;
-                    default:
-                        isReadyForNext=false;
-                        break;
                 }
             }
             @Override
@@ -273,26 +272,8 @@ public class BleService extends Service {
                 RssiValue=rssi;
             }
         };
-        mLeScanCallback = new ScanCallback() {
-            @Override
-            public void onScanResult(int callbackType, ScanResult result) {
-                super.onScanResult(callbackType, result);
-                BluetoothDevice device=result.getDevice();
-                if (!devicesList.contains(device)) {
-                    devicesList.add(device);
-                    Log.d("Ble", "find device , name= " + device.getName());
-                    Log.d("Ble", "device address="+device.getAddress());
 
-                    if(device.getAddress().equals(address)){
-                        devicesList.clear();
-                        bleAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
-                        mBluetoothGatt=device.connectGatt(BleService.this, false, mGattCallback);
-                    }
-                }
-            }
-        };
-        bleAdapter.getBluetoothLeScanner().startScan(mLeScanCallback);
-        handler=new Handler();
+        mBluetoothGatt=bleAdapter.getRemoteDevice(address).connectGatt(BleService.this, true, mGattCallback);
 
         //下面的代码用于发送心跳包
         final Handler handlerHeartBeat=new Handler();
@@ -336,6 +317,7 @@ public class BleService extends Service {
         Log.d("Ble","Ble Service onStartCommand");
         return super.onStartCommand(intent,flags,startId);
     }
+
     @Override
     public void onDestroy(){
         Log.d("Ble","Ble Service onDestroy");

@@ -25,22 +25,29 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
     @Override
     protected void onCreate(Bundle s) {
         super.onCreate(s);
+//        加载界面
         setContentView(R.layout.activity_ble_connect);
-
+//        获取sharedpreference.editor对象
         SharedPreferences.Editor dataSt=getSharedPreferences("data",MODE_PRIVATE).edit();
+//        清除sharedpreference 文件中的数据
         dataSt.clear();
+//        提交数据，完成保存工作
         dataSt.commit();
 
         isEnding=false;
+
         final TextView text=(TextView)findViewById(R.id.ble_connect_display);
         text.setText("蓝牙连接中");
         Button button=(Button)findViewById(R.id.ble_connect_skip);
         button.setOnClickListener(this);
 
+//        启动服务
         Intent intentBleService=new Intent(this,BleService.class);
         startService(intentBleService);
 
+//        获取蓝牙数据处理对象和状态返回对象
         state=new bleDataProcess(this);
+
         final Handler handler=new Handler();
         Runnable runnable=new Runnable() {
             private int count=0;
@@ -52,9 +59,11 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
                     string+='.';
                 }
                 text.setText(string);
+//                最多20个点
                 count%=20;
                 boolean check=false;
                 if(state.getBinder()!=null){
+//                    check 蓝牙是否已经发现服务
                     check=state.isReadyForData();
                     if(check){
                         Log.d("ble","ble is ready for sendData");
@@ -63,6 +72,7 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
                         finish();
                     }
                 }
+//                如果没有，500ms后再这行一次
                 if(!check&&!isEnding){
                     handler.postDelayed(this,500);
                 }
@@ -71,6 +81,7 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
         handler.post(runnable);
     }
 
+//    点击就跳转
     @Override
     public void onClick(View v) {
         switch (v.getId()) {

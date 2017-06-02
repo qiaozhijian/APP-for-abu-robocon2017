@@ -150,14 +150,4 @@
         </RelativeLayout>
     </RelativeLayout>
 
-
-    <fragment
-        android:id="@+id/id_right_menu"
-        android:name="com.action.app.actionctr.MenuRightFragment"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_gravity="right"
-        android:tag="RIGHT" />
-
-
 </android.support.v4.widget.DrawerLayout >

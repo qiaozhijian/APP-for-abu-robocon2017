@@ -21,13 +21,15 @@
         android:layout_weight="1"
         android:layout_alignParentTop="true"
         android:id="@+id/option_select"></Spinner>
-    <Spinner
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:layout_alignParentTop="true"
-        android:id="@+id/option_onTheWay"></Spinner>
-    <Spinner
+
+        <Spinner
+            android:id="@+id/option_onTheWay"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_weight="1"></Spinner>
+
+        <Spinner
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -48,9 +50,9 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/list_data_display"
         android:layout_below="@+id/Spinner"
-        android:layout_above="@+id/save_or_cancel"
-        android:id="@+id/list_data_display"></ListView>
+        android:layout_alignParentStart="true"></ListView>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

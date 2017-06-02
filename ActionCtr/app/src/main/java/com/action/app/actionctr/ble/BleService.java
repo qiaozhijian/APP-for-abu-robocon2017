@@ -356,7 +356,7 @@ public class BleService extends Service {
 //                        如果正确则情况设备表
                         devicesList.clear();
 //                        device.getAddress();device.getUuids(); 可以获得UUID
-//                        停止扫描
+//                        停止扫描        平板可能关不掉
                         bleAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
 //                        开始连接
                         mBluetoothGatt=device.connectGatt(BleService.this, false, mGattCallback);
@@ -402,6 +402,7 @@ public class BleService extends Service {
                 handlerHeartBeat.postDelayed(this,300);
             }
         };
+//        不同于上面，上面是按键按一次就会执行一次，但是这个是只会在程序启动的时候执行
         handlerHeartBeat.postDelayed(runnable,3000);
     }
     @Override

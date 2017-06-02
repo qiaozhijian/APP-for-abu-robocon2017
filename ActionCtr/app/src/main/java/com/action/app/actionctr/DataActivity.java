@@ -5,25 +5,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.action.app.actionctr.excel.Excel;
 import com.action.app.actionctr.sqlite.Manage;
-import  com.action.app.actionctr.excel.Excel;
-import java.io.File;
-import java.io.IOException;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,8 +43,8 @@ public class DataActivity extends BasicActivity implements AdapterView.OnItemSel
         (findViewById(R.id.cancel_data)).setOnClickListener(this);
 
         spinner=(Spinner)findViewById(R.id.option_select);//柱子的选择
+//        加载选择信息
         List<String> optionSelect=new ArrayList<String>();
-
         optionSelect.add("column1");
         optionSelect.add("column2");
         optionSelect.add("column3");

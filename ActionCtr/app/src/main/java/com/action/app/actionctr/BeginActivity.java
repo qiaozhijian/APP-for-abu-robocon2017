@@ -37,15 +37,20 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
 
         final ProgressBar bar=(ProgressBar)findViewById(R.id.begin_progressbar_rssi);
         final TextView textView=(TextView)findViewById(R.id.begin_textview_rssi);
-        bar.setProgress(0);
-        state=new bleDataProcess(this);
 
+//        设置初始为0
+        bar.setProgress(0);
+//        实例化
+        state=new bleDataProcess(this);
+//        线程控制
         final Handler handler=new Handler();
         Runnable runnable=new Runnable() {
             @Override
             public void run() {
+//                isEnding在destroy里面赋值TRUE
                 if(!isEnding){
                     if(state.getBinder()!=null){
+//                        如果断开连接
                         if(!state.isReadyForData()){
                             bar.setProgress(0);
                             textView.setText("蓝牙断开");
@@ -89,6 +94,7 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
             case R.id.go_to_data_activity:
                 intent=new Intent(BeginActivity.this,DataActivity.class);
                 startActivity(intent);
+//                以前发现进某些界面会闪退，就把finish关掉了
                 //finish();
                 break;
             case R.id.go_to_debug_data_activity:

@@ -11,7 +11,7 @@
             android:id="@+id/param_change_select_column"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0"
+            android:layout_weight="1"
             android:orientation="horizontal">
 
             <Button
@@ -56,49 +56,43 @@
                 android:layout_weight="1"
                 android:text="柱子7" />
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/yaw_decrease"
+                android:text="-" />
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/yaw_increase"
+                android:text="+"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:text="航向"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <Button
-            android:id="@+id/yaw_decrease"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="-" />
-
-        <Button
-            android:id="@+id/yaw_increase"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="+" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="航向" />
-
-        <EditText
-            android:id="@+id/edit_yaw"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:inputType="numberDecimal" />
-
-        <SeekBar
-            android:id="@+id/progress_yaw"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2" />
-    </LinearLayout>
-
-    <LinearLayout
+            <EditText
+                android:id="@+id/edit_yaw"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:inputType="numberSigned|numberDecimal" />
+            <SeekBar
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:id="@+id/progress_yaw"/>
+        </LinearLayout>
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
@@ -120,13 +114,14 @@
                 android:gravity="center"
                 android:layout_weight="1"
                 android:text="俯仰"/>
+
             <EditText
+                android:id="@+id/edit_pitch"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:gravity="center"
                 android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:id="@+id/edit_pitch"/>
+                android:gravity="center"
+                android:inputType="numberSigned|numberDecimal" />
             <SeekBar
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -156,13 +151,14 @@
                 android:layout_weight="1"
                 android:id="@+id/roll_or_district"
                 android:text="翻滚"/>
+
             <EditText
+                android:id="@+id/edit_roll"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:gravity="center"
                 android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:id="@+id/edit_roll"/>
+                android:gravity="center"
+                android:inputType="numberSigned|numberDecimal" />
             <SeekBar
                 android:layout_width="0dp"
                 android:layout_height="match_parent"

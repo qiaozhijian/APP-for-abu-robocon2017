@@ -48,74 +48,80 @@
                 </LinearLayout>
 
                 <Button
-                    android:layout_width="@dimen/buttonWidth"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_alignTop="@+id/column3"
-                    android:layout_toLeftOf="@+id/column2"
                     android:id="@+id/column1"
-                    android:text="c1"/>
-                <Button
                     android:layout_width="@dimen/buttonWidth"
                     android:layout_height="@dimen/buttonHeight"
-                    android:layout_marginRight="10dp"
+                    android:layout_alignTop="@+id/column3"
                     android:layout_marginBottom="10dp"
                     android:layout_marginLeft="10dp"
-                    android:layout_alignTop="@+id/column3"
-                    android:layout_toLeftOf="@+id/column3"
+                    android:layout_marginRight="10dp"
+                    android:layout_toLeftOf="@+id/column2"
+                    android:text="c1" />
+
+                <Button
                     android:id="@+id/column2"
-                    android:text="c2"/>
-                <Button
                     android:layout_width="@dimen/buttonWidth"
                     android:layout_height="@dimen/buttonHeight"
-                    android:layout_marginRight="10dp"
+                    android:layout_alignTop="@+id/column3"
+                    android:layout_marginBottom="10dp"
                     android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_toLeftOf="@+id/column3"
+                    android:text="c2" />
+
+                <Button
                     android:id="@+id/column3"
-                    android:text="c3"
+                    android:layout_width="@dimen/buttonWidth"
+                    android:layout_height="@dimen/buttonHeight"
+                    android:layout_centerHorizontal="true"
                     android:layout_centerVertical="true"
-                    android:layout_centerHorizontal="true" />
-                <Button
-                    android:layout_width="@dimen/buttonWidth"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginBottom="10dp"
                     android:layout_marginLeft="10dp"
-                    android:layout_alignTop="@+id/column3"
-                    android:layout_toRightOf="@+id/column3"
+                    android:layout_marginRight="10dp"
+                    android:text="c3" />
+
+                <Button
                     android:id="@+id/column4"
-                    android:text="c4"/>
-                <Button
                     android:layout_width="@dimen/buttonWidth"
                     android:layout_height="@dimen/buttonHeight"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="10dp"
                     android:layout_alignTop="@+id/column3"
-                    android:layout_toRightOf="@+id/column4"
-                    android:id="@+id/column5"
-                    android:text="c5"/>
-                <Button
-                    android:layout_width="@dimen/buttonWidth"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
                     android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_toRightOf="@+id/column3"
+                    android:text="c4" />
+
+                <Button
+                    android:id="@+id/column5"
+                    android:layout_width="@dimen/buttonWidth"
+                    android:layout_height="@dimen/buttonHeight"
+                    android:layout_alignTop="@+id/column3"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_toRightOf="@+id/column4"
+                    android:text="c5" />
+
+                <Button
+                    android:id="@+id/column6"
+                    android:layout_width="@dimen/buttonWidth"
+                    android:layout_height="@dimen/buttonHeight"
                     android:layout_above="@+id/column3"
                     android:layout_alignRight="@+id/column3"
-                    android:id="@+id/column6"
-                    android:text="c6"/>
-                <Button
-                    android:layout_width="@dimen/buttonWidth"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
                     android:layout_marginLeft="10dp"
-                    android:layout_below="@+id/column3"
-                    android:layout_alignRight="@+id/column3"
+                    android:layout_marginTop="10dp"
+                    android:text="c6" />
+
+                <Button
                     android:id="@+id/column7"
-                    android:text="c7"/>
+                    android:layout_width="@dimen/buttonWidth"
+                    android:layout_height="@dimen/buttonHeight"
+                    android:layout_alignRight="@+id/column3"
+                    android:layout_below="@+id/column3"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="10dp"
+                    android:text="c7" />
             </RelativeLayout>
 
             <LinearLayout

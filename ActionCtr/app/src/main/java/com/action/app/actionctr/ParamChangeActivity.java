@@ -8,14 +8,12 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -473,87 +471,93 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             }
             break;
             case R.id.button_param_change:
-                readFromLayout(sqlManage);
+                boolean dialogIsShowing=false;
+                if(progressDialog!=null){
+                    if(progressDialog.isShowing())
+                        dialogIsShowing=true;
+                }
+                Log.d("change", "changeDialog is showing:    " + String.valueOf(dialogIsShowing));
+                if(!dialogIsShowing) {
+                    readFromLayout(sqlManage);
 
-                Log.d("data change","roll: "+String.valueOf(sqlManage.roll));
-                Log.d("data change","pitch: "+String.valueOf(sqlManage.pitch));
-                Log.d("data change","yaw: "+String.valueOf(sqlManage.yaw));
-                Log.d("data change","speed1: "+String.valueOf(sqlManage.speed1));
-                Log.d("data change","speed2: "+String.valueOf(sqlManage.speed2));
+                    Log.d("data change", "roll: " + String.valueOf(sqlManage.roll));
+                    Log.d("data change", "pitch: " + String.valueOf(sqlManage.pitch));
+                    Log.d("data change", "yaw: " + String.valueOf(sqlManage.yaw));
+                    Log.d("data change", "speed1: " + String.valueOf(sqlManage.speed1));
+                    Log.d("data change", "speed2: " + String.valueOf(sqlManage.speed2));
 
-                progressDialog=new ProgressDialog(ParamChangeActivity.this);
-                progressDialog.setTitle("data sending,please wait......");
-                progressDialog.setCancelable(false);
-                progressDialog.setCanceledOnTouchOutside(false);
-                progressDialog.show();
+                    progressDialog = new ProgressDialog(ParamChangeActivity.this);
+                    progressDialog.setTitle("data sending,please wait......");
+                    progressDialog.setCancelable(false);
+                    progressDialog.setCanceledOnTouchOutside(false);
+                    progressDialog.show();
+                    final Handler handler = new Handler();
+                    Runnable runnable = new Runnable() {
+                        private byte id = 0;
+                        private byte id2 = 0;
 
-                final Handler handler=new Handler();
-                Runnable runnable=new Runnable() {
-                    private byte id=0;
-                    private byte id2=0;
-                    @Override
-                    public void run() {
-                        switch(String.valueOf(((TextView)findViewById(R.id.state)).getText())){
-                            case "打球":
-                                id2=0;
-                                break;
-                            case "打盘":
-                                id2=1;
-                                break;
-                            case "扔":
-                                id2=2;
-                                break;
-                        }
-                        id2=(byte)(id2*3);
-                        switch(String.valueOf(((TextView)findViewById(R.id.gun_num)).getText())){
-                            case "左":
-                                id2+=0;
-                                break;
-                            case "右":
-                                id2+=1;
-                                break;
-                            case "上":
-                                id2+=2;
-                                break;
-                        }
-                        int inOntheWay=readOntheWay();
-                        id2=(byte)(id2+inOntheWay*80);
-
-                        if(bleDataManage.checkSendOk()&&bleDataManage.getBinder()!=null){
-                            switch (id) {
-                                case 0:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),id2,sqlManage.roll);
+                        @Override
+                        public void run() {
+                            switch (String.valueOf(((TextView) findViewById(R.id.state)).getText())) {
+                                case "打球":
+                                    id2 = 0;
                                     break;
-                                case 1:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),id2,sqlManage.pitch);
+                                case "打盘":
+                                    id2 = 1;
                                     break;
-                                case 2:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),id2,sqlManage.yaw);
-                                    break;
-                                case 3:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),id2,sqlManage.speed1);
-                                    break;
-                                case 4:
-                                    bleDataManage.sendParam((byte) (id+buttonId*5-5),id2,sqlManage.speed2);
-                                    break;
-                                case 5:
-                                    progressDialog.cancel();
-                                    break;
-                                default:
-                                    Log.e("change button","onclick run err run err!!!!!");
+                                case "扔":
+                                    id2 = 2;
                                     break;
                             }
-                            if(id!=5){
-                                handler.postDelayed(this,50);
+                            id2 = (byte) (id2 * 3);
+                            switch (String.valueOf(((TextView) findViewById(R.id.gun_num)).getText())) {
+                                case "左":
+                                    id2 += 0;
+                                    break;
+                                case "右":
+                                    id2 += 1;
+                                    break;
+                                case "上":
+                                    id2 += 2;
+                                    break;
                             }
-                            id++;
+                            int inOntheWay = readOntheWay();
+                            id2 = (byte) (id2 + inOntheWay * 80);
+                            if (bleDataManage.checkSendOk() && bleDataManage.getBinder() != null) {
+                                switch (id) {
+                                    case 0:
+                                        bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.roll);
+                                        break;
+                                    case 1:
+                                        bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.pitch);
+                                        break;
+                                    case 2:
+                                        bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.yaw);
+                                        break;
+                                    case 3:
+                                        bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.speed1);
+                                        break;
+                                    case 4:
+                                        bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.speed2);
+                                        break;
+                                    case 5:
+                                        progressDialog.cancel();
+                                        break;
+                                    default:
+                                        Log.e("change button", "onclick run err run err!!!!!");
+                                        break;
+                                }
+                                if (id != 5) {
+                                    handler.postDelayed(this, 50);
+                                }
+                                id++;
+                            } else {
+                                handler.postDelayed(this, 50);
+                            }
                         }
-                        else {
-                            handler.postDelayed(this,50);
-                        }
-                    }
-                };
-                handler.postDelayed(runnable,50);
+                    };
+                    handler.postDelayed(runnable, 50);
+                }
                 break;
             case R.id.button_param_cancel:
                 Intent intent=new Intent(this,BeginActivity.class);

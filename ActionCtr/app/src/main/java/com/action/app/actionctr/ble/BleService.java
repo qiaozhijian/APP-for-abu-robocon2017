@@ -18,10 +18,8 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.action.app.actionctr.BeginActivity;
 import com.action.app.actionctr.wifi.wifiService;
@@ -200,40 +198,6 @@ public class BleService extends Service {
             } else {
                 return 0;
             }
-        }
-
-        public void checkState()
-        {
-             final int DISCONNECTED = 1;
-             final Handler sumHandler = new Handler() {
-                @Override
-                public void handleMessage(Message msg) {
-                    switch (msg.what) {
-                        case DISCONNECTED:
-                            Toast.makeText(getApplicationContext(),"disconneted",Toast.LENGTH_LONG).show();
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            };
-
-            Runnable sumRunnable=new Runnable() {
-                @Override
-                public void run() {
-                    Message message=new Message();
-                    message.what=DISCONNECTED;
-                    if(lastIsReady==true&&isReadyForNext==false)
-                    {
-                        lastIsReady=false;
-                        sumHandler.sendMessage(message);
-                    }
-                    Log.d("TOAST","check");
-                    sumHandler.postDelayed(this, 100);
-                }
-            };
-
-            sumHandler.postDelayed(sumRunnable, 100);
         }
     }
 

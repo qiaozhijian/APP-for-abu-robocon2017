@@ -8,14 +8,12 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -256,7 +254,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         setContentView(R.layout.activity_param_change);
         sqlManage=new Manage(this);
         bleDataManage=new bleDataProcess(this);
-      //  state.checkState();
         findViewById(R.id.button_param_shot).setOnClickListener(this);//射
         ((ToggleButton)findViewById(R.id.button_param_mode_change)).setOnCheckedChangeListener(this);
 
@@ -417,6 +414,21 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 }
             });
         }
+//        线程控制
+        final Handler sumHandler = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (bleDataManage.getBinder() != null) {
+//                        如果断开连接
+                    if (!bleDataManage.isReadyForData()) {
+                        Toast.makeText(getApplicationContext(),"disconnected",Toast.LENGTH_SHORT).show();
+                    }
+                }
+                sumHandler.postDelayed(this, 500);
+            }
+        };
+        sumHandler.post(runnable);
     }
     @Override
     public void onClick(View v)

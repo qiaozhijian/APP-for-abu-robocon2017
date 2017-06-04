@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.action.app.actionctr.ble.BleService;
 import com.action.app.actionctr.ble.bleDataProcess;
@@ -83,7 +84,21 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_human_sensor);
         bleDataManage=new bleDataProcess(this);
-     //   state.checkState();
+        //        线程控制
+        final Handler sumHandler = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (bleDataManage.getBinder() != null) {
+//                        如果断开连接
+                    if (!bleDataManage.isReadyForData()) {
+                        Toast.makeText(getApplicationContext(),"disconnected",Toast.LENGTH_SHORT).show();
+                    }
+                }
+                sumHandler.postDelayed(this, 500);
+            }
+        };
+        sumHandler.post(runnable);
         for(int i=0;i<7;i++){
             buttonsColumnList.add(null);
             buttonsBallList.add(null);

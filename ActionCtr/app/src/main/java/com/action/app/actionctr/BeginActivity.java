@@ -73,6 +73,9 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
             }
         };
         handler.post(runnable);
+
+
+
     }
 
     @Override

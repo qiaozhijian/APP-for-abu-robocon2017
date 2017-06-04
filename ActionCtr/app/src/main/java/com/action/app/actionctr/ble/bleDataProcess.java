@@ -26,6 +26,7 @@ public class bleDataProcess{
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             state=(BleService.myBleBand)iBinder;
+            state.checkState();
             Log.d("bleDataProcess","Service Connected");
         }
         @Override

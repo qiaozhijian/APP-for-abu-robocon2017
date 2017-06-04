@@ -8,18 +8,21 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.action.app.actionctr.ble.BleService;
 import com.action.app.actionctr.ble.bleDataProcess;
 import com.action.app.actionctr.sqlite.Manage;
 
@@ -72,6 +75,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
     private ProgressDialog progressDialog;
 
+    BleService.myBleBand state;
 
     private void checkButtonColor()
     {
@@ -252,6 +256,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         setContentView(R.layout.activity_param_change);
         sqlManage=new Manage(this);
         bleDataManage=new bleDataProcess(this);
+      //  state.checkState();
         findViewById(R.id.button_param_shot).setOnClickListener(this);//射
         ((ToggleButton)findViewById(R.id.button_param_mode_change)).setOnCheckedChangeListener(this);
 

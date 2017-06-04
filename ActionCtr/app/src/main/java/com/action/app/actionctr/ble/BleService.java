@@ -18,8 +18,10 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.action.app.actionctr.BeginActivity;
 import com.action.app.actionctr.wifi.wifiService;
@@ -31,57 +33,61 @@ import java.util.UUID;
 
 public class BleService extends Service {
 
-//加载C++库
+    //加载C++库
     static {
         System.loadLibrary("native-lib");
     }
-    //是否在发送
-    private boolean isSending=false;
 
-//  管理器，使能，失能，获得适配器
+    //是否在发送
+    private boolean isSending = false;
+
+    //  管理器，使能，失能，获得适配器
     private BluetoothManager bleManager;
-//  控制蓝牙扫描，读取连接设备
+    //  控制蓝牙扫描，读取连接设备
     private BluetoothAdapter bleAdapter;
-//  蓝牙设备，可以发起连接
+    //  蓝牙设备，可以发起连接
     private ArrayList<BluetoothDevice> devicesList;
-//    返回扫描到的设备
+    //    返回扫描到的设备
     private ScanCallback mLeScanCallback;
-//    GATT的回调，判断连接状态的变化，服务的读写通知回调
+    //    GATT的回调，判断连接状态的变化，服务的读写通知回调
     private BluetoothGattCallback mGattCallback;
-//    GATT实例，可以拿来断开连接，扫描服务
+    //    GATT实例，可以拿来断开连接，扫描服务
     private BluetoothGatt mBluetoothGatt;
-//    特征值，读，写
+    //    特征值，读，写
     private BluetoothGattCharacteristic characteristic;
-//    心跳包的特征值
+    //    心跳包的特征值
     private BluetoothGattCharacteristic characteristicHB;
-//    服务，读出特征值
-    private BluetoothGattService        gattService;
-//    判断蓝牙正不正常，是否可以进行下一次发数
-    private boolean isReadyForNext=false;
-//    RSSI
-    private int RssiValue=0;
-//特征值的长度
-    public static final int bleDataLen=12;
-//    private final String address="F4:5E:AB:B9:59:77";//这个参数是车上用的平板 1号
+    //    服务，读出特征值
+    private BluetoothGattService gattService;
+    //    判断蓝牙正不正常，是否可以进行下一次发数
+    private boolean isReadyForNext = false;
+
+    private boolean lastIsReady = false;
+    //    RSSI
+    private int RssiValue = 0;
+    //特征值的长度
+    public static final int bleDataLen = 12;
+    //    private final String address="F4:5E:AB:B9:59:77";//这个参数是车上用的平板 1号
 //    private final String address="F4:5E:AB:B9:58:80";//2号 白色平板
 //    从机地址
-    private final String address="F4:5E:AB:B9:5A:03";// //3号
+//   private final String address="F4:5E:AB:B9:5A:03";// //3号
+    private final String address = "90:59:AF:0E:60:1F";// //给康永的
 
-//    接收数据缓存区
+    //    接收数据缓存区
     private byte[] dataReceive;
-//    发送数据缓存区
+    //    发送数据缓存区
     private byte[] dataTrans;
-//    心跳包的缓存区
+    //    心跳包的缓存区
     private byte[] dataHeartBeats;
 
-//    心跳包的计数
-    private int HBcount=0;
+    //    心跳包的计数
+    private int HBcount = 0;
 
-//    通过WiFi发数
-    private void wifiSend(byte[] data){
-        OutputStream out=wifiService.getOutputStream();
-        if(out!=null) {
-                try {
+    //    通过WiFi发数
+    private void wifiSend(byte[] data) {
+        OutputStream out = wifiService.getOutputStream();
+        if (out != null) {
+            try {
                 out.write(data);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -90,33 +96,35 @@ public class BleService extends Service {
         }
     }
 
-//    蓝牙发数  binder跟所有涉及到蓝牙的activity通信
-    private myBleBand dataSend=new myBleBand();
-    public class myBleBand extends Binder {
-//        表明现在是第几条命令
-        byte count=0;
-//        前一次发数的检查是否完成
-        boolean isBusy=false;
-//        定时检查前面发送有没有完成，如果没有则重发
-        Handler handler=new Handler();
 
-        public void send(byte[] data){
-            isSending=true;
+    //    蓝牙发数  binder跟所有涉及到蓝牙的activity通信
+    private myBleBand dataSend = new myBleBand();
+
+    public class myBleBand extends Binder {
+        //        表明现在是第几条命令
+        byte count = 0;
+        //        前一次发数的检查是否完成
+        boolean isBusy = false;
+        //        定时检查前面发送有没有完成，如果没有则重发
+        Handler handler = new Handler();
+
+        public void send(byte[] data) {
+            isSending = true;
 //            检查数据长度是否正确
-            if(data.length!=bleDataLen){
-                Log.e("version err","length of senddata is not equal to require");
+            if (data.length != bleDataLen) {
+                Log.e("version err", "length of senddata is not equal to require");
             }
 //            放到缓存区里
-            dataTrans=data;
+            dataTrans = data;
 //            把最后一个字节当做计数
-            dataTrans[bleDataLen-1]=count;
+            dataTrans[bleDataLen - 1] = count;
 //            表明这边是第几个命令，防止重复
-            if(count<100)
+            if (count < 100)
                 count++;
             else
-                count=0;
+                count = 0;
 //            如果GATT有定义
-            if(characteristic!=null&&mBluetoothGatt!=null) {
+            if (characteristic != null && mBluetoothGatt != null) {
 //                设置值
                 characteristic.setValue(dataTrans);
 //                发送
@@ -124,81 +132,119 @@ public class BleService extends Service {
             }
             wifiSend(dataTrans);
 
-            final Runnable runnable=new Runnable() {
+            final Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
 //                  没有发送成功
-                    if(!checkSendOk()) {
-                        isBusy=true;
-                        if(characteristic!=null&&mBluetoothGatt!=null) {
+                    if (!checkSendOk()) {
+                        isBusy = true;
+                        if (characteristic != null && mBluetoothGatt != null) {
                             characteristic.setValue(dataTrans);
                             mBluetoothGatt.writeCharacteristic(characteristic);
                         }
 //                        100ms之后执行runnable
-                        handler.postDelayed(this,100);
+                        handler.postDelayed(this, 100);
                     }
 //                    发送成功
-                    else{
-                        isBusy=false;
+                    else {
+                        isBusy = false;
                     }
                 }
             };
 //           第一次进来的时候不会执行run，只有postDelayed触发时才会
 //·          第二次的时候发现第一次还是没有发送成功就不再运行一遍
-            if(!isBusy)
-                handler.postDelayed(runnable,100);
-            isSending=false;
+            if (!isBusy)
+                handler.postDelayed(runnable, 100);
+            isSending = false;
         }
-//        获取心跳包数据
+
+        //        获取心跳包数据
         public byte[] getHeartBeats() {
             return dataHeartBeats;
         }
-        public boolean checkSendOk(){
+
+        public boolean checkSendOk() {
 //            蓝牙没有准备好，就一直不重发
-            if(!isReadyForNext) {
+            if (!isReadyForNext) {
                 return true;
             }
 //            如果二者相等则返回true
-            if(Arrays.equals(dataReceive,dataTrans)) {
+            if (Arrays.equals(dataReceive, dataTrans)) {
                 return true;
             }
 //            判断数据是否匹配
-            if(dataReceive!=null&&dataTrans!=null) {
+            if (dataReceive != null && dataTrans != null) {
                 int i;
 //                如果i==9时不相等，执行break,此时i不++，i依然不满足=10条件
-                for(i=0;i<10;i++) {
-                   if(dataReceive[i]!=dataTrans[i])
-                       break;
+                for (i = 0; i < 10; i++) {
+                    if (dataReceive[i] != dataTrans[i])
+                        break;
                 }
-                if(i == 10)
-                    Log.e("ble","communicate unstable");
-                    return true;
+                if (i == 10)
+                    Log.e("ble", "communicate unstable");
+                return true;
             }
             return false;
         }
-//        连接是否完成
-        public boolean isReady(){
+
+        //        连接是否完成
+        public boolean isReady() {
             return isReadyForNext;
         }
-//        读取蓝牙强度
-        public int readRssi(){
-            if(isReadyForNext) {
+
+        //        读取蓝牙强度
+        public int readRssi() {
+            if (isReadyForNext) {
                 mBluetoothGatt.readRemoteRssi();
                 return RssiValue;
-            }
-            else{
+            } else {
                 return 0;
             }
         }
+
+        public void checkState()
+        {
+             final int DISCONNECTED = 1;
+             final Handler sumHandler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    switch (msg.what) {
+                        case DISCONNECTED:
+                            Toast.makeText(getApplicationContext(),"disconneted",Toast.LENGTH_LONG).show();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            };
+
+            Runnable sumRunnable=new Runnable() {
+                @Override
+                public void run() {
+                    Message message=new Message();
+                    message.what=DISCONNECTED;
+                    if(lastIsReady==true&&isReadyForNext==false)
+                    {
+                        lastIsReady=false;
+                        sumHandler.sendMessage(message);
+                    }
+                    Log.d("TOAST","check");
+                    sumHandler.postDelayed(this, 100);
+                }
+            };
+
+            sumHandler.postDelayed(sumRunnable, 100);
+        }
     }
-//    dataSend(binder)  通信活动与服务 获得连接状态 发送数据
+
+    //    dataSend(binder)  通信活动与服务 获得连接状态 发送数据
     @Override
     public IBinder onBind(Intent intent) {
         return dataSend;
     }
 
     @Override
-    public void onCreate(){
+    public void onCreate() {
         super.onCreate();
 
 //        通知窗口
@@ -213,153 +259,155 @@ public class BleService extends Service {
         startForeground(1, notification);
 
 
-        Log.d("Ble","Ble Service onCreate");
+        Log.d("Ble", "Ble Service onCreate");
 
 //        获取管理器
         bleManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 //        获取适配器
-        bleAdapter= bleManager.getAdapter();
+        bleAdapter = bleManager.getAdapter();
 //        获取设备列表
-        devicesList=new ArrayList<>();
+        devicesList = new ArrayList<>();
 
-        mGattCallback=new BluetoothGattCallback() {
+        mGattCallback = new BluetoothGattCallback() {
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                 super.onConnectionStateChange(gatt, status, newState);
 //                指示GATT的状态
-                if(status==BluetoothGatt.GATT_SUCCESS){
-                    Log.d("Ble","connectionStateChange gatt success");
-                }
-                else {
-                    Log.e("Ble","connectionStateChange gatt fail");
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    Log.d("Ble", "connectionStateChange gatt success");
+                } else {
+                    Log.e("Ble", "connectionStateChange gatt fail");
                 }
 //               指示连接状态
                 switch (newState) {
 //                    如果连接状态正常
                     case BluetoothProfile.STATE_CONNECTED:
 //                        如果地址正确
-                        if(gatt.getDevice().getAddress().equals(address)){
-                            Log.d("Ble","ble connected");
+                        if (gatt.getDevice().getAddress().equals(address)) {
+                            Log.d("Ble", "ble connected");
 //                            得到特征值之后才能准备好
-                            isReadyForNext=false;
+                            isReadyForNext = false;
+
 //                            去发现服务
                             mBluetoothGatt.discoverServices();
                         }
 //                        地址不正确，断开连接
                         else {
-                            Log.d("Ble","ble devicce err");
+                            Log.d("Ble", "ble devicce err");
                             gatt.disconnect();
                         }
                         break;
 //                    断开连接
                     case BluetoothProfile.STATE_DISCONNECTED:
 //                        先把资源释放，网上搜不释放会有问题
-                        if(gatt!=null)
+                        if (gatt != null)
                             gatt.close();
 //                        适配器发送扫描
                         bleAdapter.getBluetoothLeScanner().startScan(mLeScanCallback);
-                        isReadyForNext=false;
-                        Log.d("Ble","ble disconnected");
+                        isReadyForNext = false;
+                        Log.d("Ble", "ble disconnected");
                         break;
 //                    正在连接等等
                     default:
-                        isReadyForNext=false;
+                        isReadyForNext = false;
                         break;
                 }
             }
-//            当新服务被发现，进这个回调
+
+            //            当新服务被发现，进这个回调
             @Override
-            public void onServicesDiscovered(BluetoothGatt gatt,int status){
+            public void onServicesDiscovered(BluetoothGatt gatt, int status) {
 //                如果特征值和描述被更新
-                if(status==BluetoothGatt.GATT_SUCCESS){
-                    Log.d("Ble","ble gatt service success");
-                    isReadyForNext=true;
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    Log.d("Ble", "ble gatt service success");
+                    isReadyForNext = true;
+                    lastIsReady = isReadyForNext;
 //                    把这个服务赋
-                    gattService=mBluetoothGatt.getService(UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb"));
+                    gattService = mBluetoothGatt.getService(UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb"));
 //                    把这个特征值赋值
-                    characteristic=gattService.getCharacteristic(UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb"));
-                    characteristicHB=gattService.getCharacteristic(UUID.fromString("0000fff7-0000-1000-8000-00805f9b34fb"));
+                    characteristic = gattService.getCharacteristic(UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb"));
+                    characteristicHB = gattService.getCharacteristic(UUID.fromString("0000fff7-0000-1000-8000-00805f9b34fb"));
 //                    打开通知开关
-                    mBluetoothGatt.setCharacteristicNotification(characteristic,true);
-                    mBluetoothGatt.setCharacteristicNotification(characteristicHB,true);
-                }
-                else {
-                    isReadyForNext=false;
-                    Log.d("Ble","ble gatt service fail");
+                    mBluetoothGatt.setCharacteristicNotification(characteristic, true);
+                    mBluetoothGatt.setCharacteristicNotification(characteristicHB, true);
+                } else {
+                    isReadyForNext = false;
+                    Log.d("Ble", "ble gatt service fail");
                 }
             }
-//            特征值的值读取结果回调
+
+            //            特征值的值读取结果回调
             @Override
             public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-                String log_out=new String();
-                for (int i=0;i<bleDataLen;i++){
+                String log_out = new String();
+                for (int i = 0; i < bleDataLen; i++) {
 //                    为了log的时候好观察，加了个\t
-                    log_out+=String.valueOf((int)characteristic.getValue()[i])+'\t';
+                    log_out += String.valueOf((int) characteristic.getValue()[i]) + '\t';
                 }
-                Log.d("Ble","read value: "+log_out);
+                Log.d("Ble", "read value: " + log_out);
             }
-//            特征值改变
+
+            //            特征值改变
             @Override
-            public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic){
+            public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                 byte[] temp;
-                temp=characteristic.getValue();
+                temp = characteristic.getValue();
 //                判断是否是心跳包
-                if(temp[0]=='A'&&temp[1]=='C'&&temp[2]=='H'&&temp[3]=='B')
-                {
-                    dataHeartBeats=temp;
+                if (temp[0] == 'A' && temp[1] == 'C' && temp[2] == 'H' && temp[3] == 'B') {
+                    dataHeartBeats = temp;
                     HBcount++;
-                }
-                else{
-                    dataReceive=temp;
-                    String log_out=new String();
-                    for (int i=0;i<12;i++){
-                        log_out+=String.valueOf((int)dataReceive[i])+'\t';
+                } else {
+                    dataReceive = temp;
+                    String log_out = new String();
+                    for (int i = 0; i < 12; i++) {
+                        log_out += String.valueOf((int) dataReceive[i]) + '\t';
                     }
 
-                    if(dataReceive.length!=bleDataLen){
-                        Log.e("version err","length of receivedata is not equal to require");
+                    if (dataReceive.length != bleDataLen) {
+                        Log.e("version err", "length of receivedata is not equal to require");
                     }
-                    Log.d("Ble","notify: "+log_out);
+                    Log.d("Ble", "notify: " + log_out);
                 }
             }
-//            写特征值的结果回调
+
+            //            写特征值的结果回调
             @Override
-            public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status){
-                String log_out=new String();
-                for (int i=0;i<12;i++){
-                    log_out+=String.valueOf((int)characteristic.getValue()[i])+'\t';
+            public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+                String log_out = new String();
+                for (int i = 0; i < 12; i++) {
+                    log_out += String.valueOf((int) characteristic.getValue()[i]) + '\t';
                 }
-                Log.d("Ble","write: "+log_out);
+                Log.d("Ble", "write: " + log_out);
             }
-//            RSSI的结果获取
+
+            //            RSSI的结果获取
             @Override
             public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
-                RssiValue=rssi;
+                RssiValue = rssi;
             }
         };
 //        扫描回调
-        mLeScanCallback = new ScanCallback()
-        {
+        mLeScanCallback = new ScanCallback() {
 
             @Override
             public void onScanResult(int callbackType, ScanResult result) {
                 super.onScanResult(callbackType, result);
 //                获得扫描到的设备
-                BluetoothDevice device=result.getDevice();
+                BluetoothDevice device = result.getDevice();
 //                如果设备表里没有这个设备
                 if (!devicesList.contains(device)) {
                     devicesList.add(device);
                     Log.d("Ble", "find device , name= " + device.getName());
-                    Log.d("Ble", "device address="+device.getAddress());
+                    Log.d("Ble", "device address=" + device.getAddress());
 //                  判断设备地址是否正确
-                    if(device.getAddress().equals(address)){
+                    if (device.getAddress().equals(address)) {
 //                        如果正确则情况设备表
                         devicesList.clear();
 //                        device.getAddress();device.getUuids(); 可以获得UUID
 //                        停止扫描        平板可能关不掉
                         bleAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
 //                        开始连接
-                        mBluetoothGatt=device.connectGatt(BleService.this, false, mGattCallback);
+                        mBluetoothGatt = device.connectGatt(BleService.this, false, mGattCallback);
                     }
                 }
             }
@@ -368,53 +416,56 @@ public class BleService extends Service {
         bleAdapter.getBluetoothLeScanner().startScan(mLeScanCallback);
 
         //下面的代码用于发送心跳包
-        final Handler handlerHeartBeat=new Handler();
-        Runnable runnable=new Runnable() {
-            private int errCount=0;
-            private int lastHBcount=0;
+        final Handler handlerHeartBeat = new Handler();
+        Runnable runnable = new Runnable() {
+            private int errCount = 0;
+            private int lastHBcount = 0;
+
             @Override
             public void run() {
-                byte[] heartBeat=new byte[bleDataLen];
-                heartBeat[0]='A';
-                heartBeat[1]='C';
-                heartBeat[2]='H';
-                heartBeat[3]='B';
-                if(!isSending){
+                byte[] heartBeat = new byte[bleDataLen];
+                heartBeat[0] = 'A';
+                heartBeat[1] = 'C';
+                heartBeat[2] = 'H';
+                heartBeat[3] = 'B';
+                if (!isSending) {
                     wifiSend(heartBeat);
                 }
-                if(isReadyForNext){
-                    if(characteristicHB!=null) {
+                if (isReadyForNext) {
+                    if (characteristicHB != null) {
                         characteristicHB.setValue(heartBeat);
                         mBluetoothGatt.writeCharacteristic(characteristicHB);
                     }
-                    if(HBcount==lastHBcount)
+                    if (HBcount == lastHBcount)
                         errCount++;
                     else
-                        errCount=0;
-                    lastHBcount=HBcount;
-                    if(errCount>=15) {
-                        Log.e("Ble","HeartBeats disconnect");
-                        isReadyForNext=false;
+                        errCount = 0;
+                    lastHBcount = HBcount;
+                    if (errCount >= 15) {
+                        Log.e("Ble", "HeartBeats disconnect");
+                        isReadyForNext = false;
                         mBluetoothGatt.disconnect();
-                        errCount=0;
+                        errCount = 0;
                     }
                 }
-                handlerHeartBeat.postDelayed(this,300);
+                handlerHeartBeat.postDelayed(this, 300);
             }
         };
 //        不同于上面，上面是按键按一次就会执行一次，但是这个是只会在程序启动的时候执行
-        handlerHeartBeat.postDelayed(runnable,3000);
+        handlerHeartBeat.postDelayed(runnable, 3000);
     }
+
     @Override
-    public int onStartCommand(Intent intent,int flags,int startId){
-        Log.d("Ble","Ble Service onStartCommand");
-        return super.onStartCommand(intent,flags,startId);
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("Ble", "Ble Service onStartCommand");
+        return super.onStartCommand(intent, flags, startId);
     }
+
     @Override
-    public void onDestroy(){
-        Log.d("Ble","Ble Service onDestroy");
+    public void onDestroy() {
+        Log.d("Ble", "Ble Service onDestroy");
         super.onDestroy();
-        if(mBluetoothGatt!=null)
+        if (mBluetoothGatt != null)
             mBluetoothGatt.close();
     }
 }

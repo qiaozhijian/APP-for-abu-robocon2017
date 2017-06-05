@@ -26,9 +26,7 @@ import com.action.app.actionctr.BeginActivity;
 import com.action.app.actionctr.wifi.wifiService;
 
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 public class BleService extends Service {
@@ -55,8 +53,8 @@ public class BleService extends Service {
     private int RssiValue=0;
 
     public static final int bleDataLen=12;
-    private final String address="F4:5E:AB:B9:59:77";//这个参数是车上用的平板 1号
-//    private final String address="F4:5E:AB:B9:58:80";//2号 白色平板
+    //    private final String address="F4:5E:AB:B9:58:80";//1号 黄色平板
+    private final String address="F4:5E:AB:B9:59:77";//2号  白色平板
 //    private final String address="F4:5E:AB:B9:5A:03";// //3号
 
     private byte[] dataReceive;

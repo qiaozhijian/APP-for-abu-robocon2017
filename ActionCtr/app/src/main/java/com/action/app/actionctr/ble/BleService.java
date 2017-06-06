@@ -53,8 +53,8 @@ public class BleService extends Service {
     private int RssiValue=0;
 
     public static final int bleDataLen=12;
-    //    private final String address="F4:5E:AB:B9:58:80";//1号 黄色平板
-    private final String address="F4:5E:AB:B9:59:77";//2号  白色平板
+    private final String address="F4:5E:AB:B9:58:80";//1号 黄色平板
+//    private final String address="F4:5E:AB:B9:59:77";//2号  白色平板
 //    private final String address="F4:5E:AB:B9:5A:03";// //3号
 
     private byte[] dataReceive;
@@ -308,6 +308,8 @@ public class BleService extends Service {
         Runnable runnable=new Runnable() {
             private int errCount=0;
             private int lastHBcount=0;
+            private boolean lastIsReadyForNext=false;
+            private int heartBeatDelayCount=0;
             @Override
             public void run() {
                 byte[] heartBeat=new byte[bleDataLen];
@@ -318,7 +320,13 @@ public class BleService extends Service {
                 if(!isSending){
                     wifiSend(heartBeat);
                 }
-                if(isReadyForNext){
+                if(isReadyForNext||lastIsReadyForNext){
+                    heartBeatDelayCount++;
+                }
+                else{
+                    heartBeatDelayCount=0;
+                }
+                if(isReadyForNext&&lastIsReadyForNext&&heartBeatDelayCount>7){
                     if(characteristicHB!=null) {
                         characteristicHB.setValue(heartBeat);
                         mBluetoothGatt.writeCharacteristic(characteristicHB);
@@ -330,15 +338,16 @@ public class BleService extends Service {
                     lastHBcount=HBcount;
                     if(errCount>=15) {
                         Log.e("Ble","HeartBeats disconnect");
-                        //isReadyForNext=false;
+                        isReadyForNext=false;
                         mBluetoothGatt.disconnect();
                         errCount=0;
                     }
                 }
+                lastIsReadyForNext=isReadyForNext;
                 handlerHeartBeat.postDelayed(this,300);
             }
         };
-        handlerHeartBeat.postDelayed(runnable,3000);
+        handlerHeartBeat.postDelayed(runnable,500);
     }
     @Override
     public int onStartCommand(Intent intent,int flags,int startId){

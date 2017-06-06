@@ -70,26 +70,6 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
             }
         };
         handler.post(runnable);
-
-        final Handler sumHandler=new Handler();
-        Runnable sumRunnable=new Runnable() {
-            @Override
-            public void run() {
-                if(state.getBinder()!=null){
-                    if(state.isReadyForData()==false&&lastIsReady==true){
-                        lastIsReady=state.isReadyForData();
-                        Toast.makeText(getApplicationContext(),"disconnected",Toast.LENGTH_SHORT).show();
-                    }
-                    else
-                    {
-                        lastIsReady=state.isReadyForData();
-                    }
-                    sumHandler.postDelayed(this,500);
-                }
-            }
-        };
-        sumHandler.post(sumRunnable);
-
     }
 
     @Override

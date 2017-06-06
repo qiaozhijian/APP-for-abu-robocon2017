@@ -854,12 +854,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     public void onDestroy(){
         super.onDestroy();
         sqlManage.close();
-//        //发送蓝牙变回自动模式
-//        bleDataManage.sendCmd((byte)(-1));
-        //清楚数据
-//        SharedPreferences.Editor dataSt=getSharedPreferences("data",MODE_PRIVATE).edit();
-//        dataSt.clear();
-//        dataSt.commit();
+
         bleDataManage.unbind();
     }
 }

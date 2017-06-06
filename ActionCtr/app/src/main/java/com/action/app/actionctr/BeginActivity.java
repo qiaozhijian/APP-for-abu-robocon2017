@@ -1,6 +1,7 @@
 package com.action.app.actionctr;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -86,6 +87,14 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
             case R.id.go_to_human_activity:
                 intent=new Intent(BeginActivity.this,humanSensorActivity.class);
                 startActivity(intent);
+
+                //清楚数据
+                SharedPreferences.Editor dataSt=getSharedPreferences("data",MODE_PRIVATE).edit();
+                dataSt.clear();
+                dataSt.commit();
+                //发送蓝牙变回自动模式
+                state.sendCmd((byte)(-1));
+
                 finish();
                 break;
             case R.id.go_to_data_activity:

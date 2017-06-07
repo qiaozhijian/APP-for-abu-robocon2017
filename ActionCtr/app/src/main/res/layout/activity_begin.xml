@@ -4,7 +4,7 @@
     android:id="@+id/activity_begin"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.action.app.actionctr.BeginActivity">
+    tools:context="com.action.app.actionctr2.BeginActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -153,7 +153,7 @@
 
     <fragment
         android:id="@+id/id_right_menu"
-        android:name="com.action.app.actionctr.MenuRightFragment"
+        android:name="com.action.app.actionctr2.MenuRightFragment"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_gravity="right"

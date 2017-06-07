@@ -1,4 +1,4 @@
-package com.action.app.actionctr;
+package com.action.app.actionctr2;
 
 
 import android.content.Intent;
@@ -11,8 +11,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 
-import com.action.app.actionctr.ble.BleService;
-import com.action.app.actionctr.ble.bleDataProcess;
+import com.action.app.actionctr2.ble.BleService;
+import com.action.app.actionctr2.ble.bleDataProcess;
 
 
 /**

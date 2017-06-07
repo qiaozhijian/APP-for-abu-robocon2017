@@ -1,4 +1,4 @@
-package com.action.app.actionctr.sqlite;
+package com.action.app.actionctr2.sqlite;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -7,11 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.sql.Struct;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Vector;
 
 import com.facebook.stetho.Stetho;
 import com.facebook.stetho.okhttp3.StethoInterceptor;

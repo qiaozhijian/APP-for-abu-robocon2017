@@ -1,11 +1,10 @@
-package com.action.app.actionctr;
+package com.action.app.actionctr2;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import com.action.app.actionctr.ble.bleDataProcess;
-import com.action.app.actionctr.wifi.wifiService;
+import com.action.app.actionctr2.ble.bleDataProcess;
 
 public class CtrActivity extends BasicActivity implements View.OnClickListener {
 

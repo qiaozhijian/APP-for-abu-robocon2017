@@ -1,4 +1,4 @@
-package com.action.app.actionctr;
+package com.action.app.actionctr2;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

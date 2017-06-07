@@ -1,4 +1,4 @@
-package com.action.app.actionctr;
+package com.action.app.actionctr2;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -20,8 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.action.app.actionctr.ble.bleDataProcess;
-import com.action.app.actionctr.sqlite.Manage;
+import com.action.app.actionctr2.ble.bleDataProcess;
+import com.action.app.actionctr2.sqlite.Manage;
 
 import java.util.ArrayList;
 

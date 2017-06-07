@@ -1,32 +1,24 @@
-package com.action.app.actionctr;
+package com.action.app.actionctr2;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.action.app.actionctr.excel.Excel;
-import com.action.app.actionctr.sqlite.Manage;
-import com.action.app.actionctr.wifi.wifiDataProcess;
+import com.action.app.actionctr2.excel.Excel;
+import com.action.app.actionctr2.wifi.wifiDataProcess;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class DebugDataDisplayActivity extends BasicActivity implements View.OnClickListener{

@@ -1,4 +1,4 @@
-package com.action.app.actionctr.ble;
+package com.action.app.actionctr2.ble;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -22,8 +22,8 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.action.app.actionctr.BeginActivity;
-import com.action.app.actionctr.wifi.wifiService;
+import com.action.app.actionctr2.BeginActivity;
+import com.action.app.actionctr2.wifi.wifiService;
 
 import java.io.OutputStream;
 import java.util.Arrays;

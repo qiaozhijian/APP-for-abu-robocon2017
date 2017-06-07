@@ -1,32 +1,22 @@
-package com.action.app.actionctr;
+package com.action.app.actionctr2;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
-import com.action.app.actionctr.ble.BleService;
-import com.action.app.actionctr.ble.bleDataProcess;
+import com.action.app.actionctr2.ble.BleService;
+import com.action.app.actionctr2.ble.bleDataProcess;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class humanSensorActivity extends BasicActivity implements View.OnClickListener{
 

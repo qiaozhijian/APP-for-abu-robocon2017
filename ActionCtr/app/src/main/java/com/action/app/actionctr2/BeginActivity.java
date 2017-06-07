@@ -1,4 +1,4 @@
-package com.action.app.actionctr;
+package com.action.app.actionctr2;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,10 +9,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.action.app.actionctr.ble.bleDataProcess;
-import com.action.app.actionctr.wifi.wifiService;
+import com.action.app.actionctr2.ble.bleDataProcess;
+import com.action.app.actionctr2.wifi.wifiService;
 
 public class BeginActivity extends BasicActivity implements View.OnClickListener {
     private bleDataProcess state;

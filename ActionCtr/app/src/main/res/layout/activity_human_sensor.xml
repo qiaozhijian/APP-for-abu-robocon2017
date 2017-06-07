@@ -305,20 +305,21 @@
                     android:orientation="horizontal">
 
                     <Button
-                        android:id="@+id/human_sensor_defend"
+                        android:id="@+id/human_sensor_reset"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="@android:drawable/picture_frame"
-                        android:text="手动防御" />
+                        android:text="重启" />
 
                     <Button
-                        android:id="@+id/human_sensor_reset"
+                        android:id="@+id/human_sensor_defend"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="2"
                         android:background="@drawable/common_plus_signin_btn_text_light"
-                        android:text="重启" />
+                        android:text="手动防御" />
+
 
                     <Button
                         android:id="@+id/human_sensor_left_gun_none"
@@ -340,14 +341,23 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
-
+            android:layout_weight="1"
+            android:orientation="horizontal">
             <Button
                 android:id="@+id/human_sensor_cancel"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="7"
                 android:layout_height="match_parent"
                 android:background="@android:drawable/picture_frame"
                 android:text="返回" />
+
+            <Button
+                android:id="@+id/human_topgun_defend_or_attack"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:background="@drawable/common_google_signin_btn_text_light"
+                android:text="上枪防御" />
         </LinearLayout>
     </LinearLayout>
 

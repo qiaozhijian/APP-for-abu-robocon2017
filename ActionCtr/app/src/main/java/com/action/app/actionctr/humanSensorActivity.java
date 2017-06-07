@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.action.app.actionctr.ble.BleService;
@@ -50,12 +51,22 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                     if (info != null) {
                         Log.d("humanSensor","check heartbeats info");
                         if (info.length == BleService.bleDataLen) {
+                            Resources r = context.getResources();
+                            int topGunDefendOrAttack=info[BleService.bleDataLen - 3];
+                            Button btn=(Button) findViewById(R.id.human_topgun_defend_or_attack);
+                            if(topGunDefendOrAttack==0){
+                                btn.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light));
+                            } else if(topGunDefendOrAttack==1){
+                                btn.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_dark_disabled));
+                            } else{
+                                Toast.makeText(getApplicationContext(),"收到的蓝牙心跳包标志进攻防守错误",Toast.LENGTH_SHORT);
+                            }
+
                             int ballInfo = info[BleService.bleDataLen - 2];
                             int frisbeeInfo = info[BleService.bleDataLen - 1];
                             for (int i = 0; i < 7; i++) {
                                 int checkFrisbee = frisbeeInfo % 2;
                                 int checkBall = ballInfo % 2;
-                                Resources r = context.getResources();
                                 if (checkFrisbee == 1) {
                                     buttonsFrisbeeList.get(i).setBackground(r.getDrawable(R.drawable.common_plus_signin_btn_text_dark));
                                 } else {
@@ -201,6 +212,24 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                     }
                 });
                 dialog.show();
+                break;
+            case R.id.human_topgun_defend_or_attack:
+                Button btn=(Button)v;
+                byte cmd=61;
+                if(btn.getText().equals("上枪防御")){
+                    cmd=60;
+                    btn.setText("上枪进攻");
+                }
+                else if(btn.getText().equals("上枪进攻")){
+                    cmd=61;
+                    btn.setText("上枪防御");
+                }
+                else{
+                    Toast.makeText(getApplicationContext(),"上枪进攻防御切换时发生错误",Toast.LENGTH_SHORT).show();
+                    Log.e("humanSensor","上枪进攻防御切换时发生错误");
+                }
+                bleDataManage.sendCmd(cmd);
+                Log.d("humanSensor","send: "+String.valueOf(cmd));
                 break;
             case R.id.human_sensor_defend:
                 findViewById(R.id.human_sensor_defend_layout).setVisibility(View.VISIBLE);

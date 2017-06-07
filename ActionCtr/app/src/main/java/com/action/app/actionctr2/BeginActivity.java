@@ -1,4 +1,4 @@
-package com.action.app.actionctr;
+package com.action.app.actionctr2;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -9,8 +9,8 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.action.app.actionctr.ble.bleDataProcess;
-import com.action.app.actionctr.wifi.wifiService;
+import com.action.app.actionctr2.ble.bleDataProcess;
+import com.action.app.actionctr2.wifi.wifiService;
 
 public class BeginActivity extends BasicActivity implements View.OnClickListener {
     private bleDataProcess state;

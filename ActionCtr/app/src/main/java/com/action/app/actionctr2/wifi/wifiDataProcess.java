@@ -1,14 +1,10 @@
-package com.action.app.actionctr.wifi;
+package com.action.app.actionctr2.wifi;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.widget.ArrayAdapter;
-
-import com.action.app.actionctr.ble.BleService;
-import com.action.app.actionctr.ndktool.JniShareUtils;
 
 import java.util.ArrayList;
 

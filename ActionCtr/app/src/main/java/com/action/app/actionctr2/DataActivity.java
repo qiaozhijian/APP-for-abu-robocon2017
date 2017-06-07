@@ -1,4 +1,4 @@
-package com.action.app.actionctr;
+package com.action.app.actionctr2;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -15,8 +15,8 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.action.app.actionctr.excel.Excel;
-import com.action.app.actionctr.sqlite.Manage;
+import com.action.app.actionctr2.excel.Excel;
+import com.action.app.actionctr2.sqlite.Manage;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

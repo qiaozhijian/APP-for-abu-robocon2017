@@ -1,4 +1,4 @@
-package com.action.app.actionctr.wifi;
+package com.action.app.actionctr2.wifi;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -10,12 +10,10 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationCompatExtras;
 import android.util.Log;
 
 
-import com.action.app.actionctr.BeginActivity;
-import com.action.app.actionctr.BleConnectActivity;
+import com.action.app.actionctr2.BeginActivity;
 
 import java.io.IOException;
 import java.io.InputStream;

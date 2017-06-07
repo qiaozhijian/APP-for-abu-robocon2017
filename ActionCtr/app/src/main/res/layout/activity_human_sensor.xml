@@ -9,7 +9,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.action.app.actionctr.humanSensorActivity">
+    tools:context="com.action.app.actionctr2.humanSensorActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

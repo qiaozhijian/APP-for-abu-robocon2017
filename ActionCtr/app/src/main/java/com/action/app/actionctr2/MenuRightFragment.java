@@ -1,6 +1,5 @@
-package com.action.app.actionctr;
+package com.action.app.actionctr2;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,7 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.action.app.actionctr.ble.bleDataProcess;
+import com.action.app.actionctr2.ble.bleDataProcess;
 
 /**
  * Created by lenovo on 2017/1/12.

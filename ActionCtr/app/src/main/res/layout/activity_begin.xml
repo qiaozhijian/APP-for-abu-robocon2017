@@ -4,7 +4,7 @@
     android:id="@+id/activity_begin"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.action.app.actionctr.BeginActivity">
+    tools:context="com.action.app.actionctr2.BeginActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"

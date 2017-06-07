@@ -1,4 +1,4 @@
-package com.action.app.actionctr.ble;
+package com.action.app.actionctr2.ble;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -8,7 +8,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.action.app.actionctr.ndktool.JniShareUtils;
+import com.action.app.actionctr2.ndktool.JniShareUtils;
 
 /**
  * Created by 56390 on 2016/12/18.

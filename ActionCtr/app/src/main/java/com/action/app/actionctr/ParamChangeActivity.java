@@ -308,7 +308,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         {
             Log.d("paraChange","buttonId: "+String.valueOf(buttonId));
             ((TextView)findViewById(R.id.column_num)).setText("column"+String.valueOf(buttonId));
-            if(!sqlManage.Select(buttonId,"左","扔",0)){
+            if(!sqlManage.Select(buttonId,"上","扔",0)){
                 sqlManage.setZero();
             }
         }

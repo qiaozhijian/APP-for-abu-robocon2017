@@ -203,7 +203,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_weight="0">
             <Button
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -239,46 +239,51 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
+
             <Button
+                android:id="@+id/gun_left"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:id="@+id/gun_left"
-                android:text="枪.左"/>
+                android:layout_weight="0"
+                android:text="枪.左" />
             <Button
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:id="@+id/gun_up"
                 android:text="枪.上"/>
+
             <Button
+                android:id="@+id/gun_right"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:id="@+id/gun_right"
-                android:text="枪.右"/>
+                android:layout_weight="0"
+                android:text="枪.右" />
             <Button
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0"
                 android:id="@+id/gun_onTheWay"
                 android:text="位置"/>
+
             <TextView
-                android:layout_width="0dp"
                 android:id="@+id/gun_num"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:inputType="text"
-                android:layout_weight="1"
-                android:text="左"/>
-            <TextView
                 android:layout_width="0dp"
-                android:id="@+id/state"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:gravity="center"
                 android:inputType="text"
+                android:text="上" />
+
+            <TextView
+                android:id="@+id/state"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="扔"/>
+                android:gravity="center"
+                android:inputType="text"
+                android:text="扔" />
+
             <TextView
                 android:layout_width="0dp"
                 android:id="@+id/column_num"
@@ -349,28 +354,32 @@
                 android:text="射"
                 android:textStyle="bold" />
         </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+
+    <LinearLayout
+        android:id="@+id/ok_cancel_choose"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.5">
+
+        <Button
+            android:id="@+id/button_param_cancel"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:id="@+id/ok_cancel_choose">
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:id="@+id/button_param_cancel"
-                android:text="取消"/>
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:id="@+id/button_param_save"
-                android:text="保存"/>
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:id="@+id/button_param_change"
-                android:text="改变"/>
-        </LinearLayout>
+            android:text="取消" />
+
+        <Button
+            android:id="@+id/button_param_save"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="保存" />
+
+        <Button
+            android:id="@+id/button_param_change"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="改变" />
+    </LinearLayout>
 </LinearLayout>

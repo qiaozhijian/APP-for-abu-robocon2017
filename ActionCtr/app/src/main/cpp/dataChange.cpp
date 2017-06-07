@@ -2,7 +2,7 @@
 extern "C"
 {
     JNIEXPORT jbyteArray JNICALL
-    Java_com_action_app_actionctr_ndktool_JniShareUtils_floatToByte(JNIEnv *env,jobject instance,jfloat data) {
+    Java_com_action_app_actionctr2_ndktool_JniShareUtils_floatToByte(JNIEnv *env,jobject instance,jfloat data) {
         jbyteArray array;
         jbyte *temp;
         temp = (jbyte *) &data;

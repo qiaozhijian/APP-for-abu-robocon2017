@@ -174,8 +174,6 @@ public class BleService extends Service {
 
         Log.d("Ble","Ble Service onCreate");
 
-        bleManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        bleAdapter= bleManager.getAdapter();
         mGattCallback=new BluetoothGattCallback() {
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -300,54 +298,61 @@ public class BleService extends Service {
                 }
             }
         };
-        scanner=bleAdapter.getBluetoothLeScanner();
-        scanner.startScan(scanCallback);
-        isScanning=true;
-        //下面的代码用于发送心跳包
-        final Handler handlerHeartBeat=new Handler();
-        Runnable runnable=new Runnable() {
-            private int errCount=0;
-            private int lastHBcount=0;
-            private boolean lastIsReadyForNext=false;
-            private int heartBeatDelayCount=0;
-            @Override
-            public void run() {
-                byte[] heartBeat=new byte[bleDataLen];
-                heartBeat[0]='A';
-                heartBeat[1]='C';
-                heartBeat[2]='H';
-                heartBeat[3]='B';
-                if(!isSending){
-                    wifiSend(heartBeat);
-                }
-                if(isReadyForNext||lastIsReadyForNext){
-                    heartBeatDelayCount++;
-                }
-                else{
-                    heartBeatDelayCount=0;
-                }
-                if(isReadyForNext&&lastIsReadyForNext&&heartBeatDelayCount>7){
-                    if(characteristicHB!=null) {
-                        characteristicHB.setValue(heartBeat);
-                        mBluetoothGatt.writeCharacteristic(characteristicHB);
+        try {
+            bleManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+            bleAdapter= bleManager.getAdapter();
+            scanner=bleAdapter.getBluetoothLeScanner();
+            scanner.startScan(scanCallback);
+            isScanning=true;
+            //下面的代码用于发送心跳包
+            final Handler handlerHeartBeat=new Handler();
+            Runnable runnable=new Runnable() {
+                private int errCount=0;
+                private int lastHBcount=0;
+                private boolean lastIsReadyForNext=false;
+                private int heartBeatDelayCount=0;
+                @Override
+                public void run() {
+                    byte[] heartBeat=new byte[bleDataLen];
+                    heartBeat[0]='A';
+                    heartBeat[1]='C';
+                    heartBeat[2]='H';
+                    heartBeat[3]='B';
+                    if(!isSending){
+                        wifiSend(heartBeat);
                     }
-                    if(HBcount==lastHBcount)
-                        errCount++;
-                    else
-                        errCount=0;
-                    lastHBcount=HBcount;
-                    if(errCount>=15) {
-                        Log.e("Ble","HeartBeats disconnect");
-                        isReadyForNext=false;
-                        mBluetoothGatt.disconnect();
-                        errCount=0;
+                    if(isReadyForNext||lastIsReadyForNext){
+                        heartBeatDelayCount++;
                     }
+                    else{
+                        heartBeatDelayCount=0;
+                    }
+                    if(isReadyForNext&&lastIsReadyForNext&&heartBeatDelayCount>7){
+                        if(characteristicHB!=null) {
+                            characteristicHB.setValue(heartBeat);
+                            mBluetoothGatt.writeCharacteristic(characteristicHB);
+                        }
+                        if(HBcount==lastHBcount)
+                            errCount++;
+                        else
+                            errCount=0;
+                        lastHBcount=HBcount;
+                        if(errCount>=15) {
+                            Log.e("Ble","HeartBeats disconnect");
+                            isReadyForNext=false;
+                            mBluetoothGatt.disconnect();
+                            errCount=0;
+                        }
+                    }
+                    lastIsReadyForNext=isReadyForNext;
+                    handlerHeartBeat.postDelayed(this,300);
                 }
-                lastIsReadyForNext=isReadyForNext;
-                handlerHeartBeat.postDelayed(this,300);
-            }
-        };
-        handlerHeartBeat.postDelayed(runnable,500);
+            };
+            handlerHeartBeat.postDelayed(runnable,500);
+        }
+        catch (Exception e){
+            Log.e("Ble",e.getMessage());
+        }
     }
     @Override
     public int onStartCommand(Intent intent,int flags,int startId){

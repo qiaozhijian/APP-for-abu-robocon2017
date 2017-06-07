@@ -4,7 +4,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -44,10 +46,13 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                             Resources r = context.getResources();
                             int topGunDefendOrAttack=info[BleService.bleDataLen - 3];
                             Button btn=(Button) findViewById(R.id.human_topgun_defend_or_attack);
+                            Button btnCopy=(Button) findViewById(R.id.human_topgun_defend_or_attack_copy);
                             if(topGunDefendOrAttack==0){
                                 btn.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light));
+                                btnCopy.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light));
                             } else if(topGunDefendOrAttack==1){
                                 btn.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_dark_disabled));
+                                btnCopy.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light));
                             } else{
                                 Toast.makeText(getApplicationContext(),"收到的蓝牙心跳包标志进攻防守错误",Toast.LENGTH_SHORT);
                             }
@@ -121,6 +126,12 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
             }
         }
         changeColorByMCU(this);
+        if(getSharedPreferences("data",MODE_PRIVATE).getBoolean("topGunDefendOrAttack",false)){
+            Log.d("humanSensor","test");
+            ((Button)findViewById(R.id.human_topgun_defend_or_attack)).setTextColor(Color.parseColor("#000000"));
+            ((Button)findViewById(R.id.human_topgun_defend_or_attack_copy)).setTextColor(Color.parseColor("#000000"));
+        }
+
     }
     @Override
     public void onClick(final View v) {
@@ -204,15 +215,23 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                 dialog.show();
                 break;
             case R.id.human_topgun_defend_or_attack:
-                Button btn=(Button)v;
-                byte cmd=61;
-                if(btn.getText().equals("上枪防御")){
-                    cmd=60;
-                    btn.setText("上枪进攻");
+            case R.id.human_topgun_defend_or_attack_copy:
+                Button btn=(Button)findViewById(R.id.human_topgun_defend_or_attack);
+                Button btnCopy=(Button)findViewById(R.id.human_topgun_defend_or_attack_copy);
+                if(btn.getCurrentTextColor()!=(btnCopy.getCurrentTextColor())){
+                    Toast.makeText(getApplicationContext(),"上枪状态错误",Toast.LENGTH_SHORT).show();
                 }
-                else if(btn.getText().equals("上枪进攻")){
+                byte cmd=61;
+                Log.d("humanSensor",String.valueOf(btn.getCurrentTextColor()));
+                if(btn.getCurrentTextColor()== 0xde000000 ||btn.getCurrentTextColor()==0xffff0000){
+                    cmd=60;
+                    btn.setTextColor(Color.parseColor("#000000"));
+                    btnCopy.setTextColor(Color.parseColor("#000000"));
+                }
+                else if(btn.getCurrentTextColor()== 0xff000000){
                     cmd=61;
-                    btn.setText("上枪防御");
+                    btn.setTextColor(Color.parseColor("#FF0000"));
+                    btnCopy.setTextColor(Color.parseColor("#FF0000"));
                 }
                 else{
                     Toast.makeText(getApplicationContext(),"上枪进攻防御切换时发生错误",Toast.LENGTH_SHORT).show();
@@ -230,6 +249,14 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                 findViewById(R.id.human_sensor_normal_layout).setVisibility(View.VISIBLE);
                 break;
             case R.id.human_sensor_cancel:
+                SharedPreferences.Editor editor=getSharedPreferences("data",MODE_PRIVATE).edit();
+                Boolean topGunState=false;
+                if(((Button)findViewById(R.id.human_topgun_defend_or_attack)).getCurrentTextColor()==0xff000000){
+                    topGunState=true;
+                }
+                Log.d("humanSensor","top:"+String.valueOf(topGunState));
+                editor.putBoolean("topGunDefendOrAttack",topGunState);
+                editor.commit();
                 Intent intent= new Intent(this,BeginActivity.class);
                 startActivity(intent);
                 finish();

@@ -89,7 +89,9 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
 
                 //清楚数据
                 SharedPreferences.Editor dataSt=getSharedPreferences("data",MODE_PRIVATE).edit();
-                dataSt.clear();
+                dataSt.putBoolean("gun_mode_left",false);
+                dataSt.putBoolean("gun_mode_right",false);
+                dataSt.putBoolean("gun_mode_top",false);
                 dataSt.commit();
                 //发送蓝牙变回自动模式
                 state.sendCmd((byte)(-1));

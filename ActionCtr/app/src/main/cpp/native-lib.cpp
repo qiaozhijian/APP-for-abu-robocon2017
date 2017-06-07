@@ -3,7 +3,7 @@
 
 extern "C"
 {
-jstring Java_com_action_app_actionctr_BeginActivity_stringFromJNI(
+jstring Java_com_action_app_actionctr2_BeginActivity_stringFromJNI(
         JNIEnv *env,
         jobject /* this */) {
     std::string hello = "Hello from C++";

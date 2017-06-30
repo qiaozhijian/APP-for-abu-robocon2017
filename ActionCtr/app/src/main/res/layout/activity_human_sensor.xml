@@ -344,9 +344,23 @@
             android:layout_weight="1"
             android:orientation="horizontal">
             <Button
+                android:id="@+id/start_on"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:background="@android:drawable/picture_frame"
+                android:text="出发" />
+            <Button
+                android:id="@+id/goback"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:background="@android:drawable/picture_frame"
+                android:text="重装" />
+            <Button
                 android:id="@+id/human_sensor_cancel"
                 android:layout_width="0dp"
-                android:layout_weight="7"
+                android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:background="@android:drawable/picture_frame"
                 android:text="返回" />

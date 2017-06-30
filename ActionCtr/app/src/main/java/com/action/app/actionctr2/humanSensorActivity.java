@@ -20,6 +20,8 @@ import com.action.app.actionctr2.ble.bleDataProcess;
 
 import java.util.ArrayList;
 
+import static com.action.app.actionctr2.R.id.start_on;
+
 public class humanSensorActivity extends BasicActivity implements View.OnClickListener{
 
 
@@ -32,16 +34,20 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
 
     private boolean isDestroy=false;
 
+    private Button starton;
+    private Button goback;
+
     private void changeColorByMCU(final Context context)
     {
         final Handler handler=new Handler();
+//        写个循环函数还搞新花样
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (bleDataManage.getBinder() != null) {
                     final byte[] info = bleDataManage.getMCUinfo();
                     if (info != null) {
-                        Log.d("humanSensor","check heartbeats info");
+                      //  Log.d("humanSensor","check heartbeats info");
                         if (info.length == BleService.bleDataLen) {
                             Resources r = context.getResources();
                             int topGunDefendOrAttack=info[BleService.bleDataLen - 3];
@@ -95,6 +101,12 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_human_sensor);
+
+        starton=(Button)findViewById(start_on);
+        goback=(Button)findViewById(R.id.goback);
+        goback.setOnClickListener(this);
+        starton.setOnClickListener(this);
+
         bleDataManage=new bleDataProcess(this);
         for(int i=0;i<7;i++){
             buttonsColumnList.add(null);
@@ -260,6 +272,21 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                 Intent intent= new Intent(this,BeginActivity.class);
                 startActivity(intent);
                 finish();
+                break;
+            case start_on:
+                bleDataManage.sendCmd((byte)70);
+                break;
+            case R.id.goback:
+                AlertDialog.Builder dialog1= new AlertDialog.Builder(humanSensorActivity.this);
+                dialog1.setTitle("你真的确定要重装！！？？");
+                dialog1.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if(v.getId()==R.id.human_sensor_reset)
+                            bleDataManage.sendCmd((byte)71);
+                    }
+                });
+                dialog1.show();
                 break;
         }
     }

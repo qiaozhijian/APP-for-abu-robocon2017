@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 
 public class myTool {
-    static final public boolean isForTestPara=true;
+    static final public boolean isForTestPara=false;
     static public ArrayList<Button> getAllButton(ViewGroup group)
     {
         ArrayList<Button> arrayList=new ArrayList<>();
@@ -28,3 +28,7 @@ public class myTool {
         return  arrayList;
     }
 }
+
+
+
+

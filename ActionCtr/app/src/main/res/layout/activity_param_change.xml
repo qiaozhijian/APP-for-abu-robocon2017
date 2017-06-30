@@ -257,6 +257,7 @@
                 android:layout_weight="1"
                 android:id="@+id/gun_right"
                 android:text="枪.右"/>
+            <!--因为需求改变，这个按钮已经被舍弃了-->
             <Button
                 android:layout_width="0dp"
                 android:layout_height="match_parent"

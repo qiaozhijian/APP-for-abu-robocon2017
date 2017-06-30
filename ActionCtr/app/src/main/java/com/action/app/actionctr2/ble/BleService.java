@@ -37,7 +37,6 @@ public class BleService extends Service {
 
     private boolean isSending=false;
 
-
     private BluetoothManager bleManager;
     private BluetoothAdapter bleAdapter;
     private BluetoothLeScanner scanner;
@@ -53,9 +52,10 @@ public class BleService extends Service {
     private int RssiValue=0;
 
     public static final int bleDataLen=12;
-    private final String address="F4:5E:AB:B9:58:80";//1号 黄色平板
-//    private final String address="F4:5E:AB:B9:59:77";//2号  白色平板
+ //   private final String address="F4:5E:AB:B9:58:80";//1号 黄色平板
+ //   private final String address="F4:5E:AB:B9:59:77";//2号  白色平板
 //    private final String address="F4:5E:AB:B9:5A:03";// //3号
+private final String address="50:65:83:86:C6:33";// //测试号
 
     private byte[] dataReceive;
     private byte[] dataTrans;
@@ -117,6 +117,7 @@ public class BleService extends Service {
                 handler.postDelayed(runnable,100);
             isSending=false;
         }
+
         public byte[] getHeartBeats() {
             return dataHeartBeats;
         }

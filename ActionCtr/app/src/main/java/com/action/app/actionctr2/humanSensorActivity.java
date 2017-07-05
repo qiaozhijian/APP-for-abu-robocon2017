@@ -36,6 +36,9 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
 
     private Button starton;
     private Button goback;
+    private Button wayleft;
+    private Button waymiddle;
+    private Button wayright;
 
     private void changeColorByMCU(final Context context)
     {
@@ -104,8 +107,14 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
 
         starton=(Button)findViewById(start_on);
         goback=(Button)findViewById(R.id.goback);
+        wayleft=(Button)findViewById(R.id.sun_onthewayleft);
+        waymiddle=(Button)findViewById(R.id.sun_onthewaymiddle);
+        wayright=(Button)findViewById(R.id.sun_onthewayright);
         goback.setOnClickListener(this);
         starton.setOnClickListener(this);
+        wayleft.setOnClickListener(this);
+        waymiddle.setOnClickListener(this);
+        wayright.setOnClickListener(this);
 
         bleDataManage=new bleDataProcess(this);
         for(int i=0;i<7;i++){
@@ -287,6 +296,15 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                     }
                 });
                 dialog1.show();
+                break;
+            case R.id.sun_onthewayleft:
+                bleDataManage.sendCmd((byte)80);
+                break;
+            case R.id.sun_onthewaymiddle:
+                bleDataManage.sendCmd((byte)81);
+                break;
+            case R.id.sun_onthewayright:
+                bleDataManage.sendCmd((byte)82);
                 break;
         }
     }

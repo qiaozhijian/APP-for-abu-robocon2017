@@ -261,7 +261,7 @@
             <Button
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0"
+                android:layout_weight="1"
                 android:id="@+id/gun_onTheWay"
                 android:text="位置"/>
             <TextView

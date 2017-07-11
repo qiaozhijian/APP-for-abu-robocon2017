@@ -75,17 +75,17 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                                 int checkBall = ballInfo % 2;
                                 if (checkFrisbee == 1) {
                                     buttonsFrisbeeList.get(i).setBackground(r.getDrawable(R.drawable.common_plus_signin_btn_text_dark));
-                                    Log.d("humanSensor", "Frisbee  i： "+String.valueOf(i));
+                                 //   Log.d("humanSensor", "Frisbee  i： "+String.valueOf(i));
                                 } else {
                                     buttonsFrisbeeList.get(i).setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light_pressed));
-                                    Log.d("humanSensor", "Frisbee ： "+String.valueOf(i));
+                                  //  Log.d("humanSensor", "Frisbee ： "+String.valueOf(i));
                                 }
                                 if (checkBall == 1) {
                                     buttonsBallList.get(i).setBackground(r.getDrawable(R.drawable.common_plus_signin_btn_text_dark));
-                                    Log.d("humanSensor", "Ball  i： "+String.valueOf(i));
+                                 //   Log.d("humanSensor", "Ball  i： "+String.valueOf(i));
                                 } else {
                                     buttonsBallList.get(i).setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light_pressed));
-                                    Log.d("humanSensor", "Ball  ： "+String.valueOf(i));
+                                //    Log.d("humanSensor", "Ball  ： "+String.valueOf(i));
                                 }
                                 ballInfo /= 2;
                                 frisbeeInfo /= 2;

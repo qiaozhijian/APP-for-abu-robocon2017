@@ -33,14 +33,14 @@
         <activity
              android:name=".BleConnectActivity"
             android:screenOrientation="landscape">
-        </activity>
-        <activity
-            android:name=".BeginActivity"
-            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".BeginActivity"
+            android:screenOrientation="landscape">
         </activity>
         <!--人形传感器-->
         <activity android:name=".humanSensorActivity"

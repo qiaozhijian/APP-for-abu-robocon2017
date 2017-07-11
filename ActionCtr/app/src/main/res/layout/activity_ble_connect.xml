@@ -2,53 +2,19 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent" >
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:orientation="horizontal">
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:src="@drawable/yuezi"
-            android:scaleType="centerCrop"/>
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical">
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="4"
-                android:src="@drawable/mashiruo"
-                android:scaleType="centerCrop"/>
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="4"
-                android:src="@drawable/sha"
-                android:scaleType="centerCrop"/>
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="蓝牙连接中..."
-                    android:gravity="center"
-                    android:id="@+id/ble_connect_display"/>
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_alignParentRight="true"
-                    android:background="#ffffff"
-                    android:text="skip"
-                    android:id="@+id/ble_connect_skip"/>
-            </RelativeLayout>
+                    android:id="@+id/ble_connect_display"
+                    android:layout_below="@+id/ble_connect_skip"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginTop="58dp" />
 
-        </LinearLayout>
-    </LinearLayout>
+    <Button
+        android:id="@+id/ble_connect_skip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffff"
+        android:text="skip" />
 </RelativeLayout>

@@ -8,6 +8,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.action.app.actionctr2.myTool;
 import com.action.app.actionctr2.ndktool.JniShareUtils;
 
 /**
@@ -65,8 +66,9 @@ public class bleDataProcess{
     }
 //    发送参数
     public boolean sendParam(byte id1, byte id2,float value){
+        myTool mytool=new myTool();
         byte[] sendData=new byte[BleService.bleDataLen];
-        byte[] floatData=cpptool.floatToByte(value);
+        byte[] floatData=mytool.getByteArray(value);
         if(sendData.length>=10){
             sendData[0]='A';
             sendData[1]='C';
@@ -82,7 +84,6 @@ public class bleDataProcess{
                 state.send(sendData);
             return true;
         }
-        Log.e("Ble","dataSend length err");
         return false;
     }
 //    发送命令

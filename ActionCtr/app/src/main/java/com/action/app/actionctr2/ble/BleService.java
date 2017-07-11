@@ -31,57 +31,57 @@ import java.util.UUID;
 
 public class BleService extends Service {
 
-//加载C++库
+    //加载C++库
     static {
         System.loadLibrary("native-lib");
     }
     //是否在发送
     private boolean isSending=false;
 
-//  管理器，使能，失能，获得适配器
+    //  管理器，使能，失能，获得适配器
     private BluetoothManager bleManager;
-//  控制蓝牙扫描，读取连接设备
+    //  控制蓝牙扫描，读取连接设备
     private BluetoothAdapter bleAdapter;
-//  蓝牙设备，可以发起连接
+    //  蓝牙设备，可以发起连接
     private ArrayList<BluetoothDevice> devicesList;
-//    返回扫描到的设备
+    //    返回扫描到的设备
     private ScanCallback mLeScanCallback;
-//    GATT的回调，判断连接状态的变化，服务的读写通知回调
+    //    GATT的回调，判断连接状态的变化，服务的读写通知回调
     private BluetoothGattCallback mGattCallback;
-//    GATT实例，可以拿来断开连接，扫描服务
+    //    GATT实例，可以拿来断开连接，扫描服务
     private BluetoothGatt mBluetoothGatt;
-//    特征值，读，写
+    //    特征值，读，写
     private BluetoothGattCharacteristic characteristic;
-//    心跳包的特征值
+    //    心跳包的特征值
     private BluetoothGattCharacteristic characteristicHB;
-//    服务，读出特征值
+    //    服务，读出特征值
     private BluetoothGattService        gattService;
-//    判断蓝牙正不正常，是否可以进行下一次发数
+    //    判断蓝牙正不正常，是否可以进行下一次发数
     private boolean isReadyForNext=false;
-//    RSSI
+    //    RSSI
     private int RssiValue=0;
-//特征值的长度
+    //特征值的长度
     public static final int bleDataLen=12;
-//    private final String address="F4:5E:AB:B9:59:77";//这个参数是车上用的平板 1号
-//    private final String address="F4:5E:AB:B9:58:80";//2号 白色平板
+    //    private final String address="F4:5E:AB:B9:59:77";//这个参数是车上用的平板 2号
+    private final String address="F4:5E:AB:B9:58:80";//1号 白色平板
 //    从机地址
-    private final String address="F4:5E:AB:B9:5A:03";// //3号
+    // private final String address="F4:5E:AB:B9:5A:03";// //手机
 
-//    接收数据缓存区
+    //    接收数据缓存区
     private byte[] dataReceive;
-//    发送数据缓存区
+    //    发送数据缓存区
     private byte[] dataTrans;
-//    心跳包的缓存区
+    //    心跳包的缓存区
     private byte[] dataHeartBeats;
 
-//    心跳包的计数
+    //    心跳包的计数
     private int HBcount=0;
 
-//    通过WiFi发数
+    //    通过WiFi发数
     private void wifiSend(byte[] data){
         OutputStream out=wifiService.getOutputStream();
         if(out!=null) {
-                try {
+            try {
                 out.write(data);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -90,21 +90,21 @@ public class BleService extends Service {
         }
     }
 
-//    蓝牙发数  binder跟所有涉及到蓝牙的activity通信
+    //    蓝牙发数  binder跟所有涉及到蓝牙的activity通信
     private myBleBand dataSend=new myBleBand();
     public class myBleBand extends Binder {
-//        表明现在是第几条命令
+        //        表明现在是第几条命令
         byte count=0;
-//        前一次发数的检查是否完成
+        //        前一次发数的检查是否完成
         boolean isBusy=false;
-//        定时检查前面发送有没有完成，如果没有则重发
+        //        定时检查前面发送有没有完成，如果没有则重发
         Handler handler=new Handler();
 
         public void send(byte[] data){
             isSending=true;
 //            检查数据长度是否正确
             if(data.length!=bleDataLen){
-                Log.e("version err","length of senddata is not equal to require");
+                Log.e("change","length of senddata is not equal to require");
             }
 //            放到缓存区里
             dataTrans=data;
@@ -149,7 +149,7 @@ public class BleService extends Service {
                 handler.postDelayed(runnable,100);
             isSending=false;
         }
-//        获取心跳包数据
+        //        获取心跳包数据
         public byte[] getHeartBeats() {
             return dataHeartBeats;
         }
@@ -167,20 +167,20 @@ public class BleService extends Service {
                 int i;
 //                如果i==9时不相等，执行break,此时i不++，i依然不满足=10条件
                 for(i=0;i<10;i++) {
-                   if(dataReceive[i]!=dataTrans[i])
-                       break;
+                    if(dataReceive[i]!=dataTrans[i])
+                        break;
                 }
                 if(i == 10)
                     Log.e("ble","communicate unstable");
-                    return true;
+                return true;
             }
             return false;
         }
-//        连接是否完成
+        //        连接是否完成
         public boolean isReady(){
             return isReadyForNext;
         }
-//        读取蓝牙强度
+        //        读取蓝牙强度
         public int readRssi(){
             if(isReadyForNext) {
                 mBluetoothGatt.readRemoteRssi();
@@ -191,7 +191,7 @@ public class BleService extends Service {
             }
         }
     }
-//    dataSend(binder)  通信活动与服务 获得连接状态 发送数据
+    //    dataSend(binder)  通信活动与服务 获得连接状态 发送数据
     @Override
     public IBinder onBind(Intent intent) {
         return dataSend;
@@ -267,7 +267,7 @@ public class BleService extends Service {
                         break;
                 }
             }
-//            当新服务被发现，进这个回调
+            //            当新服务被发现，进这个回调
             @Override
             public void onServicesDiscovered(BluetoothGatt gatt,int status){
 //                如果特征值和描述被更新
@@ -288,7 +288,7 @@ public class BleService extends Service {
                     Log.d("Ble","ble gatt service fail");
                 }
             }
-//            特征值的值读取结果回调
+            //            特征值的值读取结果回调
             @Override
             public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                 String log_out=new String();
@@ -298,7 +298,8 @@ public class BleService extends Service {
                 }
                 Log.d("Ble","read value: "+log_out);
             }
-//            特征值改变
+
+            //            特征值改变
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic){
                 byte[] temp;
@@ -311,27 +312,37 @@ public class BleService extends Service {
                 }
                 else{
                     dataReceive=temp;
-                    String log_out=new String();
-                    for (int i=0;i<12;i++){
-                        log_out+=String.valueOf((int)dataReceive[i])+'\t';
-                    }
-
                     if(dataReceive.length!=bleDataLen){
                         Log.e("version err","length of receivedata is not equal to require");
                     }
-                    Log.d("Ble","notify: "+log_out);
                 }
+                String log_out = new String();
+                for (int i = 0; i < 12; i++) {
+                    if (i < 4)
+                        log_out += String.valueOf((char)(temp[i])) + '\t';
+                    else
+                        log_out += String.valueOf((int)temp[i]) + '\t';
+                }
+                Log.d("Ble", "notify: " + log_out);
             }
-//            写特征值的结果回调
+            //            写特征值的结果回调
             @Override
             public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status){
-                String log_out=new String();
-                for (int i=0;i<12;i++){
-                    log_out+=String.valueOf((int)characteristic.getValue()[i])+'\t';
+                byte[] temp;
+                temp=characteristic.getValue();
+                String log_out = new String();
+                for (int i = 0; i < 12; i++) {
+                    if (i < 4)
+                        log_out += String.valueOf((char)(temp[i])) + '\t';
+                    else
+                        log_out += String.valueOf((int)temp[i]) + '\t';
                 }
-                Log.d("Ble","write: "+log_out);
+                if (temp[0] == 'A' && temp[1] == 'C' && temp[2] == 'H' && temp[3] == 'B') {
+
+                } else
+                    Log.d("Ble", "write: " + log_out);
             }
-//            RSSI的结果获取
+            //            RSSI的结果获取
             @Override
             public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
                 RssiValue=rssi;

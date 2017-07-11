@@ -66,6 +66,8 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                                 Toast.makeText(getApplicationContext(),"收到的蓝牙心跳包标志进攻防守错误",Toast.LENGTH_SHORT);
                             }
 
+//                            通过心跳包进行回数
+//                            心跳包的最后两个字节储存信息，一个字节八位，0到6位代表七个盘（球），1代表有命令
                             int ballInfo = info[BleService.bleDataLen - 2];
                             int frisbeeInfo = info[BleService.bleDataLen - 1];
                             for (int i = 0; i < 7; i++) {
@@ -73,13 +75,17 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                                 int checkBall = ballInfo % 2;
                                 if (checkFrisbee == 1) {
                                     buttonsFrisbeeList.get(i).setBackground(r.getDrawable(R.drawable.common_plus_signin_btn_text_dark));
+                                    Log.d("humanSensor", "Frisbee  i： "+String.valueOf(i));
                                 } else {
                                     buttonsFrisbeeList.get(i).setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light_pressed));
+                                    Log.d("humanSensor", "Frisbee ： "+String.valueOf(i));
                                 }
                                 if (checkBall == 1) {
                                     buttonsBallList.get(i).setBackground(r.getDrawable(R.drawable.common_plus_signin_btn_text_dark));
+                                    Log.d("humanSensor", "Ball  i： "+String.valueOf(i));
                                 } else {
                                     buttonsBallList.get(i).setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light_pressed));
+                                    Log.d("humanSensor", "Ball  ： "+String.valueOf(i));
                                 }
                                 ballInfo /= 2;
                                 frisbeeInfo /= 2;
@@ -95,10 +101,6 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
             }
         }, 300);
     }
-
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +119,7 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
         wayright.setOnClickListener(this);
 
         bleDataManage=new bleDataProcess(this);
+//        按键的初始化
         for(int i=0;i<7;i++){
             buttonsColumnList.add(null);
             buttonsBallList.add(null);
@@ -126,7 +129,9 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
         }
 
         RelativeLayout layout=(RelativeLayout)findViewById(R.id.activity_human_sensor);
+//        获取刚刚初始化的所有按键
         ArrayList<Button> list=myTool.getAllButton(layout);
+//        把每个按键设定好监听，并加入到各自对应的button列表
         for (Button b:list) {
             b.setOnClickListener(this);
             if(String.valueOf(b.getText().subSequence(0,2)).equals("柱子")) {
@@ -156,6 +161,8 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
     }
     @Override
     public void onClick(final View v) {
+//        对每个按钮进行循环，如果文字和我们点击的文字一样就发数
+//        实际上就是替代了switch
         for (int i=0;i<buttonsBallList.size();i++) {
             Button b=buttonsBallList.get(i);
             if(b.getText().equals(((Button)v).getText())){

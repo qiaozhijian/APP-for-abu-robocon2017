@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -27,7 +28,10 @@ import com.action.app.actionctr2.wifi.wifiService;
 
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+
+import static android.content.ContentValues.TAG;
 
 public class BleService extends Service {
 
@@ -54,9 +58,9 @@ public class BleService extends Service {
 
     public static final int bleDataLen = 12;
     private final String address = "F4:5E:AB:B9:58:80";//1号 黄色平板
-    //  private final String address="F4:5E:AB:B9:59:77";//2号  白色平板
+    //  private final String address="50:65:83:86:C6:33";// //白色平板
+    //  private final String address="F4:5E:AB:B9:59:77";//4号
     //  private final String address="F4:5E:AB:B9:5A:03";// //3号
-    //  private final String address="50:65:83:86:C6:33";// //测试号
 
     private byte[] dataReceive;
     private byte[] dataTrans;
@@ -201,11 +205,12 @@ public class BleService extends Service {
                             scanner.startScan(scanCallback);
                             isScanning = true;
                             Log.d("Ble", "reconnect");
-                        } else if (status == BluetoothGatt.GATT_FAILURE || status == 133) {
+                        } else if (status == BluetoothGatt.GATT_FAILURE || status == 0x85) {
                             gatt.close();
-                            Log.d("Ble", "gatt close reconnect");
+                            Log.d("Ble", "gatt close reconnect"+ String.valueOf(status));
                             mBluetoothGatt = device.connectGatt(BleService.this, false, mGattCallback);
                         } else {
+//                            8
                             Log.e("Ble", "unkown disconnected: " + String.valueOf(status));
                             gatt.close();
                             mBluetoothGatt = device.connectGatt(BleService.this, false, mGattCallback);
@@ -231,8 +236,12 @@ public class BleService extends Service {
                     characteristic = gattService.getCharacteristic(UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb"));
                     characteristicHB = gattService.getCharacteristic(UUID.fromString("0000fff7-0000-1000-8000-00805f9b34fb"));
 
-                    mBluetoothGatt.setCharacteristicNotification(characteristic, true);
-                    mBluetoothGatt.setCharacteristicNotification(characteristicHB, true);
+//                    mBluetoothGatt.setCharacteristicNotification(characteristic, true);
+//                    mBluetoothGatt.setCharacteristicNotification(characteristicHB, true);
+                   // setCharacteristicNotification(characteristicHB,true);
+                    enableNotification(mBluetoothGatt,
+                            UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb"),
+                            UUID.fromString("0000fff7-0000-1000-8000-00805f9b34fb"));
                 } else {
                     isReadyForNext = false;
                     Log.d("Ble", "ble gatt service fail");
@@ -251,23 +260,91 @@ public class BleService extends Service {
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                 byte[] temp;
+                String log_out = new String();
+                for (int i = 0; i < 12; i++) {
+                    log_out += String.valueOf((int) dataReceive[i]) + '\t';
+                }
                 temp = characteristic.getValue();
                 if (temp[0] == 'A' && temp[1] == 'C' && temp[2] == 'H' && temp[3] == 'B') {
                     dataHeartBeats = temp;
                     HBcount++;
-                    Log.d("Ble", "heartBeats Receive");
+                 //   Log.d("Ble", "heartBeats Receive");
                 } else {
                     dataReceive = temp;
-                    String log_out = new String();
-                    for (int i = 0; i < 12; i++) {
-                        log_out += String.valueOf((int) dataReceive[i]) + '\t';
-                    }
 
                     if (dataReceive.length != bleDataLen) {
                         Log.e("version err", "length of receivedata is not equal to require");
                     }
-                    Log.d("Ble", "notify: " + log_out);
+                    //Log.d("Ble", "notify: " + log_out);
                 }
+                Log.d("Ble", "notify: " + log_out);
+            }
+            public void setCharacteristicNotification(
+                    BluetoothGattCharacteristic characteristic, boolean enabled) {
+                if (bleAdapter == null || mBluetoothGatt == null) {
+                    Log.w(TAG, "BluetoothAdapter not initialized");
+                    return;
+                }
+                mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
+
+                BluetoothGattDescriptor clientConfig = characteristic
+                        .getDescriptor(UUID
+                                .fromString("0000fff7-0000-1000-8000-00805f9b34fb"));
+
+                if (enabled) {
+                    clientConfig
+                            .setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                } else {
+                    clientConfig
+                            .setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+                }
+                mBluetoothGatt.writeDescriptor(clientConfig);
+            }
+
+            public boolean enableNotification(BluetoothGatt gatt, UUID serviceUUID, UUID characteristicUUID) {
+                boolean success = false;
+                BluetoothGattService service = gatt.getService(serviceUUID);
+                if (service != null) {
+                    BluetoothGattCharacteristic characteristic = findNotifyCharacteristic(service, characteristicUUID);
+                    if (characteristic != null) {
+                        success = gatt.setCharacteristicNotification(characteristic, true);
+                        if (success) {
+                            for(BluetoothGattDescriptor dp: characteristic.getDescriptors()){
+                                if (dp != null) {
+                                    if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
+                                        dp.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                                    } else if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0) {
+                                        dp.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+                                    }
+                                    gatt.writeDescriptor(dp);
+                                }
+                            }
+                        }
+                    }
+                }
+                return success;
+            }
+
+            private BluetoothGattCharacteristic findNotifyCharacteristic(BluetoothGattService service, UUID characteristicUUID) {
+                BluetoothGattCharacteristic characteristic = null;
+                List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
+                for (BluetoothGattCharacteristic c : characteristics) {
+                    if ((c.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0
+                            && characteristicUUID.equals(c.getUuid())) {
+                        characteristic = c;
+                        break;
+                    }
+                }
+                if (characteristic != null)
+                    return characteristic;
+                for (BluetoothGattCharacteristic c : characteristics) {
+                    if ((c.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
+                            && characteristicUUID.equals(c.getUuid())) {
+                        characteristic = c;
+                        break;
+                    }
+                }
+                return characteristic;
             }
 
             @Override
@@ -276,7 +353,11 @@ public class BleService extends Service {
                 for (int i = 0; i < 12; i++) {
                     log_out += String.valueOf((int) characteristic.getValue()[i]) + '\t';
                 }
-                Log.d("Ble", "write: " + log_out);
+                if (characteristic.getValue()[0] == 'A' && characteristic.getValue()[1] == 'C' && characteristic.getValue()[2] == 'H' && characteristic.getValue()[3] == 'B') {
+
+                }
+                else
+                    Log.d("Ble", "write: " + log_out);
             }
 
             @Override

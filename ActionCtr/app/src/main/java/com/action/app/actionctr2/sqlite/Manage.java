@@ -24,8 +24,8 @@ public class Manage {
     public float roll;
     public float pitch;
     public float yaw;
-    public int speed1;
-    public int speed2;
+    public float speed1;
+    public float speed2;
     public String ward;
     public String comment;
 
@@ -110,8 +110,8 @@ public class Manage {
             roll = cursor.getFloat(cursor.getColumnIndex("roll"));
             pitch = cursor.getFloat(cursor.getColumnIndex("pitch"));
             yaw = cursor.getFloat(cursor.getColumnIndex("yaw"));
-            speed1 = cursor.getInt(cursor.getColumnIndex("speed1"));
-            speed2 = cursor.getInt(cursor.getColumnIndex("speed2"));
+            speed1 = cursor.getFloat(cursor.getColumnIndex("speed1"));
+            speed2 = cursor.getFloat(cursor.getColumnIndex("speed2"));
             ward = cursor.getString(cursor.getColumnIndex("direction"));
             comment = cursor.getString(cursor.getColumnIndex("note_comment"));
             Log.d("database", "data read:");
@@ -155,8 +155,8 @@ public class Manage {
             data.roll = cursor.getFloat(cursor.getColumnIndex("roll"));
             data.pitch = cursor.getFloat(cursor.getColumnIndex("pitch"));
             data.yaw = cursor.getFloat(cursor.getColumnIndex("yaw"));
-            data.speed1 = cursor.getInt(cursor.getColumnIndex("speed1"));
-            data.speed2 = cursor.getInt(cursor.getColumnIndex("speed2"));
+            data.speed1 = cursor.getFloat(cursor.getColumnIndex("speed1"));
+            data.speed2 = cursor.getFloat(cursor.getColumnIndex("speed2"));
             data.date = cursor.getString(cursor.getColumnIndex("save_date"));
             data.direction = cursor.getString(cursor.getColumnIndex("direction"));
             data.note = cursor.getString(cursor.getColumnIndex("note_comment"));
@@ -175,8 +175,8 @@ public class Manage {
             data.roll = cursor.getFloat(cursor.getColumnIndex("roll"));
             data.pitch = cursor.getFloat(cursor.getColumnIndex("pitch"));
             data.yaw = cursor.getFloat(cursor.getColumnIndex("yaw"));
-            data.speed1 = cursor.getInt(cursor.getColumnIndex("speed1"));
-            data.speed2 = cursor.getInt(cursor.getColumnIndex("speed2"));
+            data.speed1 = cursor.getFloat(cursor.getColumnIndex("speed1"));
+            data.speed2 = cursor.getFloat(cursor.getColumnIndex("speed2"));
             data.date = cursor.getString(cursor.getColumnIndex("save_date"));
             data.direction = cursor.getString(cursor.getColumnIndex("direction"));
             data.note = cursor.getString(cursor.getColumnIndex("note_comment"));
@@ -193,8 +193,8 @@ public class Manage {
         data.roll = cursor.getFloat(cursor.getColumnIndex("roll"));
         data.pitch = cursor.getFloat(cursor.getColumnIndex("pitch"));
         data.yaw = cursor.getFloat(cursor.getColumnIndex("yaw"));
-        data.speed1 = cursor.getInt(cursor.getColumnIndex("speed1"));
-        data.speed2 = cursor.getInt(cursor.getColumnIndex("speed2"));
+        data.speed1 = cursor.getFloat(cursor.getColumnIndex("speed1"));
+        data.speed2 = cursor.getFloat(cursor.getColumnIndex("speed2"));
         data.date = cursor.getString(cursor.getColumnIndex("save_date"));
         data.direction = cursor.getString(cursor.getColumnIndex("direction"));
         data.note = cursor.getString(cursor.getColumnIndex("note_comment"));
@@ -216,8 +216,8 @@ public class Manage {
             roll = cursor.getFloat(cursor.getColumnIndex("roll"));
             pitch = cursor.getFloat(cursor.getColumnIndex("pitch"));
             yaw = cursor.getFloat(cursor.getColumnIndex("yaw"));
-            speed1 = cursor.getInt(cursor.getColumnIndex("speed1"));
-            speed2 = cursor.getInt(cursor.getColumnIndex("speed2"));
+            speed1 = cursor.getFloat(cursor.getColumnIndex("speed1"));
+            speed2 = cursor.getFloat(cursor.getColumnIndex("speed2"));
             ward = cursor.getString(cursor.getColumnIndex("direction"));
             comment = cursor.getString(cursor.getColumnIndex("note_comment"));
             return true;
@@ -243,8 +243,8 @@ public class Manage {
             data.roll = cursor.getFloat(cursor.getColumnIndex("roll"));
             data.pitch = cursor.getFloat(cursor.getColumnIndex("pitch"));
             data.yaw = cursor.getFloat(cursor.getColumnIndex("yaw"));
-            data.speed1 = cursor.getInt(cursor.getColumnIndex("speed1"));
-            data.speed2 = cursor.getInt(cursor.getColumnIndex("speed2"));
+            data.speed1 = cursor.getFloat(cursor.getColumnIndex("speed1"));
+            data.speed2 = cursor.getFloat(cursor.getColumnIndex("speed2"));
             data.date = cursor.getString(cursor.getColumnIndex("save_date"));
             data.direction = cursor.getString(cursor.getColumnIndex("direction"));
             data.note = cursor.getString(cursor.getColumnIndex("note_comment"));
@@ -272,8 +272,8 @@ public class Manage {
         public float roll;
         public float pitch;
         public float yaw;
-        public int speed1;
-        public int speed2;
+        public float speed1;
+        public float speed2;
         public String date;
         public String direction;
         public String note;
@@ -295,8 +295,8 @@ public class Manage {
             String param = "( roll real," +
                     "pitch real," +
                     "yaw real," +
-                    "speed1 integer," +
-                    "speed2 integer," +
+                    "speed1 real," +
+                    "speed2 real," +
                     "direction text," +
                     "save_date text," +
                     "note_comment text);";

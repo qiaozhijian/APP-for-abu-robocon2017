@@ -192,7 +192,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:layout_weight="1"
-                android:inputType="numberSigned"
+                android:inputType="numberSigned|numberDecimal"
                 android:id="@+id/edit_speed1"/>
             <SeekBar
                 android:layout_width="0dp"
@@ -227,7 +227,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:layout_weight="1"
-                android:inputType="numberSigned"
+                android:inputType="numberSigned|numberDecimal"
                 android:id="@+id/edit_speed2"/>
             <SeekBar
                 android:layout_width="0dp"

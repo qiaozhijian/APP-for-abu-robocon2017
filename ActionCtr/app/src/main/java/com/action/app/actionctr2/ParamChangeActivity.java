@@ -50,9 +50,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private float stepPitch = 0.5f;
 
     //最大速度和最小速度以及步长
-    private int maxSpeed = 350;
+    private int maxSpeed = 200;
     private int minSpeed = 0;
-    private float stepSpeed = 1.0f;
+    private float stepSpeed = 0.5f;
 
     //    SQL数据库类的初始化
     private Manage sqlManage;
@@ -115,8 +115,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             case R.id.progress_roll:
                 return (val + minRoll * gain_roll) / ((float) gain_roll);
             case R.id.progress_speed1:
+                return (val + minSpeed * 10) / 10.0f;
             case R.id.progress_speed2:
-                return (val + minSpeed);
+                return (val + minSpeed * 10) / 10.0f;
             default:
                 Log.e("paramChange", "err progressToFloat");
                 return 0.0f;
@@ -183,7 +184,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     val = minSpeed;
                 if (val > maxSpeed)
                     val = maxSpeed;
-                return Math.round((val - minSpeed));
+                return Math.round((val - minSpeed)*10);
             default:
                 Log.e("paramChange", "err floatToProgress");
                 return 0;
@@ -213,8 +214,8 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         seekBar_yaw.setMax((maxYaw - minYaw) * 10);
         seekBar_pitch.setMax((maxPitch - minPitch) * 10);
         seekBar_roll.setMax((maxRoll - minRoll) * gain_roll);
-        seekBar_speed1.setMax((maxSpeed - minSpeed));
-        seekBar_speed2.setMax((maxSpeed - minSpeed));
+        seekBar_speed1.setMax((maxSpeed - minSpeed) * 10);
+        seekBar_speed2.setMax((maxSpeed - minSpeed) * 10);
     }
 
     //  停靠位置中间，左，右分别对应着0,1,2
@@ -251,8 +252,8 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         sqlManage.roll = Float.parseFloat(editTextRoll.getText().toString());
         sqlManage.pitch = Float.parseFloat(editTextPitch.getText().toString());
         sqlManage.yaw = Float.parseFloat(editTextYaw.getText().toString());
-        sqlManage.speed1 = Integer.parseInt(editTextSpeed1.getText().toString());
-        sqlManage.speed2 = Integer.parseInt(editTextSpeed2.getText().toString());
+        sqlManage.speed1 = Float.parseFloat(editTextSpeed1.getText().toString());
+        sqlManage.speed2 = Float.parseFloat(editTextSpeed2.getText().toString());
     }
 
     //识别区域并更新数据
@@ -475,7 +476,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     @Override
     public void onClick(View v) {
         float valueF;
-        int valueI;
+        float valueI;
         EditText editText = null;
         SeekBar seekBar = null;
         switch (v.getId()) {
@@ -625,7 +626,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                             } else {
                                 //  progressDialog.cancel();
 //                                发送失败则跳过这个数
-                              // id++;
+                                // id++;
                                 handler.postDelayed(this, 50);
                             }
                         }
@@ -833,14 +834,18 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     break;
                 case R.id.speed1_increase:
                 case R.id.speed2_increase:
-                    valueI = Integer.parseInt(editText.getText().toString());
+                    valueI = Float.parseFloat(editText.getText().toString());
+                    Log.d("change",String.valueOf(valueI));
                     valueI += stepSpeed;
+                    Log.d("change",String.valueOf(valueI));
                     seekBar.setProgress(floatToProgress(seekBar, valueI));
                     break;
                 case R.id.speed1_decrease:
                 case R.id.speed2_decrease:
-                    valueI = Integer.parseInt(editText.getText().toString());
+                    valueI = Float.parseFloat(editText.getText().toString());
+                    Log.d("change",String.valueOf(valueI));
                     valueI -= stepSpeed;
+                    Log.d("change",String.valueOf(valueI));
                     seekBar.setProgress(floatToProgress(seekBar, valueI));
                     break;
                 default:
@@ -853,7 +858,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         checkButtonColor();
     }
 
-//    通过进度条去调试文本框
+    //    通过进度条去调试文本框
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress,
                                   boolean fromUser) {
@@ -871,10 +876,10 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 editTextYaw.setText(String.valueOf(progressToFloat(seekBar, progress)));
                 break;
             case R.id.progress_speed1:
-                editTextSpeed1.setText(String.valueOf((int) progressToFloat(seekBar, progress)));
+                editTextSpeed1.setText(String.valueOf(progressToFloat(seekBar, progress)));
                 break;
             case R.id.progress_speed2:
-                editTextSpeed2.setText(String.valueOf((int) progressToFloat(seekBar, progress)));
+                editTextSpeed2.setText(String.valueOf(progressToFloat(seekBar, progress)));
                 break;
         }
     }
@@ -886,7 +891,8 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
     }
-//
+
+    //
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 //        左上右的自动与手动,共六种

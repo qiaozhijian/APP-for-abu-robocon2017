@@ -28,7 +28,9 @@ public class myTool {
         return  arrayList;
     }
 
-//    要看大端还是小端模式
+
+
+    //    要看大端还是小端模式
     public static byte[] getByteArray(int i) {
         byte[] b = new byte[4];
         b[3] = (byte) ((i & 0xff000000) >> 24);
@@ -55,3 +57,7 @@ public class myTool {
     }
 
 }
+
+
+
+

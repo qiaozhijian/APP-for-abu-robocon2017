@@ -9,12 +9,16 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.action.app.actionctr2.DebugDataDisplayActivity">
+
     <ListView
-        android:layout_alignParentTop="true"
-        android:layout_above="@+id/activity_layout_bar"
+        android:id="@+id/activity_debugdata_listview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/activity_debugdata_listview"></ListView>
+        android:layout_above="@+id/activity_layout_bar"
+        android:layout_alignParentTop="true"
+        android:fadeScrollbars="true"
+        android:fastScrollAlwaysVisible="true"
+        android:fastScrollEnabled="true"></ListView>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

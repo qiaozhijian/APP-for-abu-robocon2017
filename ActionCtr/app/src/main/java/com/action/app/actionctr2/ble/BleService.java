@@ -64,6 +64,7 @@ public class BleService extends Service {
     public static final int bleDataLen=12;
     //    private final String address="F4:5E:AB:B9:59:77";//这个参数是车上用的平板 2号
     private final String address="F4:5E:AB:B9:58:80";//1号 白色平板
+   // private final static String address = "98:7B:F3:60:C7:1C";
 //    从机地址
     // private final String address="F4:5E:AB:B9:5A:03";// //手机
 
@@ -170,10 +171,9 @@ public class BleService extends Service {
                     if(dataReceive[i]!=dataTrans[i])
                         break;
                 }
-                if (i == 10) {
-                    Log.e("ble", "communicate unstable");
-                    return true;
-                }
+                if(i == 10)
+                    Log.e("ble","communicate unstable");
+                return true;
             }
             return false;
         }
@@ -303,21 +303,8 @@ public class BleService extends Service {
             //            特征值改变
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic){
-                byte[] temp;
-                Log.d("charchange","onCharacteristicChanged");
+                byte[] temp;Log.d("ACHB", "notify: " );
                 temp=characteristic.getValue();
-//                判断是否是心跳包
-                if(temp[0]=='A'&&temp[1]=='C'&&temp[2]=='H'&&temp[3]=='B')
-                {
-                    dataHeartBeats=temp;
-                    HBcount++;
-                }
-                else{
-                    dataReceive=temp;
-                    if(dataReceive.length!=bleDataLen){
-                        Log.e("version err","length of receivedata is not equal to require");
-                    }
-                }
                 String log_out = new String();
                 for (int i = 0; i < 12; i++) {
                     if (i < 4)
@@ -325,7 +312,21 @@ public class BleService extends Service {
                     else
                         log_out += String.valueOf((int)temp[i]) + '\t';
                 }
-                Log.d("Ble", "notify: " + log_out);
+//                判断是否是心跳包
+                if(temp[0]=='A'&&temp[1]=='C'&&temp[2]=='H'&&temp[3]=='B')
+                {
+                    dataHeartBeats=temp;
+                    HBcount++;
+                    if(temp[characteristic.getValue().length-1]!=0||temp[characteristic.getValue().length-2]!=0)
+                    Log.d("ACHB", "notify: " + log_out);
+                }
+                else{
+                    dataReceive=temp;
+                    if(dataReceive.length!=bleDataLen){
+                        Log.e("version err","length of receivedata is not equal to require");
+                    }
+                    Log.d("Ble", "notify: " + log_out);
+                }
             }
             //            写特征值的结果回调
             @Override

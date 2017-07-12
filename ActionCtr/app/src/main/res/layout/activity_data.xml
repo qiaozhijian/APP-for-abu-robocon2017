@@ -50,9 +50,9 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/list_data_display"
         android:layout_below="@+id/Spinner"
-        android:layout_alignParentStart="true"></ListView>
+        android:layout_above="@+id/save_or_cancel"
+        android:id="@+id/list_data_display"></ListView>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

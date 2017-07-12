@@ -170,9 +170,10 @@ public class BleService extends Service {
                     if(dataReceive[i]!=dataTrans[i])
                         break;
                 }
-                if(i == 10)
-                    Log.e("ble","communicate unstable");
-                return true;
+                if (i == 10) {
+                    Log.e("ble", "communicate unstable");
+                    return true;
+                }
             }
             return false;
         }
@@ -303,6 +304,7 @@ public class BleService extends Service {
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic){
                 byte[] temp;
+                Log.d("charchange","onCharacteristicChanged");
                 temp=characteristic.getValue();
 //                判断是否是心跳包
                 if(temp[0]=='A'&&temp[1]=='C'&&temp[2]=='H'&&temp[3]=='B')

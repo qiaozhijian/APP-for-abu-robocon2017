@@ -316,6 +316,7 @@ public class BleService extends Service {
                 {
                     dataHeartBeats=temp;
                     HBcount++;
+                    if(temp[characteristic.getValue().length-1]!=0||temp[characteristic.getValue().length-2]!=0)
                     Log.d("ACHB", "notify: " + log_out);
                 }
                 else{

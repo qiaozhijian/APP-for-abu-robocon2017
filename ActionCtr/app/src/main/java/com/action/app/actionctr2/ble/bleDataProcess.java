@@ -8,14 +8,13 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.action.app.actionctr2.ndktool.JniShareUtils;
+import com.action.app.actionctr2.myTool;
 
 /**
  * Created by 56390 on 2016/12/18.
  */
 
 public class bleDataProcess{
-    private JniShareUtils cpptool;
     private BleService.myBleBand state;
     private Context context;
     private ServiceConnection connection=new ServiceConnection() {
@@ -32,7 +31,6 @@ public class bleDataProcess{
     public bleDataProcess(Context text){
         Intent bindIntent=new Intent(text,BleService.class);
         context=text;
-        cpptool=new JniShareUtils();
         text.bindService(bindIntent,connection,text.BIND_AUTO_CREATE);
     }
     public boolean sendParam(byte id1, byte id2,int value){
@@ -57,8 +55,9 @@ public class bleDataProcess{
         return false;
     }
     public boolean sendParam(byte id1, byte id2,float value){
+        myTool mytool=new myTool();
         byte[] sendData=new byte[BleService.bleDataLen];
-        byte[] floatData=cpptool.floatToByte(value);
+        byte[] floatData=mytool.getByteArray(value);
         if(sendData.length>=10){
             sendData[0]='A';
             sendData[1]='C';

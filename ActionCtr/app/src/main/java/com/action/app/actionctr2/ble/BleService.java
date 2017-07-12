@@ -64,6 +64,7 @@ public class BleService extends Service {
     public static final int bleDataLen=12;
     //    private final String address="F4:5E:AB:B9:59:77";//这个参数是车上用的平板 2号
     private final String address="F4:5E:AB:B9:58:80";//1号 白色平板
+   // private final static String address = "98:7B:F3:60:C7:1C";
 //    从机地址
     // private final String address="F4:5E:AB:B9:5A:03";// //手机
 
@@ -302,7 +303,7 @@ public class BleService extends Service {
             //            特征值改变
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic){
-                byte[] temp;
+                byte[] temp;Log.d("ACHB", "notify: " );
                 temp=characteristic.getValue();
                 String log_out = new String();
                 for (int i = 0; i < 12; i++) {

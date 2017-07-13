@@ -112,7 +112,7 @@ public class bleDataProcess{
         Log.e("bletrack","dataSend length err");
         return false;
     }
-    public int checkSendOk(){
+    public boolean checkSendOk(){
         return state.checkSendOk();
     }
     

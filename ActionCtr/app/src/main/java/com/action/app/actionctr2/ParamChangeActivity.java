@@ -596,8 +596,8 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                             }
                             int inOntheWay = readOntheWay();
                             id2 = (byte) (id2 + inOntheWay * 80);
-
-                            if (bleDataManage.checkSendOk()==STATE_RECEIVE_COPY && bleDataManage.getBinder() != null) {
+//如果没连上，五个就这么直接过去了，只用WiFi发
+                            if (bleDataManage.checkSendOk() && bleDataManage.getBinder() != null) {
                                 switch (id) {
                                     case 0:
                                         bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.roll);

@@ -22,7 +22,9 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.action.app.actionctr2.BeginActivity;
+import com.action.app.actionctr2.wifi.wifiService;
 
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,6 +63,7 @@ public class BleService extends Service {
     private static final int STATE_RECEIVE_NONE = 2;
     private static boolean isReadyForNext = false;
     private int mConnectionState = STATE_DISCONNECTED;
+    private boolean isSending=false;                //是否在发送
 
     // 描述扫描蓝牙的状态
     private boolean mScanning;
@@ -457,9 +460,16 @@ public class BleService extends Service {
     }
 
     //    通过WiFi发数
-    private void wifiSend(byte[] data) {
-
-
+    private void wifiSend(byte[] data){
+        OutputStream out= wifiService.getOutputStream();
+        if(out!=null) {
+            try {
+                out.write(data);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e("wifi", "ble Exception: " + Log.getStackTraceString(e));
+            }
+        }
     }
 
     @Override
@@ -536,96 +546,107 @@ public class BleService extends Service {
         Log.d("servicetrack", getClass().getSimpleName() + "oncreate");
     }
 
-
+    //    蓝牙发数  binder跟所有涉及到蓝牙的activity通信
+    private myBleBand dataSend=new myBleBand();
     public class myBleBand extends Binder {
         //        表明现在是第几条命令
-        byte count = 0;
+        byte count=0;
+        //        前一次发数的检查是否完成
+        boolean isBusy=false;
         //        定时检查前面发送有没有完成，如果没有则重发
-        Handler handler = new Handler();
+        Handler handler=new Handler();
 
-        public void send(byte[] data) {
-
-            if (data.length != bleDataLen) {              //检查数据长度是否正确
-                Log.e("bletrack", "length of senddata is not equal to require");
+        public void send(byte[] data){
+            isSending=true;
+//            检查数据长度是否正确
+            if(data.length!=bleDataLen){
+                Log.e("change","length of senddata is not equal to require");
             }
-            dataTrans = data;                             //放到缓存区里
-            dataTrans[bleDataLen - 1] = count;            //把最后一个字节当做计数
-
+//            放到缓存区里
+            dataTrans=data;
+//            把最后一个字节当做计数
+            dataTrans[bleDataLen-1]=count;
 //            表明这边是第几个命令，防止重复
-            if (count < 100) count++;
-            else count = 0;
-
+            if(count<100)
+                count++;
+            else
+                count=0;
+//            如果GATT有定义
+            if(characteristic!=null&&mBluetoothGatt!=null) {
+//                设置值
+                characteristic.setValue(dataTrans);
+//                发送
+                mBluetoothGatt.writeCharacteristic(characteristic);
+            }
             wifiSend(dataTrans);
-            final Runnable runnable = new Runnable() {
+
+            final Runnable runnable=new Runnable() {
                 @Override
                 public void run() {
-                    switch (checkSendOk()) {
-                        case STATE_NOT_READY_FOR_SERVICE:
-                            disconnect();
-                            isReadyForNext = false;
-                            break;
-                        case STATE_RECEIVE_NONE:
-                            if (characteristic != null && mBluetoothGatt != null) {
-                                characteristic.setValue(dataTrans);
-                                mBluetoothGatt.writeCharacteristic(characteristic);
-                            }
-                            handler.postDelayed(this, 100);                 //100ms之后执行runnable
-                            break;
-                        case STATE_RECEIVE_COPY:
-//                            使两者不一样
-                            dataReceive[0] = (byte) 1;
-                            dataTrans[0] = (byte) 2;
-                            break;
+//                  没有发送成功
+                    if(!checkSendOk()) {
+                        isBusy=true;
+                        if(characteristic!=null&&mBluetoothGatt!=null) {
+                            characteristic.setValue(dataTrans);
+                            mBluetoothGatt.writeCharacteristic(characteristic);
+                        }
+//                        100ms之后执行runnable
+                        handler.postDelayed(this,100);
+                    }
+//                    发送成功
+                    else{
+                        isBusy=false;
                     }
                 }
             };
-            handler.postDelayed(runnable, 0);
+//           第一次进来的时候不会执行run，只有postDelayed触发时才会
+//·          第二次的时候发现第一次还是没有发送成功就不再运行一遍
+            if(!isBusy)
+                handler.postDelayed(runnable,100);
+            isSending=false;
         }
-
+        //        获取心跳包数据
         public byte[] getHeartBeats() {
             return dataHeartBeats;
-        }                //获取心跳包数据
-
-        public int checkSendOk() {
+        }
+        public boolean checkSendOk(){
 //            蓝牙没有准备好，就一直不重发
-            if (!isReadyForNext) {
-                return STATE_NOT_READY_FOR_SERVICE;
+            if(!isReadyForNext) {
+                return true;
             }
 //            如果二者相等则返回true
-            if (Arrays.equals(dataReceive, dataTrans)) {
-                return STATE_RECEIVE_COPY;
+            if(Arrays.equals(dataReceive,dataTrans)) {
+                return true;
             }
 //            判断数据是否匹配
-            if (dataReceive != null && dataTrans != null) {
+            if(dataReceive!=null&&dataTrans!=null) {
                 int i;
 //                如果i==9时不相等，执行break,此时i不++，i依然不满足=10条件
-                for (i = 0; i < 10; i++) {
-                    if (dataReceive[i] != dataTrans[i])
+                for(i=0;i<10;i++) {
+                    if(dataReceive[i]!=dataTrans[i])
                         break;
                 }
-                if (i == 10) {
-                    Log.e("bletrack", "communicate unstable");
-                    return STATE_RECEIVE_COPY;
+                if(i == 10) {
+                    Log.e("ble", "communicate unstable");
+                    return true;
                 }
             }
-            return STATE_RECEIVE_NONE;
+            return false;
         }
-
         //        连接是否完成
-        public boolean isReady() {
+        public boolean isReady(){
             return isReadyForNext;
         }
-
         //        读取蓝牙强度
-        public int readRssi() {
-            if (isReadyForNext) {
+        public int readRssi(){
+            if(isReadyForNext) {
                 mBluetoothGatt.readRemoteRssi();
                 return RssiValue;
-            } else {
+            }
+            else{
                 return 0;
             }
         }
-
     }
 
     @Override

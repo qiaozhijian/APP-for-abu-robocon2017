@@ -51,7 +51,7 @@ public class bleDataProcess{
                 state.send(sendData);
             return true;
         }
-        Log.e("Ble","dataSend length err");
+        Log.e("bletrack","dataSend length err");
         return false;
     }
     public boolean sendParam(byte id1, byte id2,float value){
@@ -73,7 +73,7 @@ public class bleDataProcess{
                 state.send(sendData);
             return true;
         }
-        Log.e("Ble","dataSend length err");
+        Log.e("bletrack","dataSend length err");
         return false;
     }
     public boolean sendCmd(byte id){
@@ -86,11 +86,12 @@ public class bleDataProcess{
             sendData[2]='C';
             sendData[3]='T';
             sendData[4]=id;
-            if(state!=null)
+            if(state!=null) {
                 state.send(sendData);
+            }
             return true;
         }
-        Log.e("Ble","dataSend length err");
+        Log.e("bletrack","dataSend length err");
         return false;
     }
     public boolean sendState(byte state1,byte state2){
@@ -108,12 +109,13 @@ public class bleDataProcess{
                 state.send(sendData);
             return true;
         }
-        Log.e("Ble","dataSend length err");
+        Log.e("bletrack","dataSend length err");
         return false;
     }
-    public boolean checkSendOk(){
+    public int checkSendOk(){
         return state.checkSendOk();
     }
+    
     public Binder getBinder(){
         return state;
     }

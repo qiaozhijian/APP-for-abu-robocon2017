@@ -29,6 +29,9 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
     /*部分参数值的初始化设定*/
 
+    private static final int STATE_NOT_READY_FOR_SERVICE = 0;
+    private static final int STATE_RECEIVE_COPY = 1;
+    private static final int STATE_RECEIVE_NONE = 2;
     //区域0~5
     private final int districtNum = 5;
 
@@ -566,6 +569,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
                         @Override
                         public void run() {
+
 //                            用两个switch使id2能表达出他所指的是什么枪的什么状态
                             switch (String.valueOf(((TextView) findViewById(R.id.state)).getText())) {
                                 case "打球":
@@ -593,7 +597,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                             int inOntheWay = readOntheWay();
                             id2 = (byte) (id2 + inOntheWay * 80);
 
-                            if (bleDataManage.checkSendOk() && bleDataManage.getBinder() != null) {
+                            if (bleDataManage.checkSendOk()==STATE_RECEIVE_COPY && bleDataManage.getBinder() != null) {
                                 switch (id) {
                                     case 0:
                                         bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.roll);

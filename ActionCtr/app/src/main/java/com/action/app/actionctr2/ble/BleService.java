@@ -229,7 +229,8 @@ public class BleService extends Service {
 
         /*
          * 特征值的读写
-         * */
+         *
+         */
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic, int status) {
@@ -482,28 +483,9 @@ public class BleService extends Service {
 
         ble_init();
 
-        Thread thread1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Boolean isRealScan = false;
-                while (!isRealScan) {
-                    if (mBluetoothDevice == null) {
-                        scanLeDevice(true);
-                    } else
-                        isRealScan = true;
-                    try {
-                        sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-//                此时依然在主线程里
-                    Log.d("threadtrack", Thread.currentThread().getName());
-                }
-            }
-        });
-        thread1.start();
+        scanLeDevice(true);
 
-        Thread thread2 = new Thread(new Runnable() {
+        Thread thread1 = new Thread(new Runnable() {
             private int errCount = 0;
             private int lastHBcount = 0;
 
@@ -543,7 +525,7 @@ public class BleService extends Service {
                 }
             }
         });
-        thread2.start();
+        thread1.start();
 
         Log.d("servicetrack", getClass().getSimpleName() + "oncreate");
     }

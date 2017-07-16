@@ -298,8 +298,9 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                 dialog1.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        if(v.getId()==R.id.human_sensor_reset)
-                            bleDataManage.sendCmd((byte)71);
+                        if(v.getId()==R.id.goback) {
+                            bleDataManage.sendCmd((byte) 71);
+                        }
                     }
                 });
                 dialog1.show();

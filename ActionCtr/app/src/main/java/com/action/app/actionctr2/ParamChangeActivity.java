@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.action.app.actionctr2.ble.BleService;
 import com.action.app.actionctr2.ble.bleDataProcess;
 import com.action.app.actionctr2.sqlite.Manage;
 
@@ -28,7 +29,6 @@ import java.util.ArrayList;
 public class ParamChangeActivity extends BasicActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener {
 
     /*部分参数值的初始化设定*/
-
     private static final int STATE_NOT_READY_FOR_SERVICE = 0;
     private static final int STATE_RECEIVE_COPY = 1;
     private static final int STATE_RECEIVE_NONE = 2;
@@ -75,6 +75,8 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private SeekBar seekBar_yaw;
     private SeekBar seekBar_speed1;
     private SeekBar seekBar_speed2;
+
+    static int countforMaxTime = 0;
 
     //    左上右按钮的集合
     private ArrayList<Button> gunList = new ArrayList<>();
@@ -187,7 +189,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     val = minSpeed;
                 if (val > maxSpeed)
                     val = maxSpeed;
-                return Math.round((val - minSpeed)*10);
+                return Math.round((val - minSpeed) * 10);
             default:
                 Log.e("paramChange", "err floatToProgress");
                 return 0;
@@ -547,12 +549,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 if (!dialogIsShowing) {
 //                    从文本框里读数据
                     readFromLayout(sqlManage);
-
-                    Log.d("data change", "roll: " + String.valueOf(sqlManage.roll));
-                    Log.d("data change", "pitch: " + String.valueOf(sqlManage.pitch));
-                    Log.d("data change", "yaw: " + String.valueOf(sqlManage.yaw));
-                    Log.d("data change", "speed1: " + String.valueOf(sqlManage.speed1));
-                    Log.d("data change", "speed2: " + String.valueOf(sqlManage.speed2));
 //
                     progressDialog = new ProgressDialog(ParamChangeActivity.this);
                     progressDialog.setTitle("data sending,please wait......");
@@ -569,8 +565,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
                         @Override
                         public void run() {
-
-//                            用两个switch使id2能表达出他所指的是什么枪的什么状态
+                            //                            用两个switch使id2能表达出他所指的是什么枪的什么状态
                             switch (String.valueOf(((TextView) findViewById(R.id.state)).getText())) {
                                 case "打球":
                                     id2 = 0;
@@ -601,18 +596,23 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                                 switch (id) {
                                     case 0:
                                         bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.roll);
+                                        Log.d("datasend", "id is " + String.valueOf(id));
                                         break;
                                     case 1:
                                         bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.pitch);
+                                        Log.d("datasend", "id is " + String.valueOf(id));
                                         break;
                                     case 2:
                                         bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.yaw);
+                                        Log.d("datasend", "id is " + String.valueOf(id));
                                         break;
                                     case 3:
                                         bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.speed1);
+                                        Log.d("datasend", "id is " + String.valueOf(id));
                                         break;
                                     case 4:
                                         bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.speed2);
+                                        Log.d("datasend", "id is " + String.valueOf(id));
                                         break;
                                     case 5:
                                         progressDialog.cancel();
@@ -625,12 +625,19 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 //                                当其
                                 if (id != 5) {
                                     handler.postDelayed(this, 50);
+                                    id = 5;
                                 }
                                 id++;
                             } else {
-                                //  progressDialog.cancel();
-//                                发送失败则跳过这个数
-                                // id++;
+                                countforMaxTime++;
+                                if (countforMaxTime > 20) {
+                                    progressDialog.cancel();
+                                    Intent intentBleService=new Intent(ParamChangeActivity.this,BleService.class);
+                                    startService(intentBleService);
+                                    countforMaxTime = 0;
+                                    Toast.makeText(ParamChangeActivity.this, "reconnect", Toast.LENGTH_SHORT).show();
+                                }
+                                else
                                 handler.postDelayed(this, 50);
                             }
                         }
@@ -839,17 +846,17 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 case R.id.speed1_increase:
                 case R.id.speed2_increase:
                     valueI = Float.parseFloat(editText.getText().toString());
-                    Log.d("change",String.valueOf(valueI));
+                    Log.d("change", String.valueOf(valueI));
                     valueI += stepSpeed;
-                    Log.d("change",String.valueOf(valueI));
+                    Log.d("change", String.valueOf(valueI));
                     seekBar.setProgress(floatToProgress(seekBar, valueI));
                     break;
                 case R.id.speed1_decrease:
                 case R.id.speed2_decrease:
                     valueI = Float.parseFloat(editText.getText().toString());
-                    Log.d("change",String.valueOf(valueI));
+                    Log.d("change", String.valueOf(valueI));
                     valueI -= stepSpeed;
-                    Log.d("change",String.valueOf(valueI));
+                    Log.d("change", String.valueOf(valueI));
                     seekBar.setProgress(floatToProgress(seekBar, valueI));
                     break;
                 default:

@@ -70,7 +70,7 @@ public class BleService extends Service {
 
 
     private final String AIMADDRESS = "F4:5E:AB:B9:58:80";//1号 白色平板
-   // private final String AIMADDRESS="50:65:83:86:C6:33";//这个参数是车上用的平板 2号
+    // private final String AIMADDRESS="50:65:83:86:C6:33";//这个参数是车上用的平板 2号
     //private final static String AIMADDRESS = "98:7B:F3:60:C7:1C";//测试版
     //private final String AIMADDRESS="F4:5E:AB:B9:5A:03";// //手机
     //private final String AIMADDRESS="F4:5E:AB:B9:59:77";//
@@ -144,9 +144,9 @@ public class BleService extends Service {
             }
         }
         /* 获取远端的蓝牙设备 */
-        final BluetoothDevice device = mBluetoothAdapter
+        mBluetoothDevice = mBluetoothAdapter
                 .getRemoteDevice(address);
-        if (device == null) {
+        if (mBluetoothDevice == null) {
             Log.w("bletrack", "Device not found.  Unable to connect.");
             return false;
         }
@@ -154,11 +154,10 @@ public class BleService extends Service {
         // autoConnect
         // parameter to false.
         /* 调用device中的connectGatt连接到远程设备 */
-        mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+        mBluetoothGatt = mBluetoothDevice.connectGatt(this, false, mGattCallback);
         Log.d("bletrack", "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
-        System.out.println("device.getBondState==" + device.getBondState());
         return true;
     }
 
@@ -183,21 +182,27 @@ public class BleService extends Service {
                     mConnectionState = STATE_CONNECTED;
 //                        如果地址正确
                     if (gatt.getDevice().getAddress().equals(AIMADDRESS)) {
-                        Log.d("Ble", "ble connected");
+                        Log.d("bletrack", "ble connected");
+                        if(mBluetoothDevice.getName()!=null&&mBluetoothDevice.getAddress()!=null) {
+                            Log.d("bletrack", mBluetoothDevice.getName());
+                            Log.d("bletrack", mBluetoothDevice.getAddress());
+                        }
                         isReadyForNext = false;                           //得到特征值之后才能准备好
                         mBluetoothGatt.discoverServices();              //去发现服务
                     } else {                                              //地址不正确，断开连接
-                        Log.d("Ble", "ble devicce err");
+                        Log.d("bletrack", "ble devicce err");
                         gatt.disconnect();
                     }
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:               //断开连接
                     mConnectionState = STATE_DISCONNECTED;
+//                    加上会变快
                     if (gatt != null)                                      //先把资源释放，网上搜不释放会有问题
                         close();
+                    Log.d("bletrack", "ble disconnected");
                     connect(AIMADDRESS);                                 //适配器发送扫描
+                    //scanLeDevice(true);
                     isReadyForNext = false;
-                    Log.d("Ble", "ble disconnected");
                     break;
                 default:                                                //正在连接等等
                     isReadyForNext = false;
@@ -244,9 +249,7 @@ public class BleService extends Service {
                 Log.d("bletrack", "char read fail");
         }
 
-        /*
-         * 特征值的改变
-         * */
+        /* *特征值的改* */
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
@@ -292,8 +295,8 @@ public class BleService extends Service {
             }
             if (temp[0] == 'A' && temp[1] == 'C' && temp[2] == 'H' && temp[3] == 'B') {
 
-            } else
-                Log.d("bletrack", "write: " + log_out);
+            } //else
+            //  Log.d("bletrack", "write: " + log_out);
         }
 
         /*读写蓝牙信号值 */
@@ -321,7 +324,7 @@ public class BleService extends Service {
                                       BluetoothGattDescriptor descriptor, int status) {
             // TODO Auto-generated method stub
             // super.onDescriptorWrite(gatt, descriptor, status);
-            Log.w("bletrack", "--onDescriptorWrite--: " + status);
+            // Log.w("bletrack", "--onDescriptorWrite--: " + status);
         }
 
         @Override
@@ -482,51 +485,54 @@ public class BleService extends Service {
 
         ble_init();
 
-       // scanLeDevice(true);
+        // scanLeDevice(true);
 
         connect(AIMADDRESS);
 
         //下面的代码用于发送心跳包
-        final Handler handlerHeartBeat=new Handler();
-        Runnable runnable=new Runnable() {
-            private int errCount=0;
-            private int lastHBcount=0;
+        final Handler handlerHeartBeat = new Handler();
+        Runnable runnable = new Runnable() {
+            private int errCount = 0;
+            private int lastHBcount = 0;
+
             @Override
             public void run() {
-                byte[] heartBeat=new byte[bleDataLen];
-                heartBeat[0]='A';
-                heartBeat[1]='C';
-                heartBeat[2]='H';
-                heartBeat[3]='B';
+                byte[] heartBeat = new byte[bleDataLen];
+                heartBeat[0] = 'A';
+                heartBeat[1] = 'C';
+                heartBeat[2] = 'H';
+                heartBeat[3] = 'B';
 //                if(!isSending){
 //                    wifiSend(heartBeat);
 //                }
-                if(isReadyForNext){
-                    if(characteristicHB!=null) {
-                        characteristicHB.setValue(heartBeat);
-                        if(!isDataSending) {
-                            mBluetoothGatt.writeCharacteristic(characteristicHB);
-                            isHBSending=true;
+                if (mBluetoothGatt != null) {
+                    if (isReadyForNext) {
+                        if (characteristicHB != null) {
+                            characteristicHB.setValue(heartBeat);
+                            if (!isDataSending) {
+                                mBluetoothGatt.writeCharacteristic(characteristicHB);
+                                isHBSending = true;
+                            }
+                        }
+                        if (HBcount == lastHBcount && (!isDataSending))
+                            errCount++;
+                        else
+                            errCount = 0;
+                        lastHBcount = HBcount;
+                        if (errCount >= 15) {
+                            Log.e("bletrack", "HeartBeats disconnect");
+                            isReadyForNext=false;
+                            mBluetoothGatt.disconnect();
+                            errCount = 0;
                         }
                     }
-                    if(HBcount==lastHBcount&&(!isDataSending))
-                        errCount++;
-                    else
-                        errCount=0;
-                    lastHBcount=HBcount;
-                    if(errCount>=15) {
-                        Log.e("Ble","HeartBeats disconnect");
-                        isReadyForNext=false;
-                        mBluetoothGatt.disconnect();
-                        errCount=0;
-                    }
                 }
-                isHBSending=false;
-                handlerHeartBeat.postDelayed(this,300);
+                isHBSending = false;
+                handlerHeartBeat.postDelayed(this, 300);
             }
         };
 //        不同于上面，上面是按键按一次就会执行一次，但是这个是只会在程序启动的时候执行
-        handlerHeartBeat.postDelayed(runnable,3000);
+        handlerHeartBeat.postDelayed(runnable, 3000);
 
         Log.d("servicetrack", getClass().getSimpleName() + "oncreate");
     }
@@ -543,7 +549,6 @@ public class BleService extends Service {
         Handler handler = new Handler();
 
         public void send(byte[] data) {
-            isDataSending = true;
 //            检查数据长度是否正确
             if (data.length != bleDataLen) {
                 Log.e("change", "length of senddata is not equal to require");
@@ -574,8 +579,11 @@ public class BleService extends Service {
                         isBusy = true;
                         if (characteristic != null && mBluetoothGatt != null) {
                             characteristic.setValue(dataTrans);
-                            if(!isHBSending)
-                            mBluetoothGatt.writeCharacteristic(characteristic);
+                             if(!isHBSending) {
+                                 isDataSending = true;
+                                 mBluetoothGatt.writeCharacteristic(characteristic);
+                                 Log.d("datasend", "write characteristic");
+                             }
                         }
 //                        100ms之后执行runnable
                         handler.postDelayed(this, 100);
@@ -616,7 +624,7 @@ public class BleService extends Service {
                         break;
                 }
                 if (i == 10) {
-                    Log.e("ble", "communicate unstable");
+                    Log.e("bletrack", "communicate unstable");
                     return true;
                 }
             }
@@ -637,12 +645,15 @@ public class BleService extends Service {
                 return 0;
             }
         }
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        Log.d("servicetrack", getClass().getSimpleName() + "onStartCommand");
+
+        disconnect();
+
         return flags;
     }
 

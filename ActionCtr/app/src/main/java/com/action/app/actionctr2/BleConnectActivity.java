@@ -10,8 +10,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-
-import com.action.app.actionctr2.ble.BleService;
 import com.action.app.actionctr2.ble.bleDataProcess;
 
 
@@ -36,9 +34,6 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
         text.setText("蓝牙连接中");
         Button button=(Button)findViewById(R.id.ble_connect_skip);
         button.setOnClickListener(this);
-
-        Intent intentBleService=new Intent(this,BleService.class);
-        startService(intentBleService);
 
         state=new bleDataProcess(this);
         final Handler handler=new Handler();

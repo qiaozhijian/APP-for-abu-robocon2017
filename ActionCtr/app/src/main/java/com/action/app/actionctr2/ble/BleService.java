@@ -30,8 +30,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static java.lang.Thread.sleep;
-
 public class BleService extends Service {
 
     private final IBinder mBinder = new myBleBand();
@@ -63,15 +61,16 @@ public class BleService extends Service {
     private static final int STATE_RECEIVE_NONE = 2;
     private static boolean isReadyForNext = false;
     private int mConnectionState = STATE_DISCONNECTED;
-    private boolean isSending = false;                //是否在发送
+    private boolean isHBSending = false;                //是否在发送
+    private boolean isDataSending = false;
 
     // 描述扫描蓝牙的状态
     private boolean mScanning;
     private int mRssi;
 
 
-    //private final String AIMADDRESS = "F4:5E:AB:B9:58:80";//1号 白色平板
-    private final String AIMADDRESS="50:65:83:86:C6:33";//这个参数是车上用的平板 2号
+    private final String AIMADDRESS = "F4:5E:AB:B9:58:80";//1号 白色平板
+   // private final String AIMADDRESS="50:65:83:86:C6:33";//这个参数是车上用的平板 2号
     //private final static String AIMADDRESS = "98:7B:F3:60:C7:1C";//测试版
     //private final String AIMADDRESS="F4:5E:AB:B9:5A:03";// //手机
     //private final String AIMADDRESS="F4:5E:AB:B9:59:77";//
@@ -196,7 +195,7 @@ public class BleService extends Service {
                     mConnectionState = STATE_DISCONNECTED;
                     if (gatt != null)                                      //先把资源释放，网上搜不释放会有问题
                         close();
-                    scanLeDevice(true);                                 //适配器发送扫描
+                    connect(AIMADDRESS);                                 //适配器发送扫描
                     isReadyForNext = false;
                     Log.d("Ble", "ble disconnected");
                     break;
@@ -483,49 +482,51 @@ public class BleService extends Service {
 
         ble_init();
 
-        scanLeDevice(true);
+       // scanLeDevice(true);
 
-        Thread thread1 = new Thread(new Runnable() {
-            private int errCount = 0;
-            private int lastHBcount = 0;
+        connect(AIMADDRESS);
 
+        //下面的代码用于发送心跳包
+        final Handler handlerHeartBeat=new Handler();
+        Runnable runnable=new Runnable() {
+            private int errCount=0;
+            private int lastHBcount=0;
             @Override
             public void run() {
-                byte[] heartBeat = new byte[bleDataLen];
-                heartBeat[0] = 'A';
-                heartBeat[1] = 'C';
-                heartBeat[2] = 'H';
-                heartBeat[3] = 'B';
-//                if (!isSending) {
+                byte[] heartBeat=new byte[bleDataLen];
+                heartBeat[0]='A';
+                heartBeat[1]='C';
+                heartBeat[2]='H';
+                heartBeat[3]='B';
+//                if(!isSending){
 //                    wifiSend(heartBeat);
 //                }
-                while (true) {
-                    if (isReadyForNext) {
-                        if (characteristicHB != null) {
-                            characteristicHB.setValue(heartBeat);
+                if(isReadyForNext){
+                    if(characteristicHB!=null) {
+                        characteristicHB.setValue(heartBeat);
+                        if(!isDataSending) {
                             mBluetoothGatt.writeCharacteristic(characteristicHB);
-                        }
-                        if (HBcount == lastHBcount)
-                            errCount++;
-                        else
-                            errCount = 0;
-                        lastHBcount = HBcount;
-                        if (errCount >= 15) {
-                            Log.e("Ble", "HeartBeats disconnect");
-                            isReadyForNext = false;
-                            disconnect();
-                            errCount = 0;
+                            isHBSending=true;
                         }
                     }
-                    try {
-                        sleep(300);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    if(HBcount==lastHBcount&&(!isDataSending))
+                        errCount++;
+                    else
+                        errCount=0;
+                    lastHBcount=HBcount;
+                    if(errCount>=15) {
+                        Log.e("Ble","HeartBeats disconnect");
+                        isReadyForNext=false;
+                        mBluetoothGatt.disconnect();
+                        errCount=0;
                     }
                 }
+                isHBSending=false;
+                handlerHeartBeat.postDelayed(this,300);
             }
-        });
-        thread1.start();
+        };
+//        不同于上面，上面是按键按一次就会执行一次，但是这个是只会在程序启动的时候执行
+        handlerHeartBeat.postDelayed(runnable,3000);
 
         Log.d("servicetrack", getClass().getSimpleName() + "oncreate");
     }
@@ -542,7 +543,7 @@ public class BleService extends Service {
         Handler handler = new Handler();
 
         public void send(byte[] data) {
-            isSending = true;
+            isDataSending = true;
 //            检查数据长度是否正确
             if (data.length != bleDataLen) {
                 Log.e("change", "length of senddata is not equal to require");
@@ -573,6 +574,7 @@ public class BleService extends Service {
                         isBusy = true;
                         if (characteristic != null && mBluetoothGatt != null) {
                             characteristic.setValue(dataTrans);
+                            if(!isHBSending)
                             mBluetoothGatt.writeCharacteristic(characteristic);
                         }
 //                        100ms之后执行runnable
@@ -581,6 +583,7 @@ public class BleService extends Service {
 //                    发送成功
                     else {
                         isBusy = false;
+                        isDataSending = false;
                     }
                 }
             };
@@ -588,7 +591,6 @@ public class BleService extends Service {
 //·          第二次的时候发现第一次还是没有发送成功就不再运行一遍
             if (!isBusy)
                 handler.postDelayed(runnable, 100);
-            isSending = false;
         }
 
         //        获取心跳包数据

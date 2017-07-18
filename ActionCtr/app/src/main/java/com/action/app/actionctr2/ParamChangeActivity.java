@@ -619,14 +619,16 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                                         break;
                                     default:
                                         progressDialog.cancel();
+                                        Log.d("datasend", "id is " + String.valueOf(id));
+                                        id=0;
                                         Log.e("change button", "onclick run err run err!!!!!");
                                         break;
                                 }
 //                                当其
                                 if (id != 5) {
                                     handler.postDelayed(this, 50);
-                                    id = 5;
                                 }
+                                Log.d("datasend", "id ++ ");
                                 id++;
                             } else {
                                 countforMaxTime++;
@@ -635,6 +637,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                                     Intent intentBleService=new Intent(ParamChangeActivity.this,BleService.class);
                                     startService(intentBleService);
                                     countforMaxTime = 0;
+                                    id=0;
                                     Toast.makeText(ParamChangeActivity.this, "reconnect", Toast.LENGTH_SHORT).show();
                                 }
                                 else

@@ -50,7 +50,6 @@
         <activity
             android:name=".DataActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".CtrActivity" />
         <activity
             android:name=".DebugDataDisplayActivity"
             android:screenOrientation="landscape" />
@@ -63,6 +62,9 @@
             android:name=".wifi.wifiService"
             android:enabled="true"
             android:exported="true" />
+        <service android:name=".BT2.BTtwoService"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>

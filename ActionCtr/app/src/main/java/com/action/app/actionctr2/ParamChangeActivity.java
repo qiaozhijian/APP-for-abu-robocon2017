@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.action.app.actionctr2.BT2.BTtwoDataProcess;
 import com.action.app.actionctr2.ble.BleService;
 import com.action.app.actionctr2.ble.bleDataProcess;
 import com.action.app.actionctr2.sqlite.Manage;
@@ -61,6 +62,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private Manage sqlManage;
     /*控件的定义*/
     private bleDataProcess bleDataManage;
+    private BTtwoDataProcess BTDataManage;
 
     //   手动输入框的定义
     private EditText editTextRoll;
@@ -286,7 +288,11 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         super.onCreate(s);
         setContentView(R.layout.activity_param_change);
         sqlManage = new Manage(this);
-        bleDataManage = new bleDataProcess(this);
+
+        if (blePermit)
+            bleDataManage = new bleDataProcess(this);
+        else
+            BTDataManage = new BTtwoDataProcess(this);
 
 //        发射键
         findViewById(R.id.button_param_shot).setOnClickListener(this);//射
@@ -499,7 +505,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         id = 3;
                         break;
                 }
-                bleDataManage.sendCmd(id);
+                sendCmdFit(id);
                 break;
 //            点保存数据
             case R.id.button_param_save: {
@@ -538,80 +544,188 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             break;
 //            参数改变
             case R.id.button_param_change:
-                boolean dialogIsShowing = false;
+                if (blePermit) {
+                    boolean dialogIsShowing = false;
 //                如果创建了加载框，就更新状态
-                if (progressDialog != null) {
-                    if (progressDialog.isShowing())
-                        dialogIsShowing = true;
-                }
-                Log.d("change", "changeDialog is showing:    " + String.valueOf(dialogIsShowing));
+                    if (progressDialog != null) {
+                        if (progressDialog.isShowing())
+                            dialogIsShowing = true;
+                    }
+                    Log.d("change", "changeDialog is showing:    " + String.valueOf(dialogIsShowing));
 //                如没有在转
-                if (!dialogIsShowing) {
+                    if (!dialogIsShowing) {
 //                    从文本框里读数据
-                    readFromLayout(sqlManage);
+                        readFromLayout(sqlManage);
 //
-                    progressDialog = new ProgressDialog(ParamChangeActivity.this);
-                    progressDialog.setTitle("data sending,please wait......");
-                    progressDialog.setCancelable(false);
+                        progressDialog = new ProgressDialog(ParamChangeActivity.this);
+                        progressDialog.setTitle("data sending,please wait......");
+                        progressDialog.setCancelable(false);
 //                    仅仅设置点击屏幕不会返回
-                    progressDialog.setCanceledOnTouchOutside(false);
-                    progressDialog.show();
+                        progressDialog.setCanceledOnTouchOutside(false);
+                        progressDialog.show();
 //                    循环设置
-                    final Handler handler = new Handler();
-                    Runnable runnable = new Runnable() {
-                        //                        再进入这个函数时，依然会初始化成0
-                        private byte id = 0;
-                        private byte id2 = 0;
+                        final Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            //                        再进入这个函数时，依然会初始化成0
+                            private byte id = 0;
+                            private byte id2 = 0;
 
-                        @Override
-                        public void run() {
-                            //                            用两个switch使id2能表达出他所指的是什么枪的什么状态
-                            switch (String.valueOf(((TextView) findViewById(R.id.state)).getText())) {
-                                case "打球":
-                                    id2 = 0;
-                                    break;
-                                case "打盘":
-                                    id2 = 1;
-                                    break;
-                                case "扔":
-                                    id2 = 2;
-                                    break;
-                            }
-                            id2 = (byte) (id2 * 3);
-                            switch (String.valueOf(((TextView) findViewById(R.id.gun_num)).getText())) {
-                                case "左":
-                                    id2 += 0;
-                                    break;
-                                case "右":
-                                    id2 += 1;
-                                    break;
-                                case "上":
-                                    id2 += 2;
-                                    break;
-                            }
-                            int inOntheWay = readOntheWay();
-                            id2 = (byte) (id2 + inOntheWay * 80);
+                            @Override
+                            public void run() {
+                                //                            用两个switch使id2能表达出他所指的是什么枪的什么状态
+                                switch (String.valueOf(((TextView) findViewById(R.id.state)).getText())) {
+                                    case "打球":
+                                        id2 = 0;
+                                        break;
+                                    case "打盘":
+                                        id2 = 1;
+                                        break;
+                                    case "扔":
+                                        id2 = 2;
+                                        break;
+                                }
+                                id2 = (byte) (id2 * 3);
+                                switch (String.valueOf(((TextView) findViewById(R.id.gun_num)).getText())) {
+                                    case "左":
+                                        id2 += 0;
+                                        break;
+                                    case "右":
+                                        id2 += 1;
+                                        break;
+                                    case "上":
+                                        id2 += 2;
+                                        break;
+                                }
+                                int inOntheWay = readOntheWay();
+                                id2 = (byte) (id2 + inOntheWay * 80);
 //如果没连上，五个就这么直接过去了，只用WiFi发
-                            if (bleDataManage.checkSendOk() && bleDataManage.getBinder() != null) {
+                                if (bleDataManage.checkSendOk() && bleDataManage.getBinder() != null) {
+                                    switch (id) {
+                                        case 0:
+                                            bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.roll);
+                                            Log.d("datasend", "id is " + String.valueOf(id));
+                                            break;
+                                        case 1:
+                                            bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.pitch);
+                                            Log.d("datasend", "id is " + String.valueOf(id));
+                                            break;
+                                        case 2:
+                                            bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.yaw);
+                                            Log.d("datasend", "id is " + String.valueOf(id));
+                                            break;
+                                        case 3:
+                                            bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.speed1);
+                                            Log.d("datasend", "id is " + String.valueOf(id));
+                                            break;
+                                        case 4:
+                                            bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.speed2);
+                                            Log.d("datasend", "id is " + String.valueOf(id));
+                                            break;
+                                        case 5:
+                                            progressDialog.cancel();
+                                            break;
+                                        default:
+                                            progressDialog.cancel();
+                                            Log.d("datasend", "id is " + String.valueOf(id));
+                                            id = 0;
+                                            Log.e("change button", "onclick run err run err!!!!!");
+                                            break;
+                                    }
+//                                当其
+                                    if (id != 5) {
+                                        handler.postDelayed(this, 50);
+                                    }
+                                    Log.d("datasend", "id ++ ");
+                                    id++;
+                                } else {
+                                    countforMaxTime++;
+                                    if (countforMaxTime > 20) {
+                                        progressDialog.cancel();
+                                        Intent intentBleService = new Intent(ParamChangeActivity.this, BleService.class);
+                                        startService(intentBleService);
+                                        countforMaxTime = 0;
+                                        id = 0;
+                                        Toast.makeText(ParamChangeActivity.this, "reconnect", Toast.LENGTH_SHORT).show();
+                                    } else
+                                        handler.postDelayed(this, 50);
+                                }
+                            }
+                        };
+                        handler.postDelayed(runnable, 50);
+                    }
+                } else {
+                    boolean dialogIsShowing = false;
+//                如果创建了加载框，就更新状态
+                    if (progressDialog != null) {
+                        if (progressDialog.isShowing())
+                            dialogIsShowing = true;
+                    }
+                    Log.d("change", "changeDialog is showing:    " + String.valueOf(dialogIsShowing));
+//                如没有在转
+                    if (!dialogIsShowing) {
+//                    从文本框里读数据
+                        readFromLayout(sqlManage);
+//
+                        progressDialog = new ProgressDialog(ParamChangeActivity.this);
+                        progressDialog.setTitle("data sending,please wait......");
+                        progressDialog.setCancelable(false);
+//                    仅仅设置点击屏幕不会返回
+                        progressDialog.setCanceledOnTouchOutside(false);
+                        progressDialog.show();
+//                    循环设置
+                        final Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            //                        再进入这个函数时，依然会初始化成0
+                            private byte id = 0;
+                            private byte id2 = 0;
+
+                            @Override
+                            public void run() {
+                                //                            用两个switch使id2能表达出他所指的是什么枪的什么状态
+                                switch (String.valueOf(((TextView) findViewById(R.id.state)).getText())) {
+                                    case "打球":
+                                        id2 = 0;
+                                        break;
+                                    case "打盘":
+                                        id2 = 1;
+                                        break;
+                                    case "扔":
+                                        id2 = 2;
+                                        break;
+                                }
+                                id2 = (byte) (id2 * 3);
+                                switch (String.valueOf(((TextView) findViewById(R.id.gun_num)).getText())) {
+                                    case "左":
+                                        id2 += 0;
+                                        break;
+                                    case "右":
+                                        id2 += 1;
+                                        break;
+                                    case "上":
+                                        id2 += 2;
+                                        break;
+                                }
+                                int inOntheWay = readOntheWay();
+                                id2 = (byte) (id2 + inOntheWay * 80);
                                 switch (id) {
                                     case 0:
-                                        bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.roll);
+                                        BTDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.roll);
                                         Log.d("datasend", "id is " + String.valueOf(id));
                                         break;
                                     case 1:
-                                        bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.pitch);
+                                        BTDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.pitch);
                                         Log.d("datasend", "id is " + String.valueOf(id));
                                         break;
                                     case 2:
-                                        bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.yaw);
+                                        BTDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.yaw);
                                         Log.d("datasend", "id is " + String.valueOf(id));
                                         break;
                                     case 3:
-                                        bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.speed1);
+                                        BTDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.speed1);
                                         Log.d("datasend", "id is " + String.valueOf(id));
                                         break;
                                     case 4:
-                                        bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.speed2);
+                                        BTDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.speed2);
                                         Log.d("datasend", "id is " + String.valueOf(id));
                                         break;
                                     case 5:
@@ -620,32 +734,20 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                                     default:
                                         progressDialog.cancel();
                                         Log.d("datasend", "id is " + String.valueOf(id));
-                                        id=0;
+                                        id = 0;
                                         Log.e("change button", "onclick run err run err!!!!!");
                                         break;
                                 }
 //                                当其
                                 if (id != 5) {
-                                    handler.postDelayed(this, 50);
+                                    handler.postDelayed(this, 100);
                                 }
-                                Log.d("datasend", "id ++ ");
                                 id++;
-                            } else {
-                                countforMaxTime++;
-                                if (countforMaxTime > 20) {
-                                    progressDialog.cancel();
-                                    Intent intentBleService=new Intent(ParamChangeActivity.this,BleService.class);
-                                    startService(intentBleService);
-                                    countforMaxTime = 0;
-                                    id=0;
-                                    Toast.makeText(ParamChangeActivity.this, "reconnect", Toast.LENGTH_SHORT).show();
-                                }
-                                else
-                                handler.postDelayed(this, 50);
                             }
-                        }
-                    };
-                    handler.postDelayed(runnable, 50);
+                        };
+                        handler.postDelayed(runnable, 10);
+                    }
+
                 }
                 break;
 //            返回主界面
@@ -931,7 +1033,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         if (isChecked) {
             gunId += 3;
         }
-        bleDataManage.sendCmd((byte) (gunId));
+        sendCmdFit((byte) (gunId));
 
         SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
         editor.putBoolean("gun_mode_left", gun_mode[0]);
@@ -941,11 +1043,22 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
     }
 
+    void sendCmdFit(byte id) {
+        if (blePermit)
+            sendCmdFit(id);
+        else
+            BTDataManage.sendCmd(id);
+    }
+
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         sqlManage.close();
 
-        bleDataManage.unbind();
+        if (blePermit)
+            bleDataManage.unbind();
+        else
+            BTDataManage.unbind();
     }
 }

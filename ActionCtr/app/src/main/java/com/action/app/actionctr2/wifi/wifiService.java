@@ -77,6 +77,8 @@ public class wifiService extends Service {
         Log.d("wifi","wifi service start onCreate");
         wifiDataList=new ArrayList<String>();
         wifiManager=(WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+
+        //注册广播器
         broadcastReceiver=new wifiBroadcastReceiver(wifiManager);
         intentFilter=new IntentFilter();
         intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);

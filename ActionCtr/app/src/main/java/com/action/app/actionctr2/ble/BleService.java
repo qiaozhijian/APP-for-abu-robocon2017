@@ -575,7 +575,7 @@ public class BleService extends Service {
                             if (!isDataSending) {
                                 mBluetoothGatt.writeCharacteristic(characteristicHB);
                                 isHBSending = true;
-                                Log.e("ACHB", "HeartBeats send");
+                                Log.d("ACHB", "HeartBeats send");
                             }
                         }
                         if (HBcount == lastHBcount && (!isDataSending))

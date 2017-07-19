@@ -74,13 +74,13 @@ public class BleService extends Service {
     private int mRssi;
 
 
-    private final String AIMADDRESS = "F4:5E:AB:B9:58:80";//1号 白色平板
+    //private final String AIMADDRESS = "F4:5E:AB:B9:58:80";//1号 白色平板
     // private final String AIMADDRESS="50:65:83:86:C6:33";//这个参数是车上用的平板 2号
     //private final static String AIMADDRESS = "98:7B:F3:60:C7:1C";//测试版
     //private final String AIMADDRESS="F4:5E:AB:B9:5A:03";// //手机
     //private final String AIMADDRESS="F4:5E:AB:B9:59:77";//手机
     // private final String AIMADDRESS="98:7B:F3:60:C7:01";//
-    //private final String AIMADDRESS = "90:59:AF:0E:60:1F";//
+    private final String AIMADDRESS = "90:59:AF:0E:60:1F";//
     private final static UUID[] aimUUID = {UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb")};
     private final static UUID aimServiceUUID = UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb");
     private final static UUID aimChar6UUID = UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb");
@@ -297,7 +297,7 @@ public class BleService extends Service {
                 String log_out = new String();
                 for (int i = 0; i < bleDataLen; i++) {
 //                    为了log的时候好观察，加了个\t
-                    log_out += String.valueOf((int) characteristic.getValue()[i]) + '\t';
+                    log_out += String.valueOf( characteristic.getValue()[i]) + '\t';
                 }
                 Log.d("bletrack", "read value: " + log_out);
             } else {
@@ -318,7 +318,7 @@ public class BleService extends Service {
                 if (i < 4)
                     log_out += String.valueOf((char) (temp[i])) + '\t';
                 else
-                    log_out += String.valueOf((int) temp[i]) + '\t';
+                    log_out += String.valueOf( temp[i]) + '\t';
             }
 //                判断是否是心跳包
             if (temp[0] == 'A' && temp[1] == 'C' && temp[2] == 'H' && temp[3] == 'B') {
@@ -353,8 +353,8 @@ public class BleService extends Service {
                 }
                 if (temp[0] == 'A' && temp[1] == 'C' && temp[2] == 'H' && temp[3] == 'B') {
 
-                } //else
-                Log.d("ACHB6", "write: " + log_out);
+                } else
+                Log.d("bletrack", "write: " + log_out);
             } else {
                 Log.d("bletrack", "char write fail");
                 disconnect();

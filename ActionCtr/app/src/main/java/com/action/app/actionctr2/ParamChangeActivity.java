@@ -638,6 +638,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                                     startService(intentBleService);
                                     countforMaxTime = 0;
                                     id=0;
+                                    Log.d("bletrack", "reconnect " );
                                     Toast.makeText(ParamChangeActivity.this, "reconnect", Toast.LENGTH_SHORT).show();
                                 }
                                 else

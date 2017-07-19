@@ -47,6 +47,11 @@ public class bleDataProcess{
             sendData[7]=(byte)((value>>8)&0xff);
             sendData[8]=(byte)((value>>16)&0xff);
             sendData[9]=(byte)((value>>24)&0xff);
+            String log_out = new String();
+            for (int i = 0; i < 12; i++) {
+                    log_out += String.valueOf((int) sendData[i]) + '\t';
+            }
+            Log.d("bletrack", "write: " + log_out);
             if(state!=null)
                 state.send(sendData);
             return true;
@@ -69,7 +74,7 @@ public class bleDataProcess{
             sendData[7]=floatData[1];
             sendData[8]=floatData[2];
             sendData[9]=floatData[3];
-            Log.d("datasend","data finished "+String.valueOf(sendData));
+            Log.d("datasend","sendParam ");
             if(state!=null)
                 state.send(sendData);
             return true;

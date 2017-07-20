@@ -11,8 +11,6 @@ import android.view.KeyEvent;
 
 public class BasicActivity extends AppCompatActivity{
     public final String TAG = "activitytrack";
-    protected final boolean blePermit=false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

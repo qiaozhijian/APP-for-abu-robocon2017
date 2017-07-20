@@ -2,20 +2,15 @@ package com.action.app.actionctr2;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.action.app.actionctr2.BT2.BTtwoDataProcess;
-import com.action.app.actionctr2.ble.bleDataProcess;
 import com.action.app.actionctr2.wifi.wifiService;
 
 public class BeginActivity extends BasicActivity implements View.OnClickListener {
-    private bleDataProcess state;
     private BTtwoDataProcess state2;
     private boolean isEnding = false;
     private boolean lastIsReady = false;
@@ -43,48 +38,14 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
         final ProgressBar bar = (ProgressBar) findViewById(R.id.begin_progressbar_rssi);
         final TextView textView = (TextView) findViewById(R.id.begin_textview_rssi);
         bar.setProgress(0);
-        if (blePermit) {
-            state = new bleDataProcess(this);
-            final Handler handler = new Handler();
-            Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    if (!isEnding) {
-                        if (state.getBinder() != null) {
-                            if (!state.isReadyForData()) {
-                                bar.setProgress(0);
-                                textView.setText("蓝牙断开");
-                                textView.setTextColor(Color.parseColor("#FF0000"));
-                            } else {
-                                textView.setText("蓝牙强度");
-                                textView.setTextColor(Color.parseColor("#000000"));
-                                int rssi = 150 + state.readRssi();
-                                if (rssi > 100)
-                                    rssi = 100;
-                                if (rssi < 0)
-                                    rssi = 0;
-                                bar.setProgress(rssi);
-                                Log.d("ble", "rssi: " + String.valueOf(rssi));
-                            }
-                        }
-                        handler.postDelayed(this, 500);
-                    }
-                }
-            };
-            handler.post(runnable);
-        } else {
             state2 = new BTtwoDataProcess(this);
-        }
     }
 
     @Override
     public void onDestroy() {
         isEnding = true;
         super.onDestroy();
-        if (blePermit)
-            state.unbind();
-        else
-            state2.unbind();
+        state2.unbind();
     }
 
     @Override
@@ -103,9 +64,6 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
                 dataSt.putBoolean("gun_mode_top", false);
                 dataSt.commit();
                 //发送蓝牙变回自动模式
-                if (blePermit)
-                    state.sendCmd((byte) (-1));
-                else
                     state2.sendCmd((byte) (-1));
 
                 finish();

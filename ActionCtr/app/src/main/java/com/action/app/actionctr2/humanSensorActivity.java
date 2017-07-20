@@ -5,10 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,8 +14,6 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.action.app.actionctr2.BT2.BTtwoDataProcess;
-import com.action.app.actionctr2.ble.BleService;
-import com.action.app.actionctr2.ble.bleDataProcess;
 
 import java.util.ArrayList;
 
@@ -31,7 +27,6 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
     private ArrayList<Button> buttonsColumnList = new ArrayList<>();
     private ArrayList<Button> buttonsDefendList = new ArrayList<>();
 
-    private bleDataProcess bleDataManage;
     private boolean isDestroy = false;
 
     private BTtwoDataProcess BTDataManage;
@@ -43,68 +38,7 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
     private Button wayright;
 
     private void changeColorByMCU(final Context context) {
-        if (blePermit) {
-            final Handler handler = new Handler();
-//        写个循环函数还搞新花样
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (bleDataManage.getBinder() != null) {
-                        final byte[] info = bleDataManage.getMCUinfo();
-                        if (info != null) {
-                            //  Log.d("humanSensor","check heartbeats info");
-                            if (info.length == BleService.bleDataLen) {
-                                Resources r = context.getResources();
-                                int topGunDefendOrAttack = info[BleService.bleDataLen - 3];
-                                Button btn = (Button) findViewById(R.id.human_topgun_defend_or_attack);
-                                Button btnCopy = (Button) findViewById(R.id.human_topgun_defend_or_attack_copy);
-                                if (topGunDefendOrAttack == 0) {
-                                    btn.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light));
-                                    btnCopy.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light));
-                                } else if (topGunDefendOrAttack == 1) {
-                                    btn.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_dark_disabled));
-                                    btnCopy.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light));
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "收到的蓝牙心跳包标志进攻防守错误", Toast.LENGTH_SHORT);
-                                }
 
-//                            通过心跳包进行回数
-//                            心跳包的最后两个字节储存信息，一个字节八位，0到6位代表七个盘（球），1代表有命令
-                                int ballInfo = info[BleService.bleDataLen - 2];
-                                int frisbeeInfo = info[BleService.bleDataLen - 1];
-                                for (int i = 0; i < 7; i++) {
-                                    int checkFrisbee = frisbeeInfo % 2;
-                                    int checkBall = ballInfo % 2;
-                                    if (checkFrisbee == 1) {
-                                        buttonsFrisbeeList.get(i).setBackground(r.getDrawable(R.drawable.common_plus_signin_btn_text_dark));
-                                        //   Log.d("humanSensor", "Frisbee  i： "+String.valueOf(i));
-                                    } else {
-                                        buttonsFrisbeeList.get(i).setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light_pressed));
-                                        //  Log.d("humanSensor", "Frisbee ： "+String.valueOf(i));
-                                    }
-                                    if (checkBall == 1) {
-                                        buttonsBallList.get(i).setBackground(r.getDrawable(R.drawable.common_plus_signin_btn_text_dark));
-                                        //   Log.d("humanSensor", "Ball  i： "+String.valueOf(i));
-                                    } else {
-                                        buttonsBallList.get(i).setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light_pressed));
-                                        //    Log.d("humanSensor", "Ball  ： "+String.valueOf(i));
-                                    }
-                                    ballInfo /= 2;
-                                    frisbeeInfo /= 2;
-                                }
-                            } else {
-                                Log.e("humanSensor", "请检查代码，心跳包长度不正常： " + String.valueOf(info.length));
-                            }
-                        }
-                    }
-                    if (!isDestroy) {
-                        handler.postDelayed(this, 170);
-                    }
-                }
-            }, 300);
-        } else {
-
-        }
     }
 
     @Override
@@ -123,10 +57,7 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
         waymiddle.setOnClickListener(this);
         wayright.setOnClickListener(this);
 
-        if (blePermit)
-            bleDataManage = new bleDataProcess(this);
-        else
-            BTDataManage = new BTtwoDataProcess(this);
+        BTDataManage = new BTtwoDataProcess(this);
 
 //        按键的初始化
         for (int i = 0; i < 7; i++) {
@@ -316,23 +247,17 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
         }
     }
 
-    void sendCmdFit(byte id)
-    {
-        if (blePermit)
-            sendCmdFit(id);
-        else
-            BTDataManage.sendCmd(id);
+    void sendCmdFit(byte id) {
+
+        BTDataManage.sendCmd(id);
     }
-    
-    
+
+
     @Override
     public void onDestroy() {
         isDestroy = true;
         super.onDestroy();
-        if (blePermit)
-            bleDataManage.unbind();
-        else
-            BTDataManage.unbind();
+        BTDataManage.unbind();
     }
 
 }

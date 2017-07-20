@@ -51,6 +51,8 @@ public class BTtwoService extends Service {
 
     private boolean connectState = false;
 
+    private boolean isDataSending = false;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -71,7 +73,32 @@ public class BTtwoService extends Service {
         Log.d("servicetrack", "service onCreate");
 
         registerBTReceiver();
+        //下面的代码用于发送心跳包
+        final Handler handlerHeartBeat = new Handler();
+        Runnable runnable = new Runnable() {
 
+            @Override
+            public void run() {
+                byte[] heartBeat = new byte[bleDataLen];
+                heartBeat[0] = 'A';
+                heartBeat[1] = 'C';
+                heartBeat[2] = 'H';
+                heartBeat[3] = 'B';
+                if (!isDataSending) {
+                    wifiSend(heartBeat);
+                    writeData(heartBeat);
+                    Log.d("ACHB", "HeartBeats start");
+                }
+                else
+                {
+                    Log.d("ACHB", "HeartBeats stop");
+                }
+
+                handlerHeartBeat.postDelayed(this, 300);
+            }
+        };
+//        不同于上面，上面是按键按一次就会执行一次，但是这个是只会在程序启动的时候执行
+        handlerHeartBeat.postDelayed(runnable, 3000);
     }
 
     @Override
@@ -151,6 +178,11 @@ public class BTtwoService extends Service {
         super.onDestroy();
         //注销广播
         unregisterReceiver(BTReceive);
+        try {
+            BTSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -216,6 +248,7 @@ public class BTtwoService extends Service {
             }
         }
     }
+
     //    通过WiFi发数
     private void wifiSend(byte[] data) {
         OutputStream out = wifiService.getOutputStream();
@@ -232,30 +265,30 @@ public class BTtwoService extends Service {
     public void writeData(byte[] bos) {
         int i = 0;
         OutputStream os = null;
-        Log.d("shantui","write1");
+        Log.d("shantui", "write1");
         try {
-            Log.d("shantui","write2");
-            if(BTSocket!=null)
-            os = BTSocket.getOutputStream();
+            Log.d("shantui", "write2");
+            if (BTSocket != null)
+                os = BTSocket.getOutputStream();
             else
-            Log.d("shantui","write3");
+                Log.d("shantui", "write3");
         } catch (IOException e) {
             e.printStackTrace();
-            Log.d("shantui","os 不能正常创建");
+            Log.d("shantui", "os 不能正常创建");
         }
         if (os != null) {
             try {
-                Log.d("shantui","write4");
+                Log.d("shantui", "write4");
                 os.write(bos);
-                Log.d("shantui","write5");
+                Log.d("shantui", "write5");
                 os.flush();
-                Log.d("shantui","write6");
+                Log.d("shantui", "write6");
             } catch (IOException e) {
-                Log.d("shantui","write error");
+                Log.d("shantui", "write error");
             }
-        }
-        else
-            Log.d("shantui","os = null");
+        } else
+            Log.d("shantui", "os = null");
+
     }
 
     /**
@@ -281,7 +314,6 @@ public class BTtwoService extends Service {
                             buf_data[i] = buffer[i];
                             log_out += String.valueOf((char) (buf_data[i])) + '\t';
                         }
-                        writeData(buf_data);
                         Log.d("bletrack", "input:" + log_out);
                     }
                 } catch (IOException e) {
@@ -316,22 +348,26 @@ public class BTtwoService extends Service {
             else
                 count = 0;
 
-           // wifiSend(dataTrans);
+            isDataSending=true;
+
+            wifiSend(dataTrans);
 
             writeData(dataTrans);
 
-            final Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-//                  没有发送成功
-                    if (!checkSendOk()) {
-                        writeData(dataTrans);
-//                        100ms之后执行runnable
-                        handler.postDelayed(this, 100);
-                    }
-                }
-            };
-            handler.postDelayed(runnable, 100);
+            isDataSending=false;
+
+//            final Runnable runnable = new Runnable() {
+//                @Override
+//                public void run() {
+////                  没有发送成功
+//                    if (!checkSendOk()) {
+//                        writeData(dataTrans);
+////                        100ms之后执行runnable
+//                        handler.postDelayed(this, 100);
+//                    }
+//                }
+//            };
+//            handler.postDelayed(runnable, 100);
         }
 
         boolean checkSendOk() {

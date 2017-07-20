@@ -74,18 +74,25 @@ public class BleService extends Service {
     private int mRssi;
 
 
-    private final String AIMADDRESS = "F4:5E:AB:B9:58:80";//1号 白色平板
+    //private final String AIMADDRESS = "F4:5E:AB:B9:58:80";//1号 白色平板
     // private final String AIMADDRESS="50:65:83:86:C6:33";//这个参数是车上用的平板 2号
     //private final static String AIMADDRESS = "98:7B:F3:60:C7:1C";//测试版
     //private final String AIMADDRESS="F4:5E:AB:B9:5A:03";// //手机
     //private final String AIMADDRESS="F4:5E:AB:B9:59:77";//手机
     // private final String AIMADDRESS="98:7B:F3:60:C7:01";//
-    //private final String AIMADDRESS = "90:59:AF:0E:60:1F";//
+    private final String AIMADDRESS = "90:59:AF:0E:60:1F";//
     private final static UUID[] aimUUID = {UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb")};
     private final static UUID aimServiceUUID = UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb");
     private final static UUID aimChar6UUID = UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb");
     private final static UUID aimChar7UUID = UUID.fromString("0000fff7-0000-1000-8000-00805f9b34fb");
 
+
+    private int state1;
+    private int state2;
+    private int state3;
+    private int state4;
+    private int state5;
+    private int state6;
 
     /**
      * @param enable (扫描使能，true:扫描开始,false:扫描停止)
@@ -600,6 +607,7 @@ public class BleService extends Service {
         handlerHeartBeat.postDelayed(runnable, 3000);
 
         Log.d("servicetrack", getClass().getSimpleName() + "oncreate");
+
     }
 
     //    蓝牙发数  binder跟所有涉及到蓝牙的activity通信
@@ -730,3 +738,86 @@ public class BleService extends Service {
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//   final Handler handler=new Handler();
+//
+//        Runnable runnable1=new Runnable() {
+//            private int state1last;
+//            private int state2last;
+//            private int state3last;
+//            private int state4last;
+//            private int state5last;
+//            private int state6last;
+//            @Override
+//            public void run() {
+//                state1=mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.GATT);
+//                state2=mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.GATT_SERVER);
+//                state3=mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEALTH);
+//                state4=mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET);
+//                state5=mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.A2DP);
+//                state6=mBluetoothAdapter.getProfileConnectionState(BluetoothProfile.SAP);
+//                if(state1last!=state1||state2!=state2last||state3last!=state3||state4last!=state4||state5last!=state5||state6last!=state6)
+//                {
+//                    Log.d("state2.0","state1  "+String.valueOf(state1));
+//                    Log.d("state2.0","state2  "+String.valueOf(state2));
+//                    Log.d("state2.0","state3  "+String.valueOf(state3));
+//                    Log.d("state2.0","state4  "+String.valueOf(state4));
+//                    Log.d("state2.0","state5  "+String.valueOf(state5));
+//                    Log.d("state2.0","state6  "+String.valueOf(state6));
+//                }
+//                state1last=state1;
+//                state2last=state2;
+//                state3last=state3;
+//                state4last=state4;
+//                state5last=state5;
+//                state6last=state6;
+//                handler.postDelayed(this,300);
+//            }
+//        };
+//        handler.post(runnable1);
+
+
+
+
+
+
+
+
+
+
+

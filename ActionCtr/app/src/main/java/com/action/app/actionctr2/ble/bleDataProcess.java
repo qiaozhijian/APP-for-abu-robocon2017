@@ -69,7 +69,7 @@ public class bleDataProcess{
             sendData[7]=floatData[1];
             sendData[8]=floatData[2];
             sendData[9]=floatData[3];
-            Log.d("datasend","data finished "+String.valueOf(sendData));
+
             if(state!=null)
                 state.send(sendData);
             return true;

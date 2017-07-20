@@ -49,7 +49,11 @@ public class BTtwoDataProcess {
             sendData[7]=floatData[1];
             sendData[8]=floatData[2];
             sendData[9]=floatData[3];
-            Log.d("datasend","data finished "+String.valueOf(sendData));
+            String log_out = new String();
+            for (int i = 0; i < 12; i++) {
+                    log_out += String.valueOf((byte) sendData[i]) + '\t';
+            }
+            Log.d("sendpara", log_out);
             if(binder!=null)
                 binder.sendbyBT2(sendData);
             return true;

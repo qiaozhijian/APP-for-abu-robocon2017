@@ -5,13 +5,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.action.app.actionctr2.BT2.BTtwoDataProcess;
-import com.action.app.actionctr2.ble.bleDataProcess;
 
 
 /**
@@ -19,7 +17,6 @@ import com.action.app.actionctr2.ble.bleDataProcess;
  */
 
 public class BleConnectActivity extends BasicActivity implements View.OnClickListener {
-    private bleDataProcess state;
     private BTtwoDataProcess state2;
     private boolean isEnding=false;
     @Override
@@ -37,40 +34,7 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
         Button button=(Button)findViewById(R.id.ble_connect_skip);
         button.setOnClickListener(this);
 
-        if(blePermit)
-        {
-        state=new bleDataProcess(this);
-        final Handler handler=new Handler();
-        Runnable runnable=new Runnable() {
-            private int count=0;
-            @Override
-            public void run() {
-                String string="蓝牙连接中";
-                count++;
-                for(int i=0;i<count;i++){
-                    string+='.';
-                }
-                text.setText(string);
-                count%=20;
-                boolean check=false;
-                if(state.getBinder()!=null){
-                    check=state.isReadyForData();
-                    if(check){
-                        Log.d("ble","ble is ready for sendData");
-                        Intent intent=new Intent(BleConnectActivity.this,BeginActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                }
-                if(!check&&!isEnding){
-                    handler.postDelayed(this,500);
-                }
-            }
-        };
-        handler.post(runnable);
-    }
-    else
-        {
+
             state2=new BTtwoDataProcess(this);
             final Handler handler=new Handler();
             Runnable runnable=new Runnable() {
@@ -99,7 +63,7 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
                 }
             };
             handler.post(runnable);
-        }
+
     }
 
     @Override
@@ -116,9 +80,6 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
     public void onDestroy() {
         isEnding=true;
         super.onDestroy();
-        if (blePermit)
-            state.unbind();
-        else
             state2.unbind();
     }
 }

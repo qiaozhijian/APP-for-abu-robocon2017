@@ -1,5 +1,6 @@
 package com.action.app.actionctr2;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -10,7 +11,9 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.action.app.actionctr2.ble.BleService;
 import com.action.app.actionctr2.ble.bleDataProcess;
+import com.action.app.actionctr2.sqlite.SharedPreferencesHelper;
 import com.action.app.actionctr2.wifi.wifiService;
 
 public class BeginActivity extends BasicActivity implements View.OnClickListener {
@@ -22,8 +25,8 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_begin);
         isEnding=false;
-        Intent intentWifiService=new Intent(this,wifiService.class);
-        startService(intentWifiService);
+
+        SharedPreferencesHelper sharedPreferencesHelper=new SharedPreferencesHelper(this,"data");
 
         findViewById(R.id.go_to_data_activity).setOnClickListener(this);
         findViewById(R.id.go_to_human_activity).setOnClickListener(this);
@@ -39,6 +42,14 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
 
         final ProgressBar bar=(ProgressBar)findViewById(R.id.begin_progressbar_rssi);
         final TextView textView=(TextView)findViewById(R.id.begin_textview_rssi);
+        final TextView textView1=(TextView)findViewById(R.id.begin_textview_last);
+
+        textView1.setText(sharedPreferencesHelper.getString("returnState"));
+        if(sharedPreferencesHelper.getString("returnState")!=null)
+        Log.d("state2.0",sharedPreferencesHelper.getString("returnState"));
+        Intent intentWifiService=new Intent(this,wifiService.class);
+        startService(intentWifiService);
+
         bar.setProgress(0);
         state=new bleDataProcess(this);
 
@@ -70,6 +81,16 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
             }
         };
         handler.post(runnable);
+
+
+        actionStart(this,"scan");
+    }
+
+    public void actionStart(Context context,String data)
+    {
+        Intent intent=new Intent(context, BleService.class);
+        intent.putExtra("data",data);
+        context.startService(intent);
     }
 
     @Override

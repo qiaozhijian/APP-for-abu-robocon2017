@@ -27,43 +27,52 @@
             android:layout_weight="2"
             android:max="100"
             android:progress="0" />
+
+        <TextView
+            android:id="@+id/begin_textview_last"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="正常" />
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:gravity="center"
         android:orientation="horizontal"
-        android:weightSum="1"
-        android:gravity="center">
-    <Button
-        android:id="@+id/column6"
-        android:layout_width="0dp"
-        android:layout_weight="0.1635"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="20dp"
-        android:text="c6" />
+        android:weightSum="1">
+
+        <Button
+            android:id="@+id/column6"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_weight="0.1635"
+            android:text="c6" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/activity_button_and_buttom"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="10dp"
         android:layout_marginLeft="50dp"
         android:layout_marginRight="50dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
         android:gravity="center">
 
         <Button
             android:id="@+id/column1"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
             android:layout_weight="0.2"
             android:text="c1" />
 
@@ -71,10 +80,10 @@
             android:id="@+id/column2"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
             android:layout_weight="0.2"
             android:text="c2" />
 
@@ -93,10 +102,10 @@
             android:id="@+id/column4"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
             android:layout_weight="0.2"
             android:text="c4" />
 
@@ -104,10 +113,10 @@
             android:id="@+id/column5"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
             android:layout_weight="0.2"
             android:text="c5" />
     </LinearLayout>
@@ -140,16 +149,16 @@
             android:id="@+id/go_to_human_activity"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:layout_marginBottom="2dp"
+            android:layout_weight="1"
             android:text="人形传感器" />
 
         <Button
             android:id="@+id/go_to_data_activity"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:layout_marginBottom="2dp"
+            android:layout_weight="1"
             android:text="参数数据" />
 
         <Button

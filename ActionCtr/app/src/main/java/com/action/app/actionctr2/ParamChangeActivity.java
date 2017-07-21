@@ -635,6 +635,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                                 if (countforMaxTime > 20) {
                                     progressDialog.cancel();
                                     Intent intentBleService=new Intent(ParamChangeActivity.this,BleService.class);
+                                    intentBleService.putExtra("data","重启");
                                     startService(intentBleService);
                                     countforMaxTime = 0;
                                     id=0;

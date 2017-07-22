@@ -632,7 +632,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                                 id++;
                             } else {
                                 countforMaxTime++;
-                                if (countforMaxTime > 20) {
+                                if (countforMaxTime > 40) {
                                     progressDialog.cancel();
                                     Intent intentBleService=new Intent(ParamChangeActivity.this,BleService.class);
                                     intentBleService.putExtra("data","重启");

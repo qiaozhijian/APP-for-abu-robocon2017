@@ -229,8 +229,65 @@ public class BleService extends Service {
         mConnectionState = STATE_CONNECTING;
         return true;
     }
+    /**
+     * 注册广播
+     */
+//    public void registerBTReceiver() {
+//        // 设置广播信息过滤
+//        IntentFilter filter = new IntentFilter("android.bluetooth.adapter.action.STATE_CHANGED");
+//        filter.addAction("android.bluetooth.device.action.PAIRING_REQUEST");
+//        filter.setPriority(Integer.MAX_VALUE);
+//        // 注册广播接收器，接收并处理搜索结果
+//        this.registerReceiver(BTReceive, filter);
+//    }
 
-
+    /**
+     * 广播接收者
+     */
+//    private BroadcastReceiver BTReceive = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            boolean isSuccess = false;
+//            Log.d("bletrack",intent.getAction());
+//            if (intent.getAction().equals("android.bluetooth.device.action.PAIRING_REQUEST")) {
+//                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+//                if (!device.getAddress().equals(AIMADDRESS))
+//                    return;
+//
+//                try {
+//                    int mType = intent.getIntExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT, BluetoothDevice.ERROR);
+//                    // 蓝牙有两种配对类型一种是pin，一种是密钥 先搞清楚你的设备是哪一种在做，不然瞎忙活
+//                    switch (mType) {
+//                        case 0:
+//                            // 反射 不会自己收ClsUtils
+//                            isSuccess = ClsUtils.setPin(device.getClass(), device, "123456");
+//                            Log.d("bletrack","setPin");
+//                            break;
+//                        case 1:
+//                            // 这个方法是我自己加的 ,不会的可以照着setPin写一个setPasskey boolean
+//                            // Bluetooth.setPasskey(int)
+//                            Log.d("bletrack","setpasscode");
+//                    }
+//
+//                    //配对不成功就弹出来
+//                    if (isSuccess) {
+//                        // 重点 先前已经设置我的广播接收者的优先者为最高 收到广播后 停止广播向下传递
+//                        // 因为系统的配对框的消失与弹出是通过广播做到的 我看源码得知 ，我们要将它
+//                        // 扼杀在摇篮中
+//                        abortBroadcast();
+//                        // 怕没拦截成功 补上一刀 发送一个关闭对话框的广播
+//                        context.sendBroadcast(new Intent("android.bluetooth.device.action.PAIRING_CANCEL"));
+//                    }
+//
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }else {
+//                Log.d("bletrack",intent.getAction());
+//            }
+//
+//        }
+//    };
     public void disconnect() {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w("bletrack", "BluetoothAdapter not initialized");
@@ -263,12 +320,12 @@ public class BleService extends Service {
                             }
                             isReadyForNext = false;                           //得到特征值之后才能准备好
                             mBluetoothGatt.discoverServices();              //去发现服务
+                            isConnectPermit = true;
+                            scanResult = false;
                         } else {                                              //地址不正确，断开连接
                             Log.d("bletrack", "ble devicce err");
                             gatt.disconnect();
                         }
-                        isConnectPermit = true;
-                        scanResult = false;
                         break;
                     case BluetoothProfile.STATE_DISCONNECTED:               //断开连接
                         mConnectionState = STATE_DISCONNECTED;
@@ -276,25 +333,30 @@ public class BleService extends Service {
                         Log.d("bletrack", "ble disconnected");
                         //秒连速度之快已经让车上蓝牙检测不到断开了
                         if (isConnectPermit) {
+                            if (gatt != null)                                      //先把资源释放，网上搜不释放会有问题
+                            {
+                                Log.d("bletrack", "gatt release");
+                                close();
+                            }
                             if (!connect(AIMADDRESS)) {
-                                if (gatt != null)                                      //先把资源释放，网上搜不释放会有问题
-                                {
-                                    Log.d("bletrack", "gatt release");
-                                    close();
-                                }
                                 connect(AIMADDRESS);
+                                Log.d("bletrack", "reconnect(AIMADDRESS)");
                             }                                 //适配器发送扫描
                         }
+
+
                         //scanLeDevice(true);
                         isReadyForNext = false;
                         break;
                     default:                                                //正在连接等等
                         isReadyForNext = false;
+                        Log.e("bletrack", "unkown newstate: " + String.valueOf(newState));
                         break;
                 }
             } else {
-                Log.e("mGattCallback", "gatt  回调失败");
-                disconnect();
+                Log.e("bletrack", "unkown disconnected: " + String.valueOf(status));
+                gatt.close();
+                mBluetoothGatt = mBluetoothDevice.connectGatt(BleService.this, false, mGattCallback);
             }
         }
 
@@ -794,6 +856,7 @@ public class BleService extends Service {
     public void onDestroy() {
         Log.d("servicetrack", "Ble Service onDestroy");
         super.onDestroy();
+        disconnect();
         close();
     }
 

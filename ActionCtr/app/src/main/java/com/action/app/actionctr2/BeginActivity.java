@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.action.app.actionctr2.ble.BleService;
 import com.action.app.actionctr2.ble.bleDataProcess;
@@ -44,6 +45,8 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
         final TextView textView=(TextView)findViewById(R.id.begin_textview_rssi);
         final TextView textView1=(TextView)findViewById(R.id.begin_textview_last);
 
+        findViewById(R.id.begin_textview_last).setOnClickListener(this);
+
         textView1.setText(sharedPreferencesHelper.getString("returnState"));
         if(sharedPreferencesHelper.getString("returnState")!=null)
         Log.d("state2.0",sharedPreferencesHelper.getString("returnState"));
@@ -73,7 +76,7 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
                             if(rssi<0)
                                 rssi=0;
                             bar.setProgress(rssi);
-                            Log.d("ble","rssi: "+String.valueOf(rssi));
+                            Log.d("bletrack","rssi: "+String.valueOf(state.readRssi()));
                         }
                     }
                     handler.postDelayed(this,500);
@@ -140,6 +143,10 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
                 intent.putExtra("button_id",countForColumn);
                 startActivity(intent);
                 finish();
+                break;
+            case R.id.begin_textview_last:
+                actionStart(this,"scan");
+                Toast.makeText(this,"start connecting",Toast.LENGTH_SHORT).show();
                 break;
         }
     }

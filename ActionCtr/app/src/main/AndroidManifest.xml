@@ -50,7 +50,6 @@
         <activity
             android:name=".DataActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".CtrActivity" />
         <activity
             android:name=".DebugDataDisplayActivity"
             android:screenOrientation="landscape" />

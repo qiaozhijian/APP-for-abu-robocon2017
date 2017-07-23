@@ -32,24 +32,23 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 public class BleService extends Service {
 
     private final IBinder mBinder = new myBleBand();
 
+    private static BleTool bleTool = new BleTool();
+
     private List<Sensor> mEnabledSensors = new ArrayList<Sensor>();
     //蓝牙相关类
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
-    private String mBluetoothDeviceAddress;
-    private BluetoothGatt mBluetoothGatt;
     private BluetoothDevice mBluetoothDevice;
-    private BluetoothGattService mGATTService;
+    private BluetoothGattService mServiceFirst;
     private BluetoothLeScanner scaner;  // android5.0把扫描方法单独弄成一个对象了
 
-    BluetoothGattCharacteristic characteristic;
-    BluetoothGattCharacteristic characteristicHB;
+    private ArrayList<BluetoothDevice> mDeviceContainer = new ArrayList<BluetoothDevice>();
+    private ArrayList<BluetoothGatt> connectionQueue = new ArrayList<BluetoothGatt>();
 
     public static final int bleDataLen = 12;      //    特征值的长度
     private byte[] dataReceive;                 //    接收数据缓存区
@@ -61,12 +60,12 @@ public class BleService extends Service {
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
-    private static boolean isReadyForNext = false;
+    private static boolean isReadyForNextFor1 = false;
+    private static boolean isReadyForNextFor2 = false;
     private int mConnectionState = STATE_DISCONNECTED;
     private boolean isHBSending = false;                //是否在发送
     private boolean isDataSending = false;
     private boolean isConnectPermit = false;
-    private boolean scanResult = false;
     private static final String STATE_IDLE = "STATE_IDLE";
     private static final String STATE_CONNECTION_READY = "STATE_CONNECTION_READY";
     private static final String STATE_CONNECTION_FAIL_SCAN = "STATE_CONNECTION_FAIL_SCAN";
@@ -74,24 +73,21 @@ public class BleService extends Service {
     private boolean isNeedForScan = false;
     private String returnState = STATE_IDLE;
 
+    private boolean isFirstFinished = false;
+
     // 描述扫描蓝牙的状态
     private boolean mScanning;
     private int mRssi;
 
     private SharedPreferencesHelper sharedPreferencesHelper;
 
-    private final String AIMADDRESS = "F4:5E:AB:B9:58:80";//1号 白色平板
-    // private final String AIMADDRESS="50:65:83:86:C6:33";//这个参数是车上用的平板 2号
-    //private final static String AIMADDRESS = "98:7B:F3:60:C7:1C";//测试版
-    //private final String AIMADDRESS="F4:5E:AB:B9:5A:03";// //手机
-    //private final String AIMADDRESS="F4:5E:AB:B9:59:77";//手机
-    // private final String AIMADDRESS="98:7B:F3:60:C7:01";//
-    //private final String AIMADDRESS = "90:59:AF:0E:60:1F";//
-    private final static UUID[] aimUUID = {UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb")};
-    private final static UUID aimServiceUUID = UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb");
-    private final static UUID aimChar6UUID = UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb");
-    private final static UUID aimChar7UUID = UUID.fromString("0000fff7-0000-1000-8000-00805f9b34fb");
-
+    //private final String AIMADDRESS1 = "F4:5E:AB:B9:58:80";//1号 白色平板
+    // private final String AIMADDRESS1="50:65:83:86:C6:33";//这个参数是车上用的平板 2号
+    //private final static String AIMADDRESS1 = "98:7B:F3:60:C7:1C";//测试版
+    private final String AIMADDRESS1 = "F4:5E:AB:B9:5A:03";// //手机
+    private final String AIMADDRESS2 = "F4:5E:AB:B9:59:77";//手机
+    // private final String AIMADDRESS1="98:7B:F3:60:C7:01";//
+    //private final String AIMADDRESS1 = "90:59:AF:0E:60:1F";//
 
     /**
      * @param enable (扫描使能，true:扫描开始,false:扫描停止)
@@ -116,36 +112,13 @@ public class BleService extends Service {
             scaner.stopScan(mScanCallback);   // 停止扫描
         }
     }
-//      5.0及之前的版本
-//    /**
-//     * 蓝牙扫描回调函数 实现扫描蓝牙设备，回调蓝牙BluetoothDevice，可以获取name MAC等信息
-//     **/
-//    private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
-//
-//        @Override
-//        public void onLeScan(final BluetoothDevice device, final int rssi,
-//                             byte[] scanRecord) {
-//            Log.d("bletrack", "find device: " + device.getName());
-//            Log.d("bletrack", "device address: " + device.getAddress());
-//            if (device.getAddress().equals(AIMADDRESS) && mScanning) {
-//                // TODO Auto-generated method stub
-//                Log.d("bletrack", "RIGHT DEVICE");
-//                mScanning = false;
-//                mBluetoothDevice = device;
-//                mRssi = rssi;
-//                scanLeDevice(false);
-//                connect(AIMADDRESS);
-//            }
-//        }
-//    };
+
 
     private ScanCallback mScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             BluetoothDevice deviceScan = result.getDevice();
-            Log.d("bletrack", "find device: " + deviceScan.getName());
-            Log.d("bletrack", "device address: " + deviceScan.getAddress());
             if (isNeedForScan) {
                 if (deviceScan.getAddress() != null || deviceScan.getName() != null) {
                     returnState = STATE_CONNECTION_FAIL_SCAN;
@@ -153,24 +126,26 @@ public class BleService extends Service {
                     Log.d("bletrack", "STATE_CONNECTION_FAIL_SCAN ");
                 }
             }
-            if (deviceScan.getAddress().equals(AIMADDRESS) && !scanResult) {
-                Log.d("bletrack", "start connecting");
-                mBluetoothDevice = deviceScan;
-                scanLeDevice(false);//扫描到之后停止扫描
-                connect(AIMADDRESS);
-                scanResult = true;
+            if (deviceScan.getAddress().equals(AIMADDRESS1) ||
+                    deviceScan.getAddress().equals(AIMADDRESS2)) {
+                Log.d("bletrack", "find device: " + deviceScan.getName());
+                Log.d("bletrack", "device address: " + deviceScan.getAddress());
+                if (!mDeviceContainer.isEmpty()) {
+                    Log.d("bletrack", "123 " );
+                    if (!isEquals(deviceScan)) {
+                        Log.d("bletrack", "device address: 456" );
+                        connectBle(deviceScan);
+                    }
+                } else {
+                    Log.d("bletrack", "device address:789 " );
+                    connectBle(deviceScan);
+                }
                 if (isNeedForScan) {
                     returnState = STATE_CONNECTION_FAIL_SCAN_RIGHT;
                     sharedPreferencesHelper.putString("returnState", returnState);
                     Log.d("bletrack", "STATE_CONNECTION_FAIL_SCAN_RIGHT ");
                 }
             }
-        }
-
-        @Override
-        public void onBatchScanResults(List<ScanResult> results) {
-            super.onBatchScanResults(results);
-            // 批量回调，一般不推荐使用，使用上面那个会更灵活
         }
 
         @Override
@@ -181,6 +156,20 @@ public class BleService extends Service {
         }
     };
 
+    private boolean isEquals(BluetoothDevice device) {
+        for (BluetoothDevice mDdevice : mDeviceContainer) {
+            if (mDdevice.equals(device)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void connectBle(BluetoothDevice device) {
+        mDeviceContainer.add(device);
+        connect(device.getAddress());
+    }
+
     // 连接远程蓝牙
     public boolean connect(final String address) {
         if (mBluetoothAdapter == null || address == null) {
@@ -188,115 +177,49 @@ public class BleService extends Service {
                     "BluetoothAdapter not initialized or unspecified address.");
             return false;
         }
-        if (!scanResult)
-            scanLeDevice(false);
 
         isNeedForScan = false;
 
-        // Previously connected device. Try to reconnect.
-        if (mBluetoothDeviceAddress != null
-                && address.equals(mBluetoothDeviceAddress)
-                && mBluetoothGatt != null) {
-            Log.d("bletrack", "Trying to use an existing mBluetoothGatt for connection.");
-            if (mBluetoothGatt.connect())//连接蓝牙，其实就是调用BluetoothGatt的连接方法
-            {
-                mConnectionState = STATE_CONNECTING;
-                Log.d("bletrack", "GATT connect()");
-                return true;
-            } else {
-                return false;
-            }
-        }
-
+        //scanLeDevice(false);
 
         /* 获取远端的蓝牙设备 */
-        if (mBluetoothDevice == null) {
-            mBluetoothDevice = mBluetoothAdapter.getRemoteDevice(address);
-            Log.d("bletrack", "create a bluetoothdevice");
-        }
-        if (mBluetoothDevice == null) {
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+
+        if (device == null) {
             Log.w("bletrack", "Device not found.  Unable to connect.");
             return false;
         }
+        Log.d("bletrack", "start connecting");
+        mConnectionState = STATE_CONNECTING;
+        isConnectPermit = false;//创建connectionQueue.get(0)时会进入mGattCallback
         // We want to directly connect to the device, so we are setting the
         // autoConnect
         // parameter to false.
         /* 调用device中的connectGatt连接到远程设备 */
-        isConnectPermit = false;//创建mBluetoothGatt时会进入mGattCallback
-        mBluetoothGatt = mBluetoothDevice.connectGatt(this, false, mGattCallback);
-        Log.d("bletrack", "Trying to create a new connection.");
-        mBluetoothDeviceAddress = address;
-        mConnectionState = STATE_CONNECTING;
+
+        BluetoothGatt bluetoothGatt;
+        bluetoothGatt = device.connectGatt(this, false, mGattCallback);
+        //如果没有
+        if (checkGatt(bluetoothGatt)) {
+            connectionQueue.add(bluetoothGatt);
+        }
+
+        if(connectionQueue.size()==2)
+        {
+            scanLeDevice(false);
+        }
         return true;
     }
-    /**
-     * 注册广播
-     */
-//    public void registerBTReceiver() {
-//        // 设置广播信息过滤
-//        IntentFilter filter = new IntentFilter("android.bluetooth.adapter.action.STATE_CHANGED");
-//        filter.addAction("android.bluetooth.device.action.PAIRING_REQUEST");
-//        filter.setPriority(Integer.MAX_VALUE);
-//        // 注册广播接收器，接收并处理搜索结果
-//        this.registerReceiver(BTReceive, filter);
-//    }
 
-    /**
-     * 广播接收者
-     */
-//    private BroadcastReceiver BTReceive = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            boolean isSuccess = false;
-//            Log.d("bletrack",intent.getAction());
-//            if (intent.getAction().equals("android.bluetooth.device.action.PAIRING_REQUEST")) {
-//                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-//                if (!device.getAddress().equals(AIMADDRESS))
-//                    return;
-//
-//                try {
-//                    int mType = intent.getIntExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT, BluetoothDevice.ERROR);
-//                    // 蓝牙有两种配对类型一种是pin，一种是密钥 先搞清楚你的设备是哪一种在做，不然瞎忙活
-//                    switch (mType) {
-//                        case 0:
-//                            // 反射 不会自己收ClsUtils
-//                            isSuccess = ClsUtils.setPin(device.getClass(), device, "123456");
-//                            Log.d("bletrack","setPin");
-//                            break;
-//                        case 1:
-//                            // 这个方法是我自己加的 ,不会的可以照着setPin写一个setPasskey boolean
-//                            // Bluetooth.setPasskey(int)
-//                            Log.d("bletrack","setpasscode");
-//                    }
-//
-//                    //配对不成功就弹出来
-//                    if (isSuccess) {
-//                        // 重点 先前已经设置我的广播接收者的优先者为最高 收到广播后 停止广播向下传递
-//                        // 因为系统的配对框的消失与弹出是通过广播做到的 我看源码得知 ，我们要将它
-//                        // 扼杀在摇篮中
-//                        abortBroadcast();
-//                        // 怕没拦截成功 补上一刀 发送一个关闭对话框的广播
-//                        context.sendBroadcast(new Intent("android.bluetooth.device.action.PAIRING_CANCEL"));
-//                    }
-//
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }else {
-//                Log.d("bletrack",intent.getAction());
-//            }
-//
-//        }
-//    };
-    public void disconnect() {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w("bletrack", "BluetoothAdapter not initialized");
-            return;
-        } else {
-            Log.w("bletrack", "disconnect()");
-            isConnectPermit = true;
-            mBluetoothGatt.disconnect();
+    private boolean checkGatt(BluetoothGatt bluetoothGatt) {
+        if (!connectionQueue.isEmpty()) {
+            for (BluetoothGatt btg : connectionQueue) {
+                if (btg.equals(bluetoothGatt)) {
+                    return false;
+                }
+            }
         }
+        return true;
     }
 
 
@@ -312,16 +235,20 @@ public class BleService extends Service {
                     case BluetoothProfile.STATE_CONNECTED:
                         mConnectionState = STATE_CONNECTED;
 //                        如果地址正确
-                        if (gatt.getDevice().getAddress().equals(AIMADDRESS)) {
+                        if (gatt.getDevice().getAddress().equals(AIMADDRESS1)
+                                || gatt.getDevice().getAddress().equals(AIMADDRESS2)) {
                             Log.d("bletrack", "ble connected");
-                            if (mBluetoothDevice.getName() != null && mBluetoothDevice.getAddress() != null) {
-                                Log.d("bletrack", mBluetoothDevice.getName());
-                                Log.d("bletrack", mBluetoothDevice.getAddress());
+                            if (gatt.equals(connectionQueue.get(0))) {
+                                isReadyForNextFor1 = false;                           //得到特征值之后才能准备好
+                                gatt.discoverServices();              //去发现服务
+                                Log.d("bletrack", "gatt1 looks for service");
                             }
-                            isReadyForNext = false;                           //得到特征值之后才能准备好
-                            mBluetoothGatt.discoverServices();              //去发现服务
+                            if (gatt.equals(connectionQueue.get(1))) {
+                                isReadyForNextFor2 = false;                           //得到特征值之后才能准备好
+                                gatt.discoverServices();              //去发现服务
+                                Log.d("bletrack", "gatt2 looks for service");
+                            }
                             isConnectPermit = true;
-                            scanResult = false;
                         } else {                                              //地址不正确，断开连接
                             Log.d("bletrack", "ble devicce err");
                             gatt.disconnect();
@@ -333,30 +260,34 @@ public class BleService extends Service {
                         Log.d("bletrack", "ble disconnected");
                         //秒连速度之快已经让车上蓝牙检测不到断开了
                         if (isConnectPermit) {
-                            if (gatt != null)                                      //先把资源释放，网上搜不释放会有问题
-                            {
-                                Log.d("bletrack", "gatt release");
-                                close();
+                            if (gatt.connect())//连接蓝牙，其实就是调用BluetoothGatt的连接方法
+                                Log.d("bletrack", "reconnect succeed");
+                            else {
+                                Log.d("bletrack", "reconnect fail");
                             }
-                            if (!connect(AIMADDRESS)) {
-                                connect(AIMADDRESS);
-                                Log.d("bletrack", "reconnect(AIMADDRESS)");
-                            }                                 //适配器发送扫描
                         }
-
-
                         //scanLeDevice(true);
-                        isReadyForNext = false;
+                        if (gatt.equals(mDeviceContainer.get(0))) {
+                            isReadyForNextFor1 = false;
+                        }
+                        if (gatt.equals(mDeviceContainer.get(1))) {
+                            isReadyForNextFor2 = false;
+                        }
                         break;
                     default:                                                //正在连接等等
-                        isReadyForNext = false;
+                        if (gatt.equals(mDeviceContainer.get(0))) {
+                            isReadyForNextFor1 = false;
+                        }
+                        if (gatt.equals(mDeviceContainer.get(1))) {
+                            isReadyForNextFor2 = false;
+                        }
                         Log.e("bletrack", "unkown newstate: " + String.valueOf(newState));
                         break;
                 }
             } else {
                 Log.e("bletrack", "unkown disconnected: " + String.valueOf(status));
                 gatt.close();
-                mBluetoothGatt = mBluetoothDevice.connectGatt(BleService.this, false, mGattCallback);
+                scanLeDevice(true);
             }
         }
 
@@ -366,17 +297,21 @@ public class BleService extends Service {
 //                如果特征值和描述被更新
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d("bletrack", "ble gatt service success");
-                isReadyForNext = true;
-//                    把这个服务赋
-                mGATTService = mBluetoothGatt.getService(aimServiceUUID);
-//                    把这个特征值赋值
-                characteristic = mGATTService.getCharacteristic(aimChar6UUID);
-                characteristicHB = mGATTService.getCharacteristic(aimChar7UUID);
-//                    打开通知开关
-                enableNotification(mBluetoothGatt, aimServiceUUID, aimChar6UUID);
-                enableNotification(mBluetoothGatt, aimServiceUUID, aimChar7UUID);
+                if (gatt.equals(connectionQueue.get(0))) {
+                    isReadyForNextFor1 = true;
+                    bleTool.findService(1, connectionQueue.get(0));
+                } else if (gatt.equals(connectionQueue.get(1))) {
+                    isReadyForNextFor2 = true;
+                    bleTool.findService(2, connectionQueue.get(1));
+                }
+
             } else {
-                isReadyForNext = false;
+                if (gatt.equals(mDeviceContainer.get(0))) {
+                    isReadyForNextFor1 = false;
+                }
+                if (gatt.equals(mDeviceContainer.get(1))) {
+                    isReadyForNextFor2 = false;
+                }
                 Log.d("bletrack", "ble gatt service fail");
                 disconnect();
             }
@@ -389,7 +324,7 @@ public class BleService extends Service {
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic, int status) {
-            if (status == mBluetoothGatt.GATT_SUCCESS) {
+            if (status == connectionQueue.get(0).GATT_SUCCESS) {
                 String log_out = new String();
                 for (int i = 0; i < bleDataLen; i++) {
 //                    为了log的时候好观察，加了个\t
@@ -463,86 +398,7 @@ public class BleService extends Service {
             RssiValue = rssi;
         }
 
-        /* 读描述值*/
-        @Override
-        public void onDescriptorRead(BluetoothGatt gatt,
-                                     BluetoothGattDescriptor descriptor, int status) {
-            // TODO Auto-generated method stub
-            // super.onDescriptorRead(gatt, descriptor, status);
-            Log.w("bletrack", "----onDescriptorRead status: " + status);
-            byte[] desc = descriptor.getValue();
-            if (desc != null) {
-                Log.w("bletrack", "----onDescriptorRead value: " + new String(desc));
-            }
-        }
-
-        /*写描述值*/
-        @Override
-        public void onDescriptorWrite(BluetoothGatt gatt,
-                                      BluetoothGattDescriptor descriptor, int status) {
-            // TODO Auto-generated method stub
-            // super.onDescriptorWrite(gatt, descriptor, status);
-            // Log.w("bletrack", "--onDescriptorWrite--: " + status);
-        }
-
-        @Override
-        public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
-            // TODO Auto-generated method stub
-            // super.onReliableWriteCompleted(gatt, status);
-            Log.w("bletrack", "--onReliableWriteCompleted--: " + status);
-        }
-
     };
-
-
-    public boolean enableNotification(BluetoothGatt gatt, UUID serviceUUID, UUID characteristicUUID) {
-        boolean success = false;
-        BluetoothGattService service = gatt.getService(serviceUUID);
-        if (service != null) {
-            BluetoothGattCharacteristic characteristic = findNotifyCharacteristic(service, characteristicUUID);
-            if (characteristic != null) {
-                success = gatt.setCharacteristicNotification(characteristic, true);
-                if (success) {
-                    for (BluetoothGattDescriptor dp : characteristic.getDescriptors()) {
-                        if (dp != null) {
-                            if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
-                                dp.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                            } else if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0) {
-                                dp.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
-                            }
-                            gatt.writeDescriptor(dp);
-                        }
-                    }
-                }
-            }
-        }
-        return success;
-    }
-
-    private BluetoothGattCharacteristic findNotifyCharacteristic(BluetoothGattService service, UUID characteristicUUID) {
-        BluetoothGattCharacteristic characteristic = null;
-        List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
-        for (BluetoothGattCharacteristic c : characteristics) {
-//            判断特征值是否具备通知属性，并且UUID是否相符
-            if ((c.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0
-                    && characteristicUUID.equals(c.getUuid())) {
-                characteristic = c;
-                break;
-            }
-        }
-        if (characteristic != null)
-            return characteristic;
-//            判断特征值是否具备indicate属性，并且UUID是否相符
-        for (BluetoothGattCharacteristic c : characteristics) {
-            if ((c.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
-                    && characteristicUUID.equals(c.getUuid())) {
-                characteristic = c;
-                break;
-            }
-        }
-        return characteristic;
-    }
-
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -552,53 +408,86 @@ public class BleService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        close();
+        GattClose(0);
         Log.d("servicetrack", getClass().getSimpleName() + "onUnbind");
         return super.onUnbind(intent);
     }
 
-    public void close() {
-        if (mBluetoothGatt == null) {
-            return;
+    public void GattClose(int i) {
+        switch (i) {
+            case 0:
+                if (connectionQueue.get(0) == null) {
+                } else {
+                    connectionQueue.get(0).close();
+                    connectionQueue.remove(0);
+                }
+                if (connectionQueue.get(1) == null) {
+                } else {
+                    connectionQueue.get(1).close();
+                    connectionQueue.remove(1);
+                }
+                break;
+            case 1:
+                if (connectionQueue.get(0) == null) {
+                } else {
+                    connectionQueue.get(0).close();
+                    connectionQueue.remove(0);
+                }
+                break;
+            case 2:
+                if (connectionQueue.get(1) == null) {
+                } else {
+                    connectionQueue.get(1).close();
+                    connectionQueue.remove(1);
+                }
+                break;
         }
-        mBluetoothGatt.close();
-        mBluetoothGatt = null;
     }
 
+    public void disconnect() {
+        if (mBluetoothAdapter == null || connectionQueue.get(0) == null) {
+            Log.w("bletrack", "BluetoothAdapter not initialized");
+            return;
+        } else {
+            Log.w("bletrack", "disconnect()");
+            isConnectPermit = true;
+            connectionQueue.get(0).disconnect();
+        }
+    }
 
     public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+        if (mBluetoothAdapter == null || connectionQueue.get(0) == null) {
             Log.w("bletrack", "BluetoothAdapter not initialized");
             return;
         }
-        mBluetoothGatt.readCharacteristic(characteristic);
+        connectionQueue.get(0).readCharacteristic(characteristic);
     }
 
     // 写入特征值
     public void writeCharacteristic(BluetoothGattCharacteristic characteristic) {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+        if (mBluetoothAdapter == null || connectionQueue.get(0) == null) {
             Log.w("bletrack", "BluetoothAdapter not initialized");
             return;
         }
-        mBluetoothGatt.writeCharacteristic(characteristic);
+        connectionQueue.get(0).writeCharacteristic(characteristic);
 
     }
 
 
     public void getCharacteristicDescriptor(BluetoothGattDescriptor descriptor) {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+        if (mBluetoothAdapter == null || connectionQueue.get(0) == null) {
             Log.w("bletrack", "BluetoothAdapter not initialized");
             return;
         }
 
-        mBluetoothGatt.readDescriptor(descriptor);
+        connectionQueue.get(0).readDescriptor(descriptor);
     }
 
 
     public List<BluetoothGattService> getSupportedGattServices() {
-        if (mBluetoothGatt == null)
+        if (connectionQueue.get(0) == null)
             return null;
-        return mBluetoothGatt.getServices();
+        return connectionQueue.get(0).getServices();
 
     }
 
@@ -644,9 +533,9 @@ public class BleService extends Service {
         try {
             ble_init();
 
-            //scanLeDevice(true);
+            scanLeDevice(true);
 
-            connect(AIMADDRESS);
+            //connect(AIMADDRESS1);
 
             //下面的代码用于发送心跳包
             final Handler handlerHeartBeat = new Handler();
@@ -663,14 +552,14 @@ public class BleService extends Service {
                     heartBeat[3] = 'B';
                     if (!isDataSending) {
                         wifiSend(heartBeat);
-                        Log.d("wifitrack", "wifisend");
+                        //Log.d("wifitrack", "wifisend");
                     }
-                    if (mBluetoothGatt != null) {
-                        if (isReadyForNext) {
-                            if (characteristicHB != null) {
-                                characteristicHB.setValue(heartBeat);
+                    if (connectionQueue.get(0) != null) {
+                        if (isReadyForNextFor1) {
+                            if (bleTool.charFirst7 != null) {
+                                bleTool.charFirst7.setValue(heartBeat);
                                 if (!isDataSending) {
-                                    mBluetoothGatt.writeCharacteristic(characteristicHB);
+                                    connectionQueue.get(0).writeCharacteristic(bleTool.charFirst7);
                                     isHBSending = true;
                                     Log.e("ACHB", "HeartBeats send");
                                 }
@@ -682,8 +571,29 @@ public class BleService extends Service {
                             lastHBcount = HBcount;
                             if (errCount >= 7) {
                                 Log.e("bletrack", "HeartBeats disconnect");
-                                isReadyForNext = false;
-                                disconnect();
+                              //  isReadyForNextFor1 = false;
+                              //  disconnect();
+                                errCount = 0;
+                            }
+                        }
+                        if (isReadyForNextFor2) {
+                            if (bleTool.charSecond7 != null) {
+                                bleTool.charSecond7.setValue(heartBeat);
+                                if (!isDataSending) {
+                                    connectionQueue.get(1).writeCharacteristic(bleTool.charSecond7);
+                                    isHBSending = true;
+                                    Log.e("ACHB", "HeartBeats send");
+                                }
+                            }
+                            if (HBcount == lastHBcount && (!isDataSending))
+                                errCount++;
+                            else
+                                errCount = 0;
+                            lastHBcount = HBcount;
+                            if (errCount >= 7) {
+                                Log.e("bletrack", "HeartBeats disconnect");
+                             //   isReadyForNextFor2 = false;
+                             //   disconnect();
                                 errCount = 0;
                             }
                         }
@@ -730,11 +640,11 @@ public class BleService extends Service {
             else
                 count = 0;
 //            如果GATT有定义
-            if (characteristic != null && mBluetoothGatt != null) {
+            if (bleTool.charFirst6 != null && connectionQueue.get(0) != null) {
 //                设置值
-                characteristic.setValue(dataTrans);
+                bleTool.charFirst6.setValue(dataTrans);
 //                发送
-                mBluetoothGatt.writeCharacteristic(characteristic);
+                connectionQueue.get(0).writeCharacteristic(bleTool.charFirst6);
             }
             wifiSend(dataTrans);
 
@@ -744,11 +654,11 @@ public class BleService extends Service {
 //                  没有发送成功
                     if (!checkSendOk()) {
                         isBusy = true;
-                        if (characteristic != null && mBluetoothGatt != null) {
-                            characteristic.setValue(dataTrans);
+                        if (bleTool.charFirst6 != null && connectionQueue.get(0) != null) {
+                            bleTool.charFirst6.setValue(dataTrans);
                             //  if(!isHBSending) {
                             isDataSending = true;
-                            mBluetoothGatt.writeCharacteristic(characteristic);
+                            connectionQueue.get(0).writeCharacteristic(bleTool.charFirst6);
                             Log.d("datasend", "write characteristic");
                             //  }
                         }
@@ -775,7 +685,7 @@ public class BleService extends Service {
 
         public boolean checkSendOk() {
 //            蓝牙没有准备好，就一直不重发
-            if (!isReadyForNext) {
+            if (!isReadyForNextFor1) {
                 return true;
             }
 //            如果二者相等则返回true
@@ -800,18 +710,18 @@ public class BleService extends Service {
 
         //        连接是否完成
         public boolean isReady() {
-            return isReadyForNext;
+            return isReadyForNextFor1;
         }
 
         //        读取蓝牙强度
         public int readRssi() {
-            if (isReadyForNext) {
-                mBluetoothGatt.readRemoteRssi();
+            if (isReadyForNextFor1) {
+                connectionQueue.get(0).readRemoteRssi();
                 if (rssiLast == RssiValue) rssiError++;
                 else rssiError = 0;
                 if (rssiError > 1) {
                     rssiError = 0;
-                    //connect(AIMADDRESS);
+                    //connect(AIMADDRESS1);
                     Log.d("bletrack", "rssi disconnect");
                 }
                 rssiLast = RssiValue;
@@ -857,7 +767,7 @@ public class BleService extends Service {
         Log.d("servicetrack", "Ble Service onDestroy");
         super.onDestroy();
         disconnect();
-        close();
+        GattClose(0);
     }
 
 }

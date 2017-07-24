@@ -25,7 +25,7 @@ public class BleTool {
     private BluetoothGattService mGATTSecond;
     protected BluetoothGattCharacteristic charSecond6;
     protected BluetoothGattCharacteristic charSecond7;
-    
+
     BleTool() {
     }
 
@@ -98,13 +98,26 @@ public class BleTool {
         }
         return characteristic;
     }
-}  
 
-
+    String getCharValue(BluetoothGattCharacteristic characteristic) {
+        String log_out = new String();
+        for (int i = 0; i < 12; i++) {
+            if (i < 4)
+                log_out += String.valueOf((char) characteristic.getValue()[i]) + '\t';
+            else
+                log_out += String.valueOf(characteristic.getValue()[i]) + '\t';
+        }
+        return log_out;
+    }
+}
 
 
 /**
  * 注册广播
+ * <p>
+ * 广播接收者
+ * <p>
+ * 广播接收者
  */
 //    public void registerBTReceiver() {
 //        // 设置广播信息过滤

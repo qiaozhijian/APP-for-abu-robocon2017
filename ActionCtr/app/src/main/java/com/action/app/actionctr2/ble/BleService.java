@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -51,18 +50,23 @@ public class BleService extends Service {
     private ArrayList<BluetoothGatt> connectionQueue = new ArrayList<BluetoothGatt>();
 
     public static final int bleDataLen = 12;      //    特征值的长度
-    private byte[] dataReceive;                 //    接收数据缓存区
+    private byte[] dataReceiveFirst;                 //    接收数据缓存区
+    private byte[] dataReceiveSecond;                 //    接收数据缓存区
     private byte[] dataTrans;                   //    发送数据缓存区
-    private byte[] dataHeartBeats;              //    心跳包的缓存区
-    private int HBcount = 0;                      //    心跳包的计数
-    private int RssiValue = 0;                    //    RSSI
+    private byte[] dataHeartBeatsFirst;              //    心跳包的缓存区
+    private byte[] dataHeartBeatsSecond;              //    心跳包的缓存区
+    private int HBcountFirst = 0;                      //    心跳包的计数
+    private int HBcountSecond = 0;                      //    心跳包的计数
+    private int RssiValueFirst = 0;                    //    RSSI
+    private int RssiValueSecond = 0;                    //    RSSI
 
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
     private static boolean isReadyForNextFor1 = false;
     private static boolean isReadyForNextFor2 = false;
-    private int mConnectionState = STATE_DISCONNECTED;
+    private int mConnectionStateFirst = STATE_DISCONNECTED;
+    private int mConnectionStateSecond = STATE_DISCONNECTED;
     private boolean isHBSending = false;                //是否在发送
     private boolean isDataSending = false;
     private boolean isConnectPermit = false;
@@ -102,7 +106,7 @@ public class BleService extends Service {
             Log.i("bletrack", "begin scanning");
             mScanning = true;
             //在扫描前，最好先调用一次停止扫描
-            scaner.stopScan(mScanCallback);   // 停止扫描
+            //scaner.stopScan(mScanCallback);   // 这时会引用空对象
             scaner.startScan(mScanCallback);  // 开始扫描
             //  mBluetoothAdapter.startLeScan(aimUUID, mLeScanCallback);5.0及之前的版本
         } else {
@@ -126,18 +130,19 @@ public class BleService extends Service {
                     Log.d("bletrack", "STATE_CONNECTION_FAIL_SCAN ");
                 }
             }
+
             if (deviceScan.getAddress().equals(AIMADDRESS1) ||
                     deviceScan.getAddress().equals(AIMADDRESS2)) {
-                Log.d("bletrack", "find device: " + deviceScan.getName());
-                Log.d("bletrack", "device address: " + deviceScan.getAddress());
                 if (!mDeviceContainer.isEmpty()) {
-                    Log.d("bletrack", "123 " );
+                    Log.d("bletrack", "mDeviceContainer is not empty ");
                     if (!isEquals(deviceScan)) {
-                        Log.d("bletrack", "device address: 456" );
+                        Log.d("bletrack", "add new device");
+                        Log.d("bletrack", "find device: " + deviceScan.getName());
+                        Log.d("bletrack", "device address: " + deviceScan.getAddress());
                         connectBle(deviceScan);
                     }
                 } else {
-                    Log.d("bletrack", "device address:789 " );
+                    Log.d("bletrack", "mDeviceContainer is empty ");
                     connectBle(deviceScan);
                 }
                 if (isNeedForScan) {
@@ -152,7 +157,7 @@ public class BleService extends Service {
         public void onScanFailed(int errorCode) {
             super.onScanFailed(errorCode);
             // 扫描失败，并且失败原因
-            Log.d("bletrack", "扫描失败");
+            Log.d("bletrack", "扫描失败" + String.valueOf(errorCode));
         }
     };
 
@@ -190,7 +195,8 @@ public class BleService extends Service {
             return false;
         }
         Log.d("bletrack", "start connecting");
-        mConnectionState = STATE_CONNECTING;
+        if(address.w)
+        mConnectionStateFirst = STATE_CONNECTING;
         isConnectPermit = false;//创建connectionQueue.get(0)时会进入mGattCallback
         // We want to directly connect to the device, so we are setting the
         // autoConnect
@@ -200,29 +206,22 @@ public class BleService extends Service {
         BluetoothGatt bluetoothGatt;
         bluetoothGatt = device.connectGatt(this, false, mGattCallback);
         //如果没有
-        if (checkGatt(bluetoothGatt)) {
+        if (checkGATT(bluetoothGatt)) {
             connectionQueue.add(bluetoothGatt);
         }
-
-        if(connectionQueue.size()==2)
-        {
+        if (connectionQueue.size() == 2) {
             scanLeDevice(false);
+            Log.d("bletrack", "two devices connect");
         }
         return true;
     }
 
-    private boolean checkGatt(BluetoothGatt bluetoothGatt) {
-        if (!connectionQueue.isEmpty()) {
-            for (BluetoothGatt btg : connectionQueue) {
-                if (btg.equals(bluetoothGatt)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-
+    static private int errorCountForRead = 0;
+    static private int errorCountForChange = 0;
+    static private int errorCountForWrite = 0;
+    static private int errorCountForService = 0;
+    static private int errorCountForRssi = 0;
+    private final int permitForCount = 5;
     /* 连接远程设备的回调函数 */
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
@@ -233,18 +232,19 @@ public class BleService extends Service {
                 switch (newState) {
 //                    如果连接状态正常
                     case BluetoothProfile.STATE_CONNECTED:
-                        mConnectionState = STATE_CONNECTED;
+                        mConnectionStateFirst = STATE_CONNECTED;
 //                        如果地址正确
                         if (gatt.getDevice().getAddress().equals(AIMADDRESS1)
                                 || gatt.getDevice().getAddress().equals(AIMADDRESS2)) {
                             Log.d("bletrack", "ble connected");
-                            if (gatt.equals(connectionQueue.get(0))) {
-                                isReadyForNextFor1 = false;                           //得到特征值之后才能准备好
+                            if (checkGATT(gatt, 0)) {
+                                isReadyForNextFor1 = false;           //得到特征值之后才能准备好
                                 gatt.discoverServices();              //去发现服务
                                 Log.d("bletrack", "gatt1 looks for service");
                             }
-                            if (gatt.equals(connectionQueue.get(1))) {
-                                isReadyForNextFor2 = false;                           //得到特征值之后才能准备好
+                            
+                            if (checkGATT(gatt, 1)) {
+                                isReadyForNextFor2 = false;           //得到特征值之后才能准备好
                                 gatt.discoverServices();              //去发现服务
                                 Log.d("bletrack", "gatt2 looks for service");
                             }
@@ -255,39 +255,47 @@ public class BleService extends Service {
                         }
                         break;
                     case BluetoothProfile.STATE_DISCONNECTED:               //断开连接
-                        mConnectionState = STATE_DISCONNECTED;
+                        mConnectionStateFirst = STATE_DISCONNECTED;
 //                    加上会变快
                         Log.d("bletrack", "ble disconnected");
+                        //scanLeDevice(true);
+                        if (checkGATT(gatt, 0)) {
+                            isReadyForNextFor1 = false;
+                        }
+
+                        if (checkGATT(gatt, 1)) {
+                            isReadyForNextFor2 = false;
+                        }
                         //秒连速度之快已经让车上蓝牙检测不到断开了
                         if (isConnectPermit) {
-                            if (gatt.connect())//连接蓝牙，其实就是调用BluetoothGatt的连接方法
-                                Log.d("bletrack", "reconnect succeed");
-                            else {
-                                Log.d("bletrack", "reconnect fail");
-                            }
+                            if(!isReadyForNextFor2)
+                                connect(AIMADDRESS2);
+                            if(!isReadyForNextFor1)
+                                connect(AIMADDRESS1);
                         }
-                        //scanLeDevice(true);
-                        if (gatt.equals(mDeviceContainer.get(0))) {
-                            isReadyForNextFor1 = false;
-                        }
-                        if (gatt.equals(mDeviceContainer.get(1))) {
-                            isReadyForNextFor2 = false;
-                        }
+
                         break;
                     default:                                                //正在连接等等
-                        if (gatt.equals(mDeviceContainer.get(0))) {
+                        if (checkGATT(gatt, 0)) {
                             isReadyForNextFor1 = false;
                         }
-                        if (gatt.equals(mDeviceContainer.get(1))) {
+
+                        if (checkGATT(gatt, 1)) {
                             isReadyForNextFor2 = false;
                         }
+
                         Log.e("bletrack", "unkown newstate: " + String.valueOf(newState));
                         break;
                 }
+                errorCountForChange = 0;
             } else {
+                errorCountForChange++;
                 Log.e("bletrack", "unkown disconnected: " + String.valueOf(status));
-                gatt.close();
-                scanLeDevice(true);
+                if (errorCountForChange > permitForCount) {
+                    gatt.close();
+                    scanLeDevice(true);
+                    errorCountForChange = 0;
+                }
             }
         }
 
@@ -297,23 +305,30 @@ public class BleService extends Service {
 //                如果特征值和描述被更新
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d("bletrack", "ble gatt service success");
-                if (gatt.equals(connectionQueue.get(0))) {
+                if (checkGATT(gatt, 0)) {
                     isReadyForNextFor1 = true;
                     bleTool.findService(1, connectionQueue.get(0));
-                } else if (gatt.equals(connectionQueue.get(1))) {
+                }
+
+                if (checkGATT(gatt, 1)) {
                     isReadyForNextFor2 = true;
                     bleTool.findService(2, connectionQueue.get(1));
                 }
-
+                errorCountForService = 0;
             } else {
-                if (gatt.equals(mDeviceContainer.get(0))) {
-                    isReadyForNextFor1 = false;
+                errorCountForService++;
+                if (errorCountForService > permitForCount) {
+                    if (checkGATT(gatt, 0)) {
+                        isReadyForNextFor1 = false;
+                        Log.d("bletrack", "ble gatt1 service fail");
+                    }
+
+                    if (checkGATT(gatt, 1)) {
+                        isReadyForNextFor2 = false;
+                        Log.d("bletrack", "ble gatt2 service fail");
+                    }
+                    gatt.disconnect();
                 }
-                if (gatt.equals(mDeviceContainer.get(1))) {
-                    isReadyForNextFor2 = false;
-                }
-                Log.d("bletrack", "ble gatt service fail");
-                disconnect();
             }
         }
 
@@ -324,46 +339,79 @@ public class BleService extends Service {
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic, int status) {
-            if (status == connectionQueue.get(0).GATT_SUCCESS) {
-                String log_out = new String();
-                for (int i = 0; i < bleDataLen; i++) {
+            if (status == gatt.GATT_SUCCESS) {
+                if (checkGATT(gatt, 0)) {
+                    String log_out = new String();
+                    for (int i = 0; i < bleDataLen; i++) {
 //                    为了log的时候好观察，加了个\t
-                    log_out += String.valueOf(characteristic.getValue()[i]) + '\t';
+                        log_out += String.valueOf(characteristic.getValue()[i]) + '\t';
+                    }
+                    Log.d("bletrack", "gatt 0 read value: " + log_out);
                 }
-                Log.d("bletrack", "read value: " + log_out);
+
+
+                if (checkGATT(gatt, 1)) {
+                    String log_out = new String();
+                    for (int i = 0; i < bleDataLen; i++) {
+//                    为了log的时候好观察，加了个\t
+                        log_out += String.valueOf(characteristic.getValue()[i]) + '\t';
+                    }
+                    Log.d("bletrack", "gatt 1 read value: " + log_out);
+                }
+                errorCountForRead = 0;
             } else {
-                Log.d("bletrack", "char read fail");
-                disconnect();
+                errorCountForRead++;
+                if (errorCountForRead > permitForCount) {
+                    if (checkGATT(gatt, 0)) {
+                        Log.d("bletrack", "ble gatt1 service fail");
+                    }
+                    if (checkGATT(gatt, 1)) {
+                        Log.d("bletrack", "ble gatt2 service fail");
+                    }
+                    gatt.disconnect();
+                }
             }
         }
 
+        //是不是从机设置有问题，一是多少错误就断开，二是多长广播还是说，速度重连的要求
         /* *特征值的改* */
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
-            byte[] temp;
-            Log.d("ACHB", "notify: ");
-            temp = characteristic.getValue();
             String log_out = new String();
-            for (int i = 0; i < 12; i++) {
-                if (i < 4)
-                    log_out += String.valueOf((char) (temp[i])) + '\t';
-                else
-                    log_out += String.valueOf(temp[i]) + '\t';
+
+            if (checkGATT(bleTool.charFirst6, characteristic)) {
+                dataReceiveFirst = characteristic.getValue();
+                log_out = bleTool.getCharValue(characteristic);
+                Log.d("bletrack", "first notify: " + log_out);
             }
-//                判断是否是心跳包
-            if (temp[0] == 'A' && temp[1] == 'C' && temp[2] == 'H' && temp[3] == 'B') {
-                dataHeartBeats = temp;
-                HBcount++;
-                if (temp[characteristic.getValue().length - 1] != 0 || temp[characteristic.getValue().length - 2] != 0)
-                    Log.d("ACHB", "notify: " + log_out);
-            } else {
-                dataReceive = temp;
-                if (dataReceive.length != bleDataLen) {
-                    Log.e("version err", "length of receivedata is not equal to require");
+
+            if (checkGATT(bleTool.charFirst7, characteristic)) {
+                dataHeartBeatsFirst = characteristic.getValue();
+                HBcountFirst++;
+                log_out = bleTool.getCharValue(characteristic);
+                Log.d("ACHB", "first notify: " + log_out);
+                if (dataReceiveFirst.length != bleDataLen) {
+                    Log.e("bletrack", "notify first length is not equal to require");
                 }
-                Log.d("bletrack", "notify: " + log_out);
             }
+
+            if (checkGATT(bleTool.charSecond6, characteristic)) {
+                dataReceiveSecond = characteristic.getValue();
+                log_out = bleTool.getCharValue(characteristic);
+                Log.d("bletrack", "second notify: " + log_out);
+            }
+
+            if (checkGATT(bleTool.charSecond7, characteristic)) {
+                dataHeartBeatsSecond = characteristic.getValue();
+                HBcountSecond++;
+                log_out = bleTool.getCharValue(characteristic);
+                Log.d("ACHB", "second notify: " + log_out);
+                if (dataReceiveSecond.length != bleDataLen) {
+                    Log.e("bletrack", "notify second length is not equal to require");
+                }
+            }
+
         }
 
         /*
@@ -371,33 +419,75 @@ public class BleService extends Service {
          * */
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt,
-                                          BluetoothGattCharacteristic characteristic, int status) {
+                                          BluetoothGattCharacteristic characteristic,
+                                          int status) {
+            String log_out = new String();
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                byte[] temp;
-                temp = characteristic.getValue();
-                String log_out = new String();
-                for (int i = 0; i < 12; i++) {
-                    if (i < 4)
-                        log_out += String.valueOf((char) (temp[i])) + '\t';
-                    else
-                        log_out += String.valueOf((int) temp[i]) + '\t';
+                if (checkGATT(bleTool.charFirst6, characteristic)) {
+                    log_out = bleTool.getCharValue(characteristic);
+                    Log.d("bletrack", "first write: " + log_out);
                 }
-                if (temp[0] == 'A' && temp[1] == 'C' && temp[2] == 'H' && temp[3] == 'B') {
 
-                } else
-                    Log.d("bletrack", "write: " + log_out);
+                if (checkGATT(bleTool.charFirst7, characteristic)) {
+                    log_out = bleTool.getCharValue(characteristic);
+                    Log.d("ACHB", "first write: " + log_out);
+                    if (dataReceiveFirst.length != bleDataLen) {
+                        Log.e("bletrack", "write first length is not equal to require");
+                    }
+                }
+
+                if (checkGATT(bleTool.charSecond6, characteristic)) {
+                    log_out = bleTool.getCharValue(characteristic);
+                    Log.d("bletrack", "second write: " + log_out);
+                }
+
+                if (checkGATT(bleTool.charSecond7, characteristic)) {
+                    log_out = bleTool.getCharValue(characteristic);
+                    Log.d("ACHB", "second write: " + log_out);
+                    if (dataReceiveSecond.length != bleDataLen) {
+                        Log.e("bletrack", "write second length is not equal to require");
+                    }
+                }
+                errorCountForWrite = 0;
+
             } else {
-                Log.d("bletrack", "char write fail");
-                disconnect();
+                errorCountForWrite++;
+                if (errorCountForWrite > errorCountForWrite) {
+                    if (checkGATT(gatt, 0)) {
+                        Log.d("bletrack", "gatt first char write fail");
+                    }
+                    if (checkGATT(gatt, 1)) {
+                        Log.d("bletrack", "gatt second char write fail");
+                    }
+                    gatt.disconnect();
+                }
             }
         }
 
         /*读写蓝牙信号值 */
         @Override
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
-            RssiValue = rssi;
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                if (checkGATT(gatt, 0)) {
+                    RssiValueFirst = rssi;
+                }
+                if (checkGATT(gatt, 1)) {
+                    RssiValueSecond = rssi;
+                }
+                errorCountForRssi = 0;
+            } else {
+                errorCountForRssi++;
+                if (errorCountForRssi > errorCountForWrite) {
+                    if (checkGATT(gatt, 0)) {
+                        Log.d("bletrack", "gatt first rssi fail");
+                    }
+                    if (checkGATT(gatt, 1)) {
+                        Log.d("bletrack", "gatt second rssi fail");
+                    }
+                    gatt.disconnect();
+                }
+            }
         }
-
     };
 
     @Override
@@ -416,79 +506,126 @@ public class BleService extends Service {
     public void GattClose(int i) {
         switch (i) {
             case 0:
-                if (connectionQueue.get(0) == null) {
-                } else {
+                if (checkGATT(0)) {
                     connectionQueue.get(0).close();
                     connectionQueue.remove(0);
+                    Log.w("bletrack", "gatt 1 close()");
                 }
-                if (connectionQueue.get(1) == null) {
-                } else {
+
+                if (checkGATT(1)) {
                     connectionQueue.get(1).close();
                     connectionQueue.remove(1);
+                    Log.w("bletrack", "gatt 2 close()");
                 }
                 break;
             case 1:
-                if (connectionQueue.get(0) == null) {
-                } else {
+                if (checkGATT(0)) {
                     connectionQueue.get(0).close();
                     connectionQueue.remove(0);
+                    Log.w("bletrack", "gatt 1 close()");
                 }
                 break;
             case 2:
-                if (connectionQueue.get(1) == null) {
-                } else {
+                if (checkGATT(1)) {
                     connectionQueue.get(1).close();
                     connectionQueue.remove(1);
+                    Log.w("bletrack", "gatt 2 close()");
                 }
                 break;
         }
     }
 
-    public void disconnect() {
+    public void disconnect(int i) {
         if (mBluetoothAdapter == null || connectionQueue.get(0) == null) {
             Log.w("bletrack", "BluetoothAdapter not initialized");
             return;
         } else {
-            Log.w("bletrack", "disconnect()");
             isConnectPermit = true;
-            connectionQueue.get(0).disconnect();
+            switch (i) {
+                case 0:
+                    if (checkGATT(0)) {
+                        connectionQueue.get(0).disconnect();
+                        Log.w("bletrack", "gatt 1 discount()");
+                    }
+
+                    if (checkGATT(1)) {
+                        connectionQueue.get(1).disconnect();
+                        Log.w("bletrack", "gatt 2 discount()");
+                    }
+
+                    break;
+                case 1:
+                    if (checkGATT(0)) {
+                        connectionQueue.get(0).disconnect();
+                        Log.w("bletrack", "gatt 1 discount()");
+                    }
+
+                    break;
+                case 2:
+                    if (checkGATT(1)) {
+                        connectionQueue.get(1).disconnect();
+                        Log.w("bletrack", "gatt 2 discount()");
+                    }
+
+                    break;
+            }
         }
     }
 
-    public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
-        if (mBluetoothAdapter == null || connectionQueue.get(0) == null) {
-            Log.w("bletrack", "BluetoothAdapter not initialized");
-            return;
+    private boolean checkGATT(int order) {
+
+        if (connectionQueue.size() > order) {
+            if (connectionQueue.get(order) != null)
+                return true;
+            else {
+                Log.d("checkGATT", String.valueOf(order) + " null");
+                return false;
+            }
+        } else {
+            Log.d("checkGATT", String.valueOf(order) + " size fail");
+            return false;
         }
-        connectionQueue.get(0).readCharacteristic(characteristic);
     }
 
-    // 写入特征值
-    public void writeCharacteristic(BluetoothGattCharacteristic characteristic) {
-        if (mBluetoothAdapter == null || connectionQueue.get(0) == null) {
-            Log.w("bletrack", "BluetoothAdapter not initialized");
-            return;
-        }
-        connectionQueue.get(0).writeCharacteristic(characteristic);
+    private boolean checkGATT(BluetoothGatt gatt, int order) {
 
+        if (connectionQueue.size() > order) {
+            if (gatt.equals(connectionQueue.get(order)))
+                return true;
+            else {
+                Log.d("checkGATT", String.valueOf(order) + "equal null");
+                return false;
+            }
+        } else {
+            Log.d("checkGATT", String.valueOf(order) + "equal size fail");
+            return false;
+        }
     }
 
-
-    public void getCharacteristicDescriptor(BluetoothGattDescriptor descriptor) {
-        if (mBluetoothAdapter == null || connectionQueue.get(0) == null) {
-            Log.w("bletrack", "BluetoothAdapter not initialized");
-            return;
+    private boolean checkGATT(BluetoothGatt bluetoothGatt) {
+        if (!connectionQueue.isEmpty()) {
+            for (BluetoothGatt btg : connectionQueue) {
+                if (btg.equals(bluetoothGatt)) {
+                    return false;
+                }
+            }
         }
-
-        connectionQueue.get(0).readDescriptor(descriptor);
+        return true;
     }
 
+    private boolean checkGATT(BluetoothGattCharacteristic blechar, BluetoothGattCharacteristic characteristic) {
 
-    public List<BluetoothGattService> getSupportedGattServices() {
-        if (connectionQueue.get(0) == null)
-            return null;
-        return connectionQueue.get(0).getServices();
-
+        if (blechar != null) {
+            if (characteristic.equals(blechar))
+                return true;
+            else {
+                Log.d("checkGATT", blechar.toString() + "blechar equal fail");
+                return false;
+            }
+        } else {
+            Log.d("checkGATT", blechar.toString() + "blechar null");
+            return false;
+        }
     }
 
     private void notification() {
@@ -540,8 +677,10 @@ public class BleService extends Service {
             //下面的代码用于发送心跳包
             final Handler handlerHeartBeat = new Handler();
             Runnable runnable = new Runnable() {
-                private int errCount = 0;
-                private int lastHBcount = 0;
+                private int errCount1 = 0;
+                private int lastHBcountFirst = 0;
+                private int errCount2 = 0;
+                private int lastHBcountSecond = 0;
 
                 @Override
                 public void run() {
@@ -554,7 +693,7 @@ public class BleService extends Service {
                         wifiSend(heartBeat);
                         //Log.d("wifitrack", "wifisend");
                     }
-                    if (connectionQueue.get(0) != null) {
+                    if (connectionQueue.size() > 0) {
                         if (isReadyForNextFor1) {
                             if (bleTool.charFirst7 != null) {
                                 bleTool.charFirst7.setValue(heartBeat);
@@ -564,16 +703,16 @@ public class BleService extends Service {
                                     Log.e("ACHB", "HeartBeats send");
                                 }
                             }
-                            if (HBcount == lastHBcount && (!isDataSending))
-                                errCount++;
+                            if (HBcountFirst == lastHBcountFirst && (!isDataSending))
+                                errCount1++;
                             else
-                                errCount = 0;
-                            lastHBcount = HBcount;
-                            if (errCount >= 7) {
+                                errCount1 = 0;
+                            lastHBcountFirst = HBcountFirst;
+                            if (errCount1 >= 13) {
                                 Log.e("bletrack", "HeartBeats disconnect");
-                              //  isReadyForNextFor1 = false;
-                              //  disconnect();
-                                errCount = 0;
+                                isReadyForNextFor1 = false;
+                                disconnect(1);
+                                errCount1 = 0;
                             }
                         }
                         if (isReadyForNextFor2) {
@@ -585,16 +724,16 @@ public class BleService extends Service {
                                     Log.e("ACHB", "HeartBeats send");
                                 }
                             }
-                            if (HBcount == lastHBcount && (!isDataSending))
-                                errCount++;
+                            if (HBcountSecond == lastHBcountSecond && (!isDataSending))
+                                errCount2++;
                             else
-                                errCount = 0;
-                            lastHBcount = HBcount;
-                            if (errCount >= 13) {
+                                errCount2 = 0;
+                            lastHBcountSecond = HBcountSecond;
+                            if (errCount2 >= 13) {
                                 Log.e("bletrack", "HeartBeats disconnect");
-                             //   isReadyForNextFor2 = false;
-                             //   disconnect();
-                                errCount = 0;
+                                isReadyForNextFor2 = false;
+                                disconnect(2);
+                                errCount2 = 0;
                             }
                         }
                     }
@@ -614,8 +753,10 @@ public class BleService extends Service {
     //    蓝牙发数  binder跟所有涉及到蓝牙的activity通信
     private myBleBand dataSend = new myBleBand();
 
-    private static int rssiLast = 0;
-    private static int rssiError = 0;
+    private static int rssiLastFirst = 0;
+    private static int rssiErrorFirst = 0;
+    private static int rssiLastSecond = 0;
+    private static int rssiErrorSecond = 0;
 
     public class myBleBand extends Binder {
         //        表明现在是第几条命令
@@ -640,11 +781,17 @@ public class BleService extends Service {
             else
                 count = 0;
 //            如果GATT有定义
-            if (bleTool.charFirst6 != null && connectionQueue.get(0) != null) {
+            if (bleTool.charFirst6 != null && connectionQueue.size() > 0) {
 //                设置值
                 bleTool.charFirst6.setValue(dataTrans);
 //                发送
                 connectionQueue.get(0).writeCharacteristic(bleTool.charFirst6);
+            }
+            if (bleTool.charSecond6 != null && connectionQueue.size() > 1) {
+//                设置值
+                bleTool.charSecond6.setValue(dataTrans);
+//                发送
+                connectionQueue.get(1).writeCharacteristic(bleTool.charSecond6);
             }
             wifiSend(dataTrans);
 
@@ -652,13 +799,21 @@ public class BleService extends Service {
                 @Override
                 public void run() {
 //                  没有发送成功
-                    if (!checkSendOk()) {
+                    if ((!checkSendOkFirst()) && (!checkSendOkSecond())) {
                         isBusy = true;
-                        if (bleTool.charFirst6 != null && connectionQueue.get(0) != null) {
+                        if (bleTool.charFirst6 != null && connectionQueue.size() > 0) {
                             bleTool.charFirst6.setValue(dataTrans);
                             //  if(!isHBSending) {
                             isDataSending = true;
                             connectionQueue.get(0).writeCharacteristic(bleTool.charFirst6);
+                            Log.d("datasend", "write characteristic");
+                            //  }
+                        }
+                        if (bleTool.charSecond6 != null && connectionQueue.size() > 1) {
+                            bleTool.charSecond6.setValue(dataTrans);
+                            //  if(!isHBSending) {
+                            isDataSending = true;
+                            connectionQueue.get(1).writeCharacteristic(bleTool.charSecond6);
                             Log.d("datasend", "write characteristic");
                             //  }
                         }
@@ -680,24 +835,60 @@ public class BleService extends Service {
 
         //        获取心跳包数据
         public byte[] getHeartBeats() {
-            return dataHeartBeats;
+            if (isReadyForNextFor1)
+                return dataHeartBeatsFirst;
+            if (isReadyForNextFor2)
+                return dataHeartBeatsSecond;
+            return dataHeartBeatsFirst;
         }
 
-        public boolean checkSendOk() {
-//            蓝牙没有准备好，就一直不重发
-            if (!isReadyForNextFor1) {
-                return true;
-            }
+
+        public int getConnectNum() {
+            int conNum = 0;
+            if (isReadyForNextFor1 == true)
+                conNum++;
+            if (isReadyForNextFor2 == true)
+                conNum++;
+            return conNum;
+        }
+
+
+        public boolean checkSendOkFirst() {
 //            如果二者相等则返回true
-            if (Arrays.equals(dataReceive, dataTrans)) {
+            if (Arrays.equals(dataReceiveFirst, dataTrans)) {
                 return true;
             }
 //            判断数据是否匹配
-            if (dataReceive != null && dataTrans != null) {
+            if (dataReceiveFirst != null && dataTrans != null) {
                 int i;
 //                如果i==9时不相等，执行break,此时i不++，i依然不满足=10条件
                 for (i = 0; i < 10; i++) {
-                    if (dataReceive[i] != dataTrans[i])
+                    if (dataReceiveFirst[i] != dataTrans[i])
+                        break;
+                }
+                if (i == 10) {
+                    Log.e("bletrack", "communicate unstable");
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public boolean checkSendOkSecond() {
+//            蓝牙没有准备好，就一直不重发
+            if (!isReadyForNextFor2) {
+                return true;
+            }
+//            如果二者相等则返回true
+            if (Arrays.equals(dataReceiveSecond, dataTrans)) {
+                return true;
+            }
+//            判断数据是否匹配
+            if (dataReceiveSecond != null && dataTrans != null) {
+                int i;
+//                如果i==9时不相等，执行break,此时i不++，i依然不满足=10条件
+                for (i = 0; i < 10; i++) {
+                    if (dataReceiveSecond[i] != dataTrans[i])
                         break;
                 }
                 if (i == 10) {
@@ -709,23 +900,44 @@ public class BleService extends Service {
         }
 
         //        连接是否完成
-        public boolean isReady() {
+        public boolean isReadyFirst() {
             return isReadyForNextFor1;
         }
 
+        public boolean isReadySecond() {
+            return isReadyForNextFor2;
+        }
+
         //        读取蓝牙强度
-        public int readRssi() {
+        public int readRssiFirst() {
             if (isReadyForNextFor1) {
                 connectionQueue.get(0).readRemoteRssi();
-                if (rssiLast == RssiValue) rssiError++;
-                else rssiError = 0;
-                if (rssiError > 1) {
-                    rssiError = 0;
+                if (rssiLastFirst == RssiValueFirst) rssiErrorFirst++;
+                else rssiErrorFirst = 0;
+                if (rssiErrorFirst > 1) {
+                    rssiErrorFirst = 0;
                     //connect(AIMADDRESS1);
-                    Log.d("bletrack", "rssi disconnect");
+                    Log.d("RSSI", "rssi disconnect");
                 }
-                rssiLast = RssiValue;
-                return RssiValue;
+                rssiLastFirst = RssiValueFirst;
+                return RssiValueFirst;
+            } else {
+                return 0;
+            }
+        }
+
+        public int readRssiSecond() {
+            if (isReadyForNextFor2) {
+                connectionQueue.get(1).readRemoteRssi();
+                if (rssiLastSecond == RssiValueSecond) rssiErrorSecond++;
+                else rssiErrorSecond = 0;
+                if (rssiErrorSecond > 1) {
+                    rssiErrorSecond = 0;
+                    //connect(AIMADDRESS1);
+                    Log.d("RSSI", "rssi disconnect");
+                }
+                rssiLastSecond = RssiValueSecond;
+                return RssiValueSecond;
             } else {
                 return 0;
             }
@@ -743,7 +955,7 @@ public class BleService extends Service {
         super.onStartCommand(intent, flags, startId);
 
         if (intent.getStringExtra("data").equals("scan")) {
-            if (mConnectionState != STATE_CONNECTED) {
+            if (mConnectionStateFirst != STATE_CONNECTED) {
                 scanLeDevice(true);
                 isNeedForScan = true;
                 Log.d("bletrack", "connect fail rescan");
@@ -753,12 +965,7 @@ public class BleService extends Service {
                 sharedPreferencesHelper.putString("returnState", returnState);
                 Log.d("bletrack", "connect succeed");
             }
-        } else if (intent.getStringExtra("data").equals("重启")) {
-            disconnect();
-            Log.d("bletrack", "重启");
         }
-
-
         return flags;
     }
 
@@ -766,7 +973,7 @@ public class BleService extends Service {
     public void onDestroy() {
         Log.d("servicetrack", "Ble Service onDestroy");
         super.onDestroy();
-        disconnect();
+        disconnect(0);
         GattClose(0);
     }
 

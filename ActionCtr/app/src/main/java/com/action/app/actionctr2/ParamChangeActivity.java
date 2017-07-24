@@ -19,7 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.action.app.actionctr2.ble.BleService;
 import com.action.app.actionctr2.ble.bleDataProcess;
 import com.action.app.actionctr2.sqlite.Manage;
 
@@ -592,7 +591,8 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                             int inOntheWay = readOntheWay();
                             id2 = (byte) (id2 + inOntheWay * 80);
 //如果没连上，五个就这么直接过去了，只用WiFi发
-                            if (bleDataManage.checkSendOk() && bleDataManage.getBinder() != null) {
+                            if (((bleDataManage.checkSendOkFirst()||bleDataManage.checkSendOkSecond()) && bleDataManage.getBinder() != null)
+                            ||(!bleDataManage.isReadyForDataFirst()&&!bleDataManage.isReadyForDataSecond())){
                                 switch (id) {
                                     case 0:
                                         bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.roll);
@@ -634,13 +634,10 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                                 countforMaxTime++;
                                 if (countforMaxTime > 40) {
                                     progressDialog.cancel();
-                                    Intent intentBleService=new Intent(ParamChangeActivity.this,BleService.class);
-                                    intentBleService.putExtra("data","重启");
-                                    startService(intentBleService);
                                     countforMaxTime = 0;
                                     id=0;
                                     Log.d("bletrack", "reconnect " );
-                                    Toast.makeText(ParamChangeActivity.this, "reconnect", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ParamChangeActivity.this, "建议你重启app", Toast.LENGTH_SHORT).show();
                                 }
                                 else
                                 handler.postDelayed(this, 50);

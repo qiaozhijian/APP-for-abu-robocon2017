@@ -28,32 +28,32 @@
             android:max="100"
             android:progress="0" />
 
-        <TextView
-            android:id="@+id/begin_textview_last"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="3"
-            android:text="正常" />
 
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:weightSum="1">
+        android:layout_weight="1">
 
         <Button
             android:id="@+id/column6"
-            android:layout_width="0dp"
+            android:layout_width="166dp"
             android:layout_height="match_parent"
+            android:text="c6"
+            android:layout_alignTop="@+id/begin_textview_last"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/begin_textview_last"
+            android:layout_width="200dp"
+            android:layout_height="100dp"
+            android:layout_alignParentRight="true"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="20dp"
-            android:layout_weight="0.1635"
-            android:text="c6" />
-    </LinearLayout>
+            android:text="正常" />
+
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/activity_button_and_buttom"

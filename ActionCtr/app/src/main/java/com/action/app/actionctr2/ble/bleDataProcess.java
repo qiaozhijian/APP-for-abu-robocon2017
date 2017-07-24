@@ -106,44 +106,35 @@ public class bleDataProcess {
         return false;
     }
 
-    public boolean sendState(byte state1, byte state2) {
 
-        byte[] sendData = new byte[BleService.bleDataLen];
 
-        if (sendData.length >= 10) {
-            sendData[0] = 'A';
-            sendData[1] = 'C';
-            sendData[2] = 'S';
-            sendData[3] = 'T';
-            sendData[4] = state1;
-            sendData[5] = state2;
-            if (state != null)
-                state.send(sendData);
-            return true;
-        }
-        Log.e("bletrack", "dataSend length err");
-        return false;
+    public boolean checkSendOkFirst() {
+        return state.checkSendOkFirst();
     }
 
-    public boolean checkSendOk() {
-        return state.checkSendOk();
+    public boolean checkSendOkSecond() {
+        return state.checkSendOkSecond();
     }
 
     public Binder getBinder() {
         return state;
     }
 
-    public boolean isReadyForData() {
-        return state.isReady();
+    public boolean isReadyForDataFirst() {return state.isReadyFirst();}
+
+    public boolean isReadyForDataSecond() {return state.isReadySecond();}
+
+    public byte[] getMCUinfo() {return state.getHeartBeats();}
+
+    public int readRssiFirst() {
+        return state.readRssiFirst();
     }
 
-    public byte[] getMCUinfo() {
-        return state.getHeartBeats();
+    public int readRssiSecond() {
+        return state.readRssiSecond();
     }
 
-    public int readRssi() {
-        return state.readRssi();
-    }
+    public int readNum() { return state.getConnectNum(); }
 
     public void unbind() {
         context.unbindService(connection);

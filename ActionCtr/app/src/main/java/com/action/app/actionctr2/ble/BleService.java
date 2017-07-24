@@ -590,7 +590,7 @@ public class BleService extends Service {
                             else
                                 errCount = 0;
                             lastHBcount = HBcount;
-                            if (errCount >= 7) {
+                            if (errCount >= 13) {
                                 Log.e("bletrack", "HeartBeats disconnect");
                              //   isReadyForNextFor2 = false;
                              //   disconnect();

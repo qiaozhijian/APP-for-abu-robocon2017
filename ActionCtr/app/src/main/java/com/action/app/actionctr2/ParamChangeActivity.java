@@ -718,7 +718,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             case R.id.gun_up:
                 ((TextView) findViewById(R.id.gun_num)).setText("上");
 
-                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_top", false));
+                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_top", true));
 
                 if (param2set != null && init_state[1].equals("上") && init_state[2].equals(String.valueOf(((TextView) findViewById(R.id.state)).getText()))) {
                     setProgressAll(param2set);

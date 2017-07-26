@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.action.app.actionctr2.BeginActivity;
 import com.action.app.actionctr2.sqlite.SharedPreferencesHelper;
@@ -35,16 +36,16 @@ public class BleService extends Service {
     private final IBinder mBinder = new myBleBand();
 
     //有一个默认第一设备，第二设备，如果扫描就是哪个先进哪个是，如果直接连接就用默认的
-    //private final String AIMADDRESS1 = "F4:5E:AB:B9:58:80";//1号 白色平板
+    private String AIMADDRESS1 = "F4:5E:AB:B9:58:80";//1号 白色平板
     // private final String AIMADDRESS1="50:65:83:86:C6:33";//这个参数是车上用的平板 2号
-    //private final static String AIMADDRESS1 = "98:7B:F3:60:C7:1C";//测试版
-    private final String AIMADDRESS1 = "F4:5E:AB:B9:5A:03";// //手机
-    private final String AIMADDRESS2 = "F4:5E:AB:B9:59:77";//手机
+    private final static String AIMADDRESS2 = "98:7B:F3:60:C7:1C";//测试版
+    // private final String AIMADDRESS1 = "F4:5E:AB:B9:5A:03";// //手机
+    //private String AIMADDRESS2 = "F4:5E:AB:B9:59:77";//手机
     // private final String AIMADDRESS1="98:7B:F3:60:C7:01";//
     //private final String AIMADDRESS1 = "90:59:AF:0E:60:1F";//
 
-    private deviceManager deviceFirst = new deviceManager(AIMADDRESS1);
-    private deviceManager deviceSecond = new deviceManager(AIMADDRESS1);
+    private DeviceManager deviceFirst = new DeviceManager(AIMADDRESS1);
+    private DeviceManager deviceSecond = new DeviceManager(AIMADDRESS2);
     //蓝牙相关类
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -67,6 +68,8 @@ public class BleService extends Service {
     private static final String STATE_CONNECTION_FAIL_SCAN_RIGHT = "STATE_CONNECTION_FAIL_SCAN_RIGHT";
     private boolean isNeedForScan = false;
     private String returnState = STATE_IDLE;
+
+    private final Handler handler = new Handler();
 
 
     // 描述扫描蓝牙的状态
@@ -168,43 +171,53 @@ public class BleService extends Service {
         connectSafe(device.getAddress());
     }
 
-    final Handler conHandler = new Handler();
+    //final Handler conHandler = new Handler();
 
     //Android十秒连一次
     public void connectSafe(final String address) {
-        Runnable conRunnable = new Runnable() {
-            String conAddress = address;
 
-            @Override
-            public void run() {
-                if (conAddress.equals(deviceFirst.aimAddress) && deviceFirst.connectionState != STATE_CONNECTED) {
-                    //创建deviceManager.connectionQueue.get(0)时会进入mGattCallback
-                    deviceFirst.isConnectPermit = false;
-                    Log.d("bletrack", "1 connectsafe");
-                    connectFirst(conAddress);
-                    if (deviceFirst.checkConRun(this)) {
-                        deviceFirst.runnables.add(this);
-                    }
-                    conHandler.postDelayed(this, 10000);
-                } else if (conAddress.equals(deviceSecond.aimAddress) && deviceSecond.connectionState != STATE_CONNECTED) {
-                    connectSecond(conAddress);
-                    deviceSecond.isConnectPermit = false;
-                    Log.d("bletrack", "2 connectsafe");
-                    if (deviceSecond.checkConRun(this)) {
-                        deviceSecond.runnables.add(this);
-                    }
-                    conHandler.postDelayed(this, 10000);
-                } else {
-                    conHandler.removeCallbacks(this);
-                }
-            }
-        };
-        if (address.equals(deviceFirst.aimAddress)) {
-            removeALLConRun(deviceFirst.runnables);
-        } else if (address.equals(deviceSecond.aimAddress)) {
-            removeALLSerRun(deviceSecond.runnables);
+        if (address.equals(deviceFirst.aimAddress) && deviceFirst.connectionState != STATE_CONNECTED) {
+            //创建DeviceManager.connectionQueue.get(0)时会进入mGattCallback
+            deviceFirst.isConnectPermit = false;
+            Log.d("bletrack", "1 connectsafe");
+            connectFirst(address);
+        } else if (address.equals(deviceSecond.aimAddress) && deviceSecond.connectionState != STATE_CONNECTED) {
+            connectSecond(address);
+            deviceSecond.isConnectPermit = false;
+            Log.d("bletrack", "2 connectsafe");
         }
-        conHandler.post(conRunnable);
+//        Runnable conRunnable = new Runnable() {
+//            String conAddress = address;
+//            @Override
+//            public void run() {
+//                if (conAddress.equals(deviceFirst.aimAddress) && deviceFirst.connectionState != STATE_CONNECTED) {
+//                    //创建DeviceManager.connectionQueue.get(0)时会进入mGattCallback
+//                    deviceFirst.isConnectPermit = false;
+//                    Log.d("bletrack", "1 connectsafe");
+//                    connectFirst(conAddress);
+//                    if (deviceFirst.checkConRun(this)) {
+//                        deviceFirst.runnables.add(this);
+//                    }
+//                    conHandler.postDelayed(this, 10000);
+//                } else if (conAddress.equals(deviceSecond.aimAddress) && deviceSecond.connectionState != STATE_CONNECTED) {
+//                    connectSecond(conAddress);
+//                    deviceSecond.isConnectPermit = false;
+//                    Log.d("bletrack", "2 connectsafe");
+//                    if (deviceSecond.checkConRun(this)) {
+//                        deviceSecond.runnables.add(this);
+//                    }
+//                    conHandler.postDelayed(this, 10000);
+//                } else {
+//                    conHandler.removeCallbacks(this);
+//                }
+//            }
+//        };
+//        if (address.equals(deviceFirst.aimAddress)) {
+//            removeALLConRun(deviceFirst.runnables);
+//        } else if (address.equals(deviceSecond.aimAddress)) {
+//            removeALLSerRun(deviceSecond.runnables);
+//        }
+//        conHandler.post(conRunnable);
     }
 
     // 连接远程蓝牙
@@ -217,18 +230,18 @@ public class BleService extends Service {
 
         isNeedForScan = false;
 
-        if (deviceManager.checkGATT(0)) {
-            if (deviceManager.connectionQueue.get(0).getDevice().getAddress().equals(address)) {
-                if (deviceManager.connectionQueue.get(0).connect()) {
-                    deviceFirst.connectionState = STATE_CONNECTING;
-                    Log.d("bletrack", "GATT1 connect()");
-                    return true;
-                } else {
-                    Log.d("bletrack", "GATT1 connect()   fail");
-                    return false;
-                }
-            }
-        }
+//        if (DeviceManager.checkGATT(0)) {
+//            if (DeviceManager.connectionQueue.get(0).getDevice().getAddress().equals(address)) {
+//                if (DeviceManager.connectionQueue.get(0).connect()) {
+//                    deviceFirst.connectionState = STATE_CONNECTING;
+//                    Log.d("bletrack", "GATT1 connect()");
+//                    return true;
+//                } else {
+//                    Log.d("bletrack", "GATT1 connect()   fail");
+//                    return false;
+//                }
+//            }
+//        }
         Log.d("bletrack", "lala3");
         /* 获取远端的蓝牙设备 */
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
@@ -250,10 +263,9 @@ public class BleService extends Service {
         bluetoothGatt = device.connectGatt(this, false, mGattCallback);
         //如果没有
         Log.d("bletrack", "lala7");
-        if (deviceManager.checkGATT(bluetoothGatt)) {
-            deviceManager.connectionQueue.add(bluetoothGatt);
-            Log.d("bletrack", "add new GATT");
-        }
+        DeviceManager.connectionQueue.set(0, bluetoothGatt);
+        Log.d("bletrack", "set GATT 1");
+
         return true;
     }
 
@@ -267,23 +279,22 @@ public class BleService extends Service {
 
         isNeedForScan = false;
 
-        if (deviceManager.checkGATT(1)) {
-            Log.d("bletrack", "2lala2");
-            if (deviceManager.connectionQueue.get(1).getDevice().getAddress().equals(address)) {
-                if (deviceManager.connectionQueue.get(1).connect()) {
-                    deviceSecond.connectionState = STATE_CONNECTING;
-                    Log.d("bletrack", "GATT2 connect()");
-                    return true;
-                } else {
-                    Log.d("bletrack", "GATT2 connect()   fail");
-                    return false;
-                }
-            }
-        }
+//        if (DeviceManager.checkGATT(1)) {
+//            Log.d("bletrack", "2lala2");
+//            if (DeviceManager.connectionQueue.get(1).getDevice().getAddress().equals(address)) {
+//                if (DeviceManager.connectionQueue.get(1).connect()) {
+//                    deviceSecond.connectionState = STATE_CONNECTING;
+//                    Log.d("bletrack", "GATT2 connect()");
+//                    return true;
+//                } else {
+//                    Log.d("bletrack", "GATT2 connect()   fail");
+//                    return false;
+//                }
+//            }
+//        }
         Log.d("bletrack", "2lala3");
         /* 获取远端的蓝牙设备 */
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-
         Log.d("bletrack", "2lala4");
         if (device == null) {
             Log.w("bletrack", "Device not found.  Unable to connect.");
@@ -301,59 +312,63 @@ public class BleService extends Service {
         bluetoothGatt = device.connectGatt(this, false, mGattCallback);
         //如果没有
         Log.d("bletrack", "2lala7");
-        if (deviceManager.checkGATT(bluetoothGatt)) {
-            deviceManager.connectionQueue.add(bluetoothGatt);
-            Log.d("bletrack", "2add new GATT");
-        }
+        DeviceManager.connectionQueue.set(1, bluetoothGatt);
         return true;
     }
 
-    final Handler serHandler = new Handler();
+//    final Handler serHandler = new Handler();
 
     //Android出现找服务慢的情况
     public void discoverSafe(final BluetoothGatt gatt) {
-        Runnable conRunnable = new Runnable() {
-            BluetoothGatt bluetoothGatt = gatt;
-
-            @Override
-            public void run() {
-                if (bluetoothGatt.getDevice().getAddress().equals(deviceFirst.aimAddress)
-                        && !(deviceFirst.isReadyForNextFor)
-                        && deviceFirst.connectionState == STATE_CONNECTED) {
-                    if (deviceFirst.checkSerRun(this))
-                        deviceFirst.serRunnables.add(this);
-                    deviceFirst.findService++;
-                    if (deviceFirst.findService > 2)
-                        disconnect(1);
-                    else
-                        bluetoothGatt.discoverServices();
-                    Log.d("bletrack", "1 refind service");
-                    serHandler.postDelayed(this, 5000);
-                } else if (bluetoothGatt.getDevice().getAddress().equals(deviceSecond.aimAddress)
-                        && !deviceSecond.isReadyForNextFor
-                        && deviceSecond.connectionState == STATE_CONNECTED) {
-                    if (deviceSecond.checkSerRun(this))
-                        deviceSecond.serRunnables.add(this);
-                    deviceSecond.findService++;
-                    if (deviceSecond.findService > 2)
-                        disconnect(2);
-                    else
-                        bluetoothGatt.discoverServices();
-                    Log.d("bletrack", "2 refind service");
-                    serHandler.postDelayed(this, 5000);
-                } else
-                    serHandler.removeCallbacks(this);
-            }
-        };
-        if (gatt.getDevice().getAddress().equals(deviceFirst.aimAddress)) {
-            removeALLSerRun(deviceFirst.serRunnables);
-        } else if (gatt.getDevice().getAddress().equals(deviceSecond.aimAddress)) {
-            removeALLSerRun(deviceFirst.serRunnables);
+        if (gatt.getDevice().getAddress().equals(deviceFirst.aimAddress)
+                && !(deviceFirst.isReadyForNextFor)) {
+            gatt.discoverServices();
+            Log.d("bletrack", "1 refind service");
+        } else if (gatt.getDevice().getAddress().equals(deviceSecond.aimAddress)
+                && !deviceSecond.isReadyForNextFor) {
+            gatt.discoverServices();
+            Log.d("bletrack", "2 refind service");
         }
-        conHandler.post(conRunnable);
+//        Runnable conRunnable = new Runnable() {
+//            BluetoothGatt bluetoothGatt = gatt;
+//            @Override
+//            public void run() {
+//                if (bluetoothGatt.getDevice().getAddress().equals(deviceFirst.aimAddress)
+//                        && !(deviceFirst.isReadyForNextFor)
+//                        && deviceFirst.connectionState == STATE_CONNECTED) {
+//                    if (deviceFirst.checkSerRun(this))
+//                        deviceFirst.serRunnables.add(this);
+//                    deviceFirst.findService++;
+//                    if (deviceFirst.findService > 2)
+//                        disconnect(1);
+//                    else
+//                        bluetoothGatt.discoverServices();
+//                    Log.d("bletrack", "1 refind service");
+//                    serHandler.postDelayed(this, 5000);
+//                } else if (bluetoothGatt.getDevice().getAddress().equals(deviceSecond.aimAddress)
+//                        && !deviceSecond.isReadyForNextFor
+//                        && deviceSecond.connectionState == STATE_CONNECTED) {
+//                    if (deviceSecond.checkSerRun(this))
+//                        deviceSecond.serRunnables.add(this);
+//                    deviceSecond.findService++;
+//                    if (deviceSecond.findService > 2)
+//                        disconnect(2);
+//                    else
+//                        bluetoothGatt.discoverServices();
+//                    Log.d("bletrack", "2 refind service");
+//                    serHandler.postDelayed(this, 5000);
+//                } else
+//                    serHandler.removeCallbacks(this);
+//            }
+//        };
+//        if (gatt.getDevice().getAddress().equals(deviceFirst.aimAddress)) {
+//            removeALLSerRun(deviceFirst.serRunnables);
+//        } else if (gatt.getDevice().getAddress().equals(deviceSecond.aimAddress)) {
+//            removeALLSerRun(deviceFirst.serRunnables);
+//        }
+//        serHandler.post(conRunnable);
     }
 
-    final Handler handler = new Handler();
     /* 连接远程设备的回调函数 */
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
@@ -364,79 +379,112 @@ public class BleService extends Service {
 //                    如果连接状态正常
                     case BluetoothProfile.STATE_CONNECTED:
                         if (gatt.getDevice().getAddress().equals(deviceFirst.aimAddress)) {
-                            removeALLConRun(deviceFirst.runnables);
+//                            removeALLConRun(deviceFirst.runnables);
                             deviceFirst.isReadyForNextFor = false;           //得到特征值之后才能准备好
-                            if (deviceFirst.connectionState == STATE_CONNECTING)
+                            if (deviceFirst.connectionState == STATE_CONNECTING) {
                                 discoverSafe(gatt);             //去发现服务
+                            }
                             deviceFirst.connectionState = STATE_CONNECTED;
                             deviceFirst.isConnectPermit = true;
+
                             Log.d("bletrack", "GATT 1 connected");
-                            if (deviceSecond.connectionState == STATE_DISCONNECTED) {
-                                handler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (deviceSecond.connectionState == STATE_DISCONNECTED) {
-                                            connectSafe(deviceSecond.aimAddress);
-                                            Log.d("bletrack", "GATT 2 reconnect by 1");
-                                        } else
-                                            handler.removeCallbacks(this);
-                                    }
-                                }, 3000);
-                            }
+//                            if (deviceSecond.connectionState == STATE_DISCONNECTED) {
+//                                handler.postDelayed(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        if (deviceSecond.connectionState == STATE_DISCONNECTED) {
+//                                            connectSafe(deviceSecond.aimAddress);
+//                                            Log.d("bletrack", "GATT 2 reconnect by 1");
+//                                        } else
+//                                            handler.removeCallbacks(this);
+//                                    }
+//                                }, 3000);
+//                            }
 
                         } else if (gatt.getDevice().getAddress().equals(deviceSecond.aimAddress)) {
-                            removeALLConRun(deviceSecond.runnables);
+//                            removeALLConRun(deviceSecond.runnables);
                             deviceSecond.isReadyForNextFor = false;           //得到特征值之后才能准备好
                             if (deviceSecond.connectionState == STATE_CONNECTING)
                                 discoverSafe(gatt);
                             deviceSecond.connectionState = STATE_CONNECTED;
                             deviceSecond.isConnectPermit = true;
                             Log.d("bletrack", "GATT 2 connected");
-                            if (deviceFirst.connectionState == STATE_DISCONNECTED) {
-                                final Handler handler = new Handler();
-                                handler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (deviceFirst.connectionState == STATE_DISCONNECTED) {
-                                            connectSafe(deviceFirst.aimAddress);
-                                            Log.d("bletrack", "GATT 1 reconnect by 2");
-                                        } else
-                                            handler.removeCallbacks(this);
-                                    }
-                                }, 3000);
-                            }
+//                            if (deviceFirst.connectionState == STATE_DISCONNECTED) {
+//                                final Handler handler = new Handler();
+//                                handler.postDelayed(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        if (deviceFirst.connectionState == STATE_DISCONNECTED) {
+//                                            connectSafe(deviceFirst.aimAddress);
+//                                            Log.d("bletrack", "GATT 1 reconnect by 2");
+//                                        } else
+//                                            handler.removeCallbacks(this);
+//                                    }
+//                                }, 3000);
+//                            }
                         }
                         break;
                     default:
                         Log.e("bletrack", "unkown newstate: " + String.valueOf(newState));
                     case BluetoothProfile.STATE_DISCONNECTED:               //断开连接
 //                    加上会变快
-                        if (deviceManager.checkGATT(gatt, 0)) {
-                            Log.d("bletrack", "gatt 1 disconnect");
+                        if (DeviceManager.checkGATT(gatt, 0)) {
                             deviceFirst.isReadyForNextFor = false;
                             deviceFirst.connectionState = STATE_DISCONNECTED;
-                        } else if (deviceManager.checkGATT(gatt, 1)) {
-                            Log.d("bletrack", "gatt 2 disconnect");
+                            gatt.close();
+                            if(DeviceManager.checkGATT(1))
+                            if(deviceSecond.connectionState==STATE_CONNECTING)
+                                DeviceManager.connectionQueue.get(1).close();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Log.d("bletrack", "gatt 1 reconnect");
+                                    connectFirst(AIMADDRESS1);
+                                }
+                            }, 1000);
+                        } else if (DeviceManager.checkGATT(gatt, 1)) {
                             deviceSecond.connectionState = STATE_DISCONNECTED;
                             deviceSecond.isReadyForNextFor = false;
+                            gatt.close();
+                            if(DeviceManager.checkGATT(0))
+                                if(deviceFirst.connectionState==STATE_CONNECTING)
+                                    DeviceManager.connectionQueue.get(0).close();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Log.d("bletrack", "gatt 2 reconnect");
+                                    connectSecond(AIMADDRESS2);
+                                }
+                            }, 1000);
                         }
                         //秒连速度之快已经让车上蓝牙检测不到断开了
-                        if (deviceFirst.isConnectPermit)
-                            if (deviceFirst.connectionState == STATE_DISCONNECTED) {
-                                Log.d("bletrack", "gatt 1 reconnect");
-                                connectSafe(AIMADDRESS1);
-                            }
-                        if (deviceSecond.isConnectPermit)
-                            if (deviceSecond.connectionState == STATE_DISCONNECTED) {
-                                Log.d("bletrack", "gatt 2 reconnect");
-                                connectSafe(AIMADDRESS2);
-                            }
                         break;
                 }
             } else {
-                Log.e("bletrack", "unkown disconnected: " + String.valueOf(status));
-                gatt.close();
-                scanLeDevice(true);
+                if (DeviceManager.checkGATT(gatt, 0)) {
+                    Log.e("bletrack", "1 unkown disconnected: " + String.valueOf(status));
+                    deviceFirst.isReadyForNextFor = false;
+                    deviceFirst.connectionState = STATE_DISCONNECTED;
+                    gatt.close();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            connectFirst(AIMADDRESS1);
+                        }
+                    }, 1000);
+                } else if (DeviceManager.checkGATT(gatt, 1)) {
+                    Log.e("bletrack", "2 unkown disconnected: " + String.valueOf(status));
+                    deviceSecond.connectionState = STATE_DISCONNECTED;
+                    deviceSecond.isReadyForNextFor = false;
+                    gatt.close();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            connectSecond(AIMADDRESS2);
+                        }
+                    }, 1000);
+                }
+                //scanLeDevice(true);
             }
         }
 
@@ -445,24 +493,24 @@ public class BleService extends Service {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
 //                如果特征值和描述被更新
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                if (deviceManager.checkGATT(gatt, 0)) {
-                    removeALLSerRun(deviceFirst.serRunnables);
+                if (DeviceManager.checkGATT(gatt, 0)) {
+//                    removeALLSerRun(deviceFirst.serRunnables);
                     deviceFirst.isReadyForNextFor = true;
-                    deviceFirst.findService = 0;
-                    deviceFirst.findService(deviceManager.connectionQueue.get(0));
+                    //deviceFirst.findService = 0;
+                    deviceFirst.findService(DeviceManager.connectionQueue.get(0));
                     Log.d("bletrack", " gatt 1 service success");
-                } else if (deviceManager.checkGATT(gatt, 1)) {
-                    removeALLSerRun(deviceSecond.serRunnables);
+                } else if (DeviceManager.checkGATT(gatt, 1)) {
+//                    removeALLSerRun(deviceSecond.serRunnables);
                     deviceSecond.isReadyForNextFor = true;
-                    deviceSecond.findService = 0;
-                    deviceSecond.findService(deviceManager.connectionQueue.get(1));
+                    //deviceSecond.findService = 0;
+                    deviceSecond.findService(DeviceManager.connectionQueue.get(1));
                     Log.d("bletrack", " gatt 2 service success");
                 }
             } else {
-                if (deviceManager.checkGATT(gatt, 0)) {
+                if (DeviceManager.checkGATT(gatt, 0)) {
                     deviceFirst.isReadyForNextFor = false;
                     Log.d("bletrack", "ble gatt1 service fail");
-                } else if (deviceManager.checkGATT(gatt, 1)) {
+                } else if (DeviceManager.checkGATT(gatt, 1)) {
                     deviceSecond.isReadyForNextFor = false;
                     Log.d("bletrack", "ble gatt2 service fail");
                 }
@@ -478,14 +526,14 @@ public class BleService extends Service {
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic, int status) {
             if (status == gatt.GATT_SUCCESS) {
-                if (deviceManager.checkGATT(gatt, 0)) {
+                if (DeviceManager.checkGATT(gatt, 0)) {
                     String log_out = new String();
                     for (int i = 0; i < bleDataLen; i++) {
 //                    为了log的时候好观察，加了个\t
                         log_out += String.valueOf(characteristic.getValue()[i]) + '\t';
                     }
                     Log.d("bletrack", "gatt 0 read value: " + log_out);
-                } else if (deviceManager.checkGATT(gatt, 1)) {
+                } else if (DeviceManager.checkGATT(gatt, 1)) {
                     String log_out = new String();
                     for (int i = 0; i < bleDataLen; i++) {
 //                    为了log的时候好观察，加了个\t
@@ -494,9 +542,9 @@ public class BleService extends Service {
                     Log.d("bletrack", "gatt 1 read value: " + log_out);
                 }
             } else {
-                if (deviceManager.checkGATT(gatt, 0)) {
+                if (DeviceManager.checkGATT(gatt, 0)) {
                     Log.d("bletrack", "ble gatt1 service fail");
-                } else if (deviceManager.checkGATT(gatt, 1)) {
+                } else if (DeviceManager.checkGATT(gatt, 1)) {
                     Log.d("bletrack", "ble gatt2 service fail");
                 }
                 gatt.disconnect();
@@ -511,11 +559,11 @@ public class BleService extends Service {
                                             BluetoothGattCharacteristic characteristic) {
             String log_out = new String();
 
-            if (deviceManager.checkGATT(deviceFirst.characteristic6, characteristic)) {
+            if (DeviceManager.checkGATT(deviceFirst.characteristic6, characteristic)) {
                 deviceFirst.dataReceive = characteristic.getValue();
                 log_out = deviceFirst.getCharValue(characteristic);
                 Log.d("bletrack", "first notify: " + log_out);
-            } else if (deviceManager.checkGATT(deviceFirst.characteristic7, characteristic)) {
+            } else if (DeviceManager.checkGATT(deviceFirst.characteristic7, characteristic)) {
                 deviceFirst.dataHeartBeats = characteristic.getValue();
                 deviceFirst.HBcount++;
                 log_out = deviceFirst.getCharValue(characteristic);
@@ -524,11 +572,11 @@ public class BleService extends Service {
                     if (deviceFirst.dataReceive.length != bleDataLen) {
                         Log.e("bletrack", "notify first length is not equal to require");
                     }
-            } else if (deviceManager.checkGATT(deviceSecond.characteristic6, characteristic)) {
+            } else if (DeviceManager.checkGATT(deviceSecond.characteristic6, characteristic)) {
                 deviceSecond.dataReceive = characteristic.getValue();
                 log_out = deviceSecond.getCharValue(characteristic);
                 Log.d("bletrack", "second notify: " + log_out);
-            } else if (deviceManager.checkGATT(deviceSecond.characteristic7, characteristic)) {
+            } else if (DeviceManager.checkGATT(deviceSecond.characteristic7, characteristic)) {
                 deviceSecond.dataHeartBeats = characteristic.getValue();
                 deviceSecond.HBcount++;
                 log_out = deviceSecond.getCharValue(characteristic);
@@ -550,20 +598,20 @@ public class BleService extends Service {
                                           int status) {
             String log_out = new String();
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                if (deviceManager.checkGATT(deviceFirst.characteristic6, characteristic)) {
+                if (DeviceManager.checkGATT(deviceFirst.characteristic6, characteristic)) {
                     log_out = deviceFirst.getCharValue(characteristic);
                     Log.d("bletrack", "first write: " + log_out);
-                } else if (deviceManager.checkGATT(deviceFirst.characteristic7, characteristic)) {
+                } else if (DeviceManager.checkGATT(deviceFirst.characteristic7, characteristic)) {
                     log_out = deviceFirst.getCharValue(characteristic);
                     Log.d("ACHB", "first write: " + log_out);
                     if (deviceFirst.dataReceive != null)
                         if (deviceFirst.dataReceive.length != bleDataLen) {
                             Log.e("bletrack", "write first length is not equal to require");
                         }
-                } else if (deviceManager.checkGATT(deviceSecond.characteristic6, characteristic)) {
+                } else if (DeviceManager.checkGATT(deviceSecond.characteristic6, characteristic)) {
                     log_out = deviceSecond.getCharValue(characteristic);
                     Log.d("bletrack", "second write: " + log_out);
-                } else if (deviceManager.checkGATT(deviceSecond.characteristic7, characteristic)) {
+                } else if (DeviceManager.checkGATT(deviceSecond.characteristic7, characteristic)) {
                     log_out = deviceSecond.getCharValue(characteristic);
                     Log.d("ACHB", "second write: " + log_out);
                     if (deviceSecond.dataReceive != null)
@@ -573,10 +621,10 @@ public class BleService extends Service {
                 }
 
             } else {
-                if (deviceManager.checkGATT(gatt, 0)) {
+                if (DeviceManager.checkGATT(gatt, 0)) {
                     Log.d("bletrack", "gatt first char write fail");
                 }
-                if (deviceManager.checkGATT(gatt, 1)) {
+                if (DeviceManager.checkGATT(gatt, 1)) {
                     Log.d("bletrack", "gatt second char write fail");
                 }
                 gatt.disconnect();
@@ -588,15 +636,15 @@ public class BleService extends Service {
         @Override
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                if (deviceManager.checkGATT(gatt, 0)) {
+                if (DeviceManager.checkGATT(gatt, 0)) {
                     deviceFirst.RssiValue = rssi;
-                } else if (deviceManager.checkGATT(gatt, 1)) {
+                } else if (DeviceManager.checkGATT(gatt, 1)) {
                     deviceSecond.RssiValue = rssi;
                 }
             } else {
-                if (deviceManager.checkGATT(gatt, 0)) {
+                if (DeviceManager.checkGATT(gatt, 0)) {
                     Log.d("bletrack", "gatt first rssi fail");
-                } else if (deviceManager.checkGATT(gatt, 1)) {
+                } else if (DeviceManager.checkGATT(gatt, 1)) {
                     Log.d("bletrack", "gatt second rssi fail");
                 }
                 gatt.disconnect();
@@ -620,29 +668,29 @@ public class BleService extends Service {
     public void GattClose(int i) {
         switch (i) {
             case 0:
-                if (deviceManager.checkGATT(0)) {
-                    deviceManager.connectionQueue.get(0).close();
-                    deviceManager.connectionQueue.remove(0);
+                if (DeviceManager.checkGATT(0)) {
+                    DeviceManager.connectionQueue.get(0).close();
+                    DeviceManager.connectionQueue.remove(0);
                     Log.w("bletrack", "gatt 1 close()");
                 }
 
-                if (deviceManager.checkGATT(1)) {
-                    deviceManager.connectionQueue.get(1).close();
-                    deviceManager.connectionQueue.remove(1);
+                if (DeviceManager.checkGATT(1)) {
+                    DeviceManager.connectionQueue.get(1).close();
+                    DeviceManager.connectionQueue.remove(1);
                     Log.w("bletrack", "gatt 2 close()");
                 }
                 break;
             case 1:
-                if (deviceManager.checkGATT(0)) {
-                    deviceManager.connectionQueue.get(0).close();
-                    deviceManager.connectionQueue.remove(0);
+                if (DeviceManager.checkGATT(0)) {
+                    DeviceManager.connectionQueue.get(0).close();
+                    DeviceManager.connectionQueue.remove(0);
                     Log.w("bletrack", "gatt 1 close()");
                 }
                 break;
             case 2:
-                if (deviceManager.checkGATT(1)) {
-                    deviceManager.connectionQueue.get(1).close();
-                    deviceManager.connectionQueue.remove(1);
+                if (DeviceManager.checkGATT(1)) {
+                    DeviceManager.connectionQueue.get(1).close();
+                    DeviceManager.connectionQueue.remove(1);
                     Log.w("bletrack", "gatt 2 close()");
                 }
                 break;
@@ -650,36 +698,36 @@ public class BleService extends Service {
     }
 
     public void disconnect(int i) {
-        if (mBluetoothAdapter == null || deviceManager.connectionQueue.size() == 0) {
+        if (mBluetoothAdapter == null || DeviceManager.connectionQueue.size() == 0) {
             Log.w("bletrack", "BluetoothAdapter not initialized");
             return;
         } else {
             switch (i) {
                 case 0:
-                    if (deviceManager.checkGATT(0)) {
-                        deviceManager.connectionQueue.get(0).disconnect();
+                    if (DeviceManager.checkGATT(0)) {
+                        DeviceManager.connectionQueue.get(0).disconnect();
                         deviceFirst.isConnectPermit = true;
                         Log.w("bletrack", "gatt 1 discount()");
                     }
 
-                    if (deviceManager.checkGATT(1)) {
-                        deviceManager.connectionQueue.get(1).disconnect();
+                    if (DeviceManager.checkGATT(1)) {
+                        DeviceManager.connectionQueue.get(1).disconnect();
                         deviceSecond.isConnectPermit = true;
                         Log.w("bletrack", "gatt 2 discount()");
                     }
 
                     break;
                 case 1:
-                    if (deviceManager.checkGATT(0)) {
-                        deviceManager.connectionQueue.get(0).disconnect();
+                    if (DeviceManager.checkGATT(0)) {
+                        DeviceManager.connectionQueue.get(0).disconnect();
                         deviceFirst.isConnectPermit = true;
                         Log.w("bletrack", "gatt 1 discount()");
                     }
 
                     break;
                 case 2:
-                    if (deviceManager.checkGATT(1)) {
-                        deviceManager.connectionQueue.get(1).disconnect();
+                    if (DeviceManager.checkGATT(1)) {
+                        DeviceManager.connectionQueue.get(1).disconnect();
                         deviceSecond.isConnectPermit = true;
                         Log.w("bletrack", "gatt 2 discount()");
                     }
@@ -689,21 +737,21 @@ public class BleService extends Service {
         }
     }
 
-    private void removeALLConRun(ArrayList<Runnable> runnables) {
-        if (!runnables.isEmpty()) {
-            for (Runnable run : runnables) {
-                conHandler.removeCallbacks(run);
-            }
-        }
-    }
-
-    private void removeALLSerRun(ArrayList<Runnable> runnables) {
-        if (!runnables.isEmpty()) {
-            for (Runnable run : runnables) {
-                serHandler.removeCallbacks(run);
-            }
-        }
-    }
+//    private void removeALLConRun(ArrayList<Runnable> runnables) {
+//        if (!runnables.isEmpty()) {
+//            for (Runnable run : runnables) {
+//                conHandler.removeCallbacks(run);
+//            }
+//        }
+//    }
+//
+//    private void removeALLSerRun(ArrayList<Runnable> runnables) {
+//        if (!runnables.isEmpty()) {
+//            for (Runnable run : runnables) {
+//                serHandler.removeCallbacks(run);
+//            }
+//        }
+//    }
 
     private void notification() {
         //        通知窗口
@@ -722,7 +770,7 @@ public class BleService extends Service {
     private void ble_init() {
         mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = mBluetoothManager.getAdapter();
-        scaner = mBluetoothAdapter.getBluetoothLeScanner();
+        //scaner = mBluetoothAdapter.getBluetoothLeScanner();
     }
 
     //    通过WiFi发数
@@ -751,18 +799,37 @@ public class BleService extends Service {
 
             connectSafe(deviceFirst.aimAddress);
 
-             connectSafe(deviceSecond.aimAddress);
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    connectSafe(deviceSecond.aimAddress);
+                }
+            }, 200);
 
             final Handler handler1 = new Handler();
             handler1.post(new Runnable() {
                 @Override
                 public void run() {
+                    if (deviceFirst.connectionState == STATE_CONNECTING)
+                        deviceFirst.connectTime++;
+                    else
+                        deviceFirst.connectTime = 0;
+                    if (deviceSecond.connectionState == STATE_CONNECTING)
+                        deviceSecond.connectTime++;
+                    else
+                        deviceSecond.connectTime = 0;
+                    if (deviceFirst.connectTime > 5 && deviceSecond.connectTime > 5) {
+                        handler.post(new ToastRunnable("蓝牙断开，建议你重启APP"));
+                        deviceSecond.connectTime = 0;
+                        deviceFirst.connectTime = 0;
+                    }
                     Log.d("constate", "1  " + String.valueOf(deviceFirst.connectionState));
                     Log.d("constate", "2  " + String.valueOf(deviceSecond.connectionState));
+                    Log.d("constate", "1 r " + String.valueOf(deviceFirst.isReadyForNextFor));
+                    Log.d("constate", "2 r " + String.valueOf(deviceSecond.isReadyForNextFor));
                     handler1.postDelayed(this, 1000);
                 }
             });
-
 
             //下面的代码用于发送心跳包
             final Handler handlerHeartBeat = new Handler();
@@ -783,14 +850,13 @@ public class BleService extends Service {
                         wifiSend(heartBeat);
                         //Log.d("wifitrack", "wifisend");
                     }
-                    if (deviceManager.connectionQueue.size() > 0) {
+                    if (DeviceManager.connectionQueue.size() > 0) {
                         if (deviceFirst.isReadyForNextFor) {
                             if (deviceFirst.characteristic7 != null) {
                                 deviceFirst.characteristic7.setValue(heartBeat);
                                 if (!isDataSending) {
-                                    deviceManager.connectionQueue.get(0).writeCharacteristic(deviceFirst.characteristic7);
+                                    DeviceManager.connectionQueue.get(0).writeCharacteristic(deviceFirst.characteristic7);
                                     isHBSending = true;
-                                    Log.e("ACHB", "HeartBeats send");
                                 }
                             }
                             if (deviceFirst.HBcount == lastHBcount1 && (!isDataSending))
@@ -798,20 +864,18 @@ public class BleService extends Service {
                             else
                                 errCount1 = 0;
                             lastHBcount1 = deviceFirst.HBcount;
-                            if (errCount1 >= 7) {
+                            if (errCount1 >= 10) {
                                 Log.e("bletrack", "HeartBeats 1 disconnect");
                                 deviceFirst.isReadyForNextFor = false;
                                 disconnect(1);
                                 errCount1 = 0;
                             }
-                        } else {
-                            errCount1 = 0;
                         }
                         if (deviceSecond.isReadyForNextFor) {
                             if (deviceSecond.characteristic7 != null) {
                                 deviceSecond.characteristic7.setValue(heartBeat);
                                 if (!isDataSending) {
-                                    deviceManager.connectionQueue.get(1).writeCharacteristic(deviceSecond.characteristic7);
+                                    DeviceManager.connectionQueue.get(1).writeCharacteristic(deviceSecond.characteristic7);
                                     isHBSending = true;
                                     Log.e("ACHB", "HeartBeats send");
                                 }
@@ -821,19 +885,17 @@ public class BleService extends Service {
                             else
                                 errCount2 = 0;
                             lastHBcount2 = deviceSecond.HBcount;
-                            if (errCount2 >= 8) {
+                            if (errCount2 >= 10) {
                                 Log.e("bletrack", "HeartBeats 2 disconnect");
                                 deviceSecond.isReadyForNextFor = false;
                                 disconnect(2);
                                 errCount2 = 0;
                             }
-                        } else {
-                            errCount2 = 0;
                         }
                     }
 
                     isHBSending = false;
-                    handlerHeartBeat.postDelayed(this, 600);
+                    handlerHeartBeat.postDelayed(this, 300);
                 }
             };
 //        不同于上面，上面是按键按一次就会执行一次，但是这个是只会在程序启动的时候执行
@@ -871,39 +933,42 @@ public class BleService extends Service {
             else
                 count = 0;
 //            如果GATT有定义
-            if (deviceFirst.characteristic6 != null && deviceManager.connectionQueue.size() > 0) {
+            if (deviceFirst.characteristic6 != null && DeviceManager.connectionQueue.size() > 0) {
 //                设置值
                 deviceFirst.characteristic6.setValue(dataTrans);
 //                发送
-                deviceManager.connectionQueue.get(0).writeCharacteristic(deviceFirst.characteristic6);
+                DeviceManager.connectionQueue.get(0).writeCharacteristic(deviceFirst.characteristic6);
             }
-            if (deviceSecond.characteristic6 != null && deviceManager.connectionQueue.size() > 1) {
+            if (deviceSecond.characteristic6 != null && DeviceManager.connectionQueue.size() > 1) {
 //                设置值
                 deviceSecond.characteristic6.setValue(dataTrans);
 //                发送
-                deviceManager.connectionQueue.get(1).writeCharacteristic(deviceSecond.characteristic6);
+                DeviceManager.connectionQueue.get(1).writeCharacteristic(deviceSecond.characteristic6);
             }
             wifiSend(dataTrans);
 
             final Runnable runnable = new Runnable() {
+                private int sendCount = 0;
+
                 @Override
                 public void run() {
 //                  没有发送成功
                     if ((!checkSendOkFirst()) && (!checkSendOkSecond())) {
                         isBusy = true;
-                        if (deviceFirst.characteristic6 != null && deviceManager.connectionQueue.size() > 0 && deviceFirst.isReadyForNextFor) {
+                        if (deviceFirst.characteristic6 != null && DeviceManager.connectionQueue.size() > 0 && deviceFirst.isReadyForNextFor) {
                             deviceFirst.characteristic6.setValue(dataTrans);
                             //  if(!isHBSending) {
+                            sendCount++;
                             isDataSending = true;
-                            deviceManager.connectionQueue.get(0).writeCharacteristic(deviceFirst.characteristic6);
-                            Log.d("datasend", "write characteristic");
+                            DeviceManager.connectionQueue.get(0).writeCharacteristic(deviceFirst.characteristic6);
+                            Log.d("datasend", "write characteristic" + String.valueOf(sendCount));
                             //  }
                         }
-                        if (deviceSecond.characteristic6 != null && deviceManager.connectionQueue.size() > 1 && deviceSecond.isReadyForNextFor) {
+                        if (deviceSecond.characteristic6 != null && DeviceManager.connectionQueue.size() > 1 && deviceSecond.isReadyForNextFor) {
                             deviceSecond.characteristic6.setValue(dataTrans);
                             //  if(!isHBSending) {
                             isDataSending = true;
-                            deviceManager.connectionQueue.get(1).writeCharacteristic(deviceSecond.characteristic6);
+                            DeviceManager.connectionQueue.get(1).writeCharacteristic(deviceSecond.characteristic6);
                             Log.d("datasend", "write characteristic");
                             //  }
                         }
@@ -936,10 +1001,12 @@ public class BleService extends Service {
 
         public int getConnectNum() {
             int conNum = 0;
-            if (deviceFirst.isReadyForNextFor == true)
-                conNum++;
-            if (deviceSecond.isReadyForNextFor == true)
-                conNum++;
+            if (deviceFirst != null)
+                if (deviceFirst.isReadyForNextFor == true)
+                    conNum++;
+            if (deviceSecond != null)
+                if (deviceSecond.isReadyForNextFor == true)
+                    conNum++;
             return conNum;
         }
 
@@ -1002,7 +1069,7 @@ public class BleService extends Service {
         //        读取蓝牙强度
         public int readRssiFirst() {
             if (deviceFirst.isReadyForNextFor) {
-                deviceManager.connectionQueue.get(0).readRemoteRssi();
+                DeviceManager.connectionQueue.get(0).readRemoteRssi();
                 return deviceFirst.RssiValue;
             } else {
                 return 0;
@@ -1011,20 +1078,29 @@ public class BleService extends Service {
 
         public int readRssiSecond() {
             if (deviceSecond.isReadyForNextFor) {
-                deviceManager.connectionQueue.get(1).readRemoteRssi();
+                DeviceManager.connectionQueue.get(1).readRemoteRssi();
                 return deviceSecond.RssiValue;
             } else {
                 return 0;
             }
         }
-
     }
 
-    //    如果连接上
-//    如果没连接上 扫到设备
-//    如果没连接上 连接到指定设备
-//    通过handler获得数据，改变文本框的字
-//    关闭蓝牙再测
+
+    private class ToastRunnable implements Runnable {
+        String mText;
+
+        public ToastRunnable(String text) {
+            mText = text;
+        }
+
+        @Override
+        public void run() {
+            Toast.makeText(getApplicationContext(), mText, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //    关闭蓝牙再测
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);

@@ -107,7 +107,6 @@ public class bleDataProcess {
     }
 
 
-
     public boolean checkSendOkFirst() {
         return state.checkSendOkFirst();
     }
@@ -120,11 +119,17 @@ public class bleDataProcess {
         return state;
     }
 
-    public boolean isReadyForDataFirst() {return state.isReadyFirst();}
+    public boolean isReadyForDataFirst() {
+        return state.isReadyFirst();
+    }
 
-    public boolean isReadyForDataSecond() {return state.isReadySecond();}
+    public boolean isReadyForDataSecond() {
+        return state.isReadySecond();
+    }
 
-    public byte[] getMCUinfo() {return state.getHeartBeats();}
+    public byte[] getMCUinfo() {
+        return state.getHeartBeats();
+    }
 
     public int readRssiFirst() {
         return state.readRssiFirst();
@@ -134,9 +139,12 @@ public class bleDataProcess {
         return state.readRssiSecond();
     }
 
-    public int readNum() { return state.getConnectNum(); }
+    public int readNum() {
+        return state.getConnectNum();
+    }
 
     public void unbind() {
         context.unbindService(connection);
     }
+
 }

@@ -41,11 +41,11 @@
             android:layout_width="166dp"
             android:layout_height="match_parent"
             android:text="c6"
-            android:layout_alignTop="@+id/begin_textview_last"
+            android:layout_alignTop="@+id/thenum"
             android:layout_centerHorizontal="true" />
 
         <Button
-            android:id="@+id/begin_textview_last"
+            android:id="@+id/thenum"
             android:layout_width="200dp"
             android:layout_height="100dp"
             android:layout_alignParentRight="true"

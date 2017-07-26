@@ -10,16 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Created by Administrator on 2017/7/25/025.
- */
 
-public class deviceManager {
+public class DeviceManager {
 
     protected static final int STATE_DISCONNECTED = 0;
     
     protected boolean isConnectPermit = false;
-    protected static boolean isReadyForNextFor = false;
+    protected boolean isReadyForNextFor = false;
     protected byte[] dataReceive;                 //    接收数据缓存区
     protected byte[] dataHeartBeats;              //    心跳包的缓存区
     protected int HBcount = 0;                      //    心跳包的计数
@@ -32,18 +29,27 @@ public class deviceManager {
     private BluetoothGattService mGATTSevice;
     protected BluetoothGattCharacteristic characteristic6;
     protected BluetoothGattCharacteristic characteristic7;
-    protected int findService=0;
-
+    protected int connectTime=0;
     protected ArrayList<Runnable> runnables=new ArrayList<Runnable>();
 
     protected ArrayList<Runnable> serRunnables=new ArrayList<Runnable>();
 
-    deviceManager(String aimAddress) {
+    DeviceManager(String aimAddress) {
+        connectionQueue.add(mblueToothGatt1);
+        connectionQueue.add(mblueToothGatt2);
         this.aimAddress = aimAddress;
+    }
+
+    public DeviceManager()
+    {
+        super();
     }
 
     protected static ArrayList<BluetoothGatt> connectionQueue = new ArrayList<BluetoothGatt>();
 
+    protected static BluetoothGatt mblueToothGatt1;
+
+    protected static BluetoothGatt mblueToothGatt2;
 
     public void findService(BluetoothGatt gatt) {
 
@@ -194,6 +200,7 @@ public class deviceManager {
         }
         return true;
     }
+
 }
 
 

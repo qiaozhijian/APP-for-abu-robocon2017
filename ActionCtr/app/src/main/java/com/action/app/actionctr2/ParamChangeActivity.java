@@ -699,7 +699,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 //                设置提示文本
                 ((TextView) findViewById(R.id.gun_num)).setText("左");
 //                初始化手动按钮
-                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_left", false));
+                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_left", true));
 //                先判断是不是从数据加载页面跳过来的，然后去更新数据
                 if (param2set != null && init_state[1].equals("左") && init_state[2].equals(String.valueOf(((TextView) findViewById(R.id.state)).getText()))) {
                     setProgressAll(param2set);
@@ -730,7 +730,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             case R.id.gun_right:
                 ((TextView) findViewById(R.id.gun_num)).setText("右");
 
-                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_right", false));
+                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_right", true));
 
                 if (param2set != null && init_state[1].equals("右") && init_state[2].equals(String.valueOf(((TextView) findViewById(R.id.state)).getText()))) {
                     setProgressAll(param2set);

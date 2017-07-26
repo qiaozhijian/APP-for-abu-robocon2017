@@ -72,11 +72,11 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
                             int rssi = 0;
                             if (state.isReadyForDataFirst()) {
                                 rssi = 150 + state.readRssiFirst();
-                                Log.d("bletrack", "rssi: " + String.valueOf(state.readRssiFirst()));
+                                Log.d("ACHB", "1 rssi: " + String.valueOf(state.readRssiFirst()));
                             }
                             else if(state.isReadyForDataSecond()) {
                                 rssi = 150 + state.readRssiSecond();
-                                Log.d("bletrack", "rssi: " + String.valueOf(state.readRssiSecond()));
+                                Log.d("ACHB", "2 rssi: " + String.valueOf(state.readRssiSecond()));
                             }
                             if (rssi > 100)
                                 rssi = 100;

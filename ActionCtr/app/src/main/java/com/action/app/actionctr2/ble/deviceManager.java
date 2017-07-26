@@ -4,50 +4,56 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
+import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 /**
- * Created by Administrator on 2017/7/23/023.
+ * Created by Administrator on 2017/7/25/025.
  */
 
-public class BleTool {
+public class deviceManager {
 
+    protected static final int STATE_DISCONNECTED = 0;
+    
+    protected boolean isConnectPermit = false;
+    protected static boolean isReadyForNextFor = false;
+    protected byte[] dataReceive;                 //    接收数据缓存区
+    protected byte[] dataHeartBeats;              //    心跳包的缓存区
+    protected int HBcount = 0;                      //    心跳包的计数
+    protected int RssiValue = 0;                    //    RSSI
+    protected String aimAddress;
+    protected int connectionState=STATE_DISCONNECTED;
     private final static UUID aimServiceUUID = UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb");
     private final static UUID aimChar6UUID = UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb");
     private final static UUID aimChar7UUID = UUID.fromString("0000fff7-0000-1000-8000-00805f9b34fb");
+    private BluetoothGattService mGATTSevice;
+    protected BluetoothGattCharacteristic characteristic6;
+    protected BluetoothGattCharacteristic characteristic7;
+    protected int findService=0;
 
-    private BluetoothGattService mGATTFirst;
-    protected BluetoothGattCharacteristic charFirst6;
-    protected BluetoothGattCharacteristic charFirst7;
+    protected ArrayList<Runnable> runnables=new ArrayList<Runnable>();
 
-    private BluetoothGattService mGATTSecond;
-    protected BluetoothGattCharacteristic charSecond6;
-    protected BluetoothGattCharacteristic charSecond7;
+    protected ArrayList<Runnable> serRunnables=new ArrayList<Runnable>();
 
-    BleTool() {
+    deviceManager(String aimAddress) {
+        this.aimAddress = aimAddress;
     }
 
-    public void findService(int i, BluetoothGatt gatt) {
-        switch (i) {
-            case 1:
-                mGATTFirst = gatt.getService(aimServiceUUID);
-                charFirst6 = mGATTFirst.getCharacteristic(aimChar6UUID);
-                charFirst7 = mGATTFirst.getCharacteristic(aimChar7UUID);
-                enableNotification(gatt, aimServiceUUID, aimChar6UUID);
-                enableNotification(gatt, aimServiceUUID, aimChar7UUID);
-                break;
-            case 2:
-                mGATTSecond = gatt.getService(aimServiceUUID);
-                charSecond6 = mGATTSecond.getCharacteristic(aimChar6UUID);
-                charSecond7 = mGATTSecond.getCharacteristic(aimChar7UUID);
-                enableNotification(gatt, aimServiceUUID, aimChar6UUID);
-                enableNotification(gatt, aimServiceUUID, aimChar7UUID);
-                break;
-            case 3:
-                break;
-        }
+    protected static ArrayList<BluetoothGatt> connectionQueue = new ArrayList<BluetoothGatt>();
+
+
+    public void findService(BluetoothGatt gatt) {
+
+        mGATTSevice = gatt.getService(aimServiceUUID);
+        characteristic6 = mGATTSevice.getCharacteristic(aimChar6UUID);
+        characteristic7 = mGATTSevice.getCharacteristic(aimChar7UUID);
+        enableNotification(gatt, aimServiceUUID, aimChar6UUID);
+        enableNotification(gatt, aimServiceUUID, aimChar7UUID);
+
+
     }
 
 
@@ -109,7 +115,94 @@ public class BleTool {
         }
         return log_out;
     }
+
+    protected static boolean checkGATT(int order) {
+
+        if (connectionQueue.size() > order) {
+            if (connectionQueue.get(order) != null)
+                return true;
+            else {
+                Log.d("checkGATT", String.valueOf(order) + " null");
+                return false;
+            }
+        } else {
+            Log.d("checkGATT", String.valueOf(order) + " size fail");
+            return false;
+        }
+    }
+
+    protected static boolean checkGATT(BluetoothGatt gatt, int order) {
+
+        if (connectionQueue.size() > order) {
+            if (gatt.equals(connectionQueue.get(order))) {
+                Log.d("checkGATT", String.valueOf(order) + "  equal ");
+                return true;
+            } else {
+                Log.d("checkGATT", String.valueOf(order) + "  equal null");
+                return false;
+            }
+        } else {
+            Log.d("checkGATT", String.valueOf(order) + "equal size fail");
+            return false;
+        }
+    }
+
+
+    protected static boolean checkGATT(BluetoothGatt bluetoothGatt) {
+        if (!connectionQueue.isEmpty()) {
+            for (BluetoothGatt btg : connectionQueue) {
+                if (btg.equals(bluetoothGatt)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    protected static boolean checkGATT(BluetoothGattCharacteristic blechar, BluetoothGattCharacteristic characteristic) {
+
+        if (blechar != null && characteristic != null) {
+            if (characteristic.equals(blechar))
+                return true;
+            else {
+                Log.d("checkGATT", blechar.toString() + "blechar equal fail");
+                return false;
+            }
+        } else {
+            Log.d("checkGATT", blechar.toString() + "blechar null");
+            return false;
+        }
+    }
+    protected boolean checkConRun(Runnable runnable) {
+        if (!runnables.isEmpty()) {
+            for (Runnable run : runnables) {
+                if (run.equals(runnable)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    protected boolean checkSerRun(Runnable runnable) {
+        if (!serRunnables.isEmpty()) {
+            for (Runnable run : serRunnables) {
+                if (run.equals(runnable)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
+
+
+
+
+
+
+
+
 
 
 /**

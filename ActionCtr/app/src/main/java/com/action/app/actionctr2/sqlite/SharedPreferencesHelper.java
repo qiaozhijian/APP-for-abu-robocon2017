@@ -8,7 +8,7 @@ import android.content.SharedPreferences;
  */
 
 public class SharedPreferencesHelper {
-    SharedPreferences sp;
+    protected static SharedPreferences sp;
     SharedPreferences.Editor editor;
     Context context;
 

@@ -14,7 +14,7 @@ import java.util.UUID;
 public class DeviceManager {
 
     protected static final int STATE_DISCONNECTED = 0;
-    
+
     protected boolean isConnectPermit = false;
     protected boolean isReadyForNextFor = false;
     protected byte[] dataReceive;                 //    接收数据缓存区
@@ -22,16 +22,20 @@ public class DeviceManager {
     protected int HBcount = 0;                      //    心跳包的计数
     protected int RssiValue = 0;                    //    RSSI
     protected String aimAddress;
-    protected int connectionState=STATE_DISCONNECTED;
+    protected int connectionState = STATE_DISCONNECTED;
     private final static UUID aimServiceUUID = UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb");
     private final static UUID aimChar6UUID = UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb");
     private final static UUID aimChar7UUID = UUID.fromString("0000fff7-0000-1000-8000-00805f9b34fb");
+    private BluetoothGattService mGATTSevice;
     protected BluetoothGattCharacteristic characteristic6;
     protected BluetoothGattCharacteristic characteristic7;
-    protected int connectTime=0;
-    protected ArrayList<Runnable> runnables=new ArrayList<Runnable>();
+    protected int connectTime = 0;
+    protected ArrayList<Runnable> runnables = new ArrayList<Runnable>();
 
-    protected ArrayList<Runnable> serRunnables=new ArrayList<Runnable>();
+    protected ArrayList<Runnable> serRunnables = new ArrayList<Runnable>();
+
+    protected boolean firstConnect = true;
+    protected boolean firstEnable = false;
 
     DeviceManager(String aimAddress) {
         connectionQueue.add(mblueToothGatt1);
@@ -39,8 +43,7 @@ public class DeviceManager {
         this.aimAddress = aimAddress;
     }
 
-    public DeviceManager()
-    {
+    public DeviceManager() {
         super();
     }
 
@@ -50,12 +53,22 @@ public class DeviceManager {
 
     protected static BluetoothGatt mblueToothGatt2;
 
-    public void findService(BluetoothGatt gatt) {
+    public boolean findService(BluetoothGatt gatt) {
 
-        characteristic6 = gatt.getService(aimServiceUUID).getCharacteristic(aimChar6UUID);
-        characteristic7 = gatt.getService(aimServiceUUID).getCharacteristic(aimChar7UUID);
-        enableNotification(gatt, aimServiceUUID, aimChar6UUID);
-        enableNotification(gatt, aimServiceUUID, aimChar7UUID);
+        mGATTSevice = gatt.getService(aimServiceUUID);
+        if (mGATTSevice != null) {
+            Log.d("bletrack", "get service");
+            characteristic6 = mGATTSevice.getCharacteristic(aimChar6UUID);
+            characteristic7 = mGATTSevice.getCharacteristic(aimChar7UUID);
+            enableNotification(gatt, aimServiceUUID, aimChar6UUID);
+            enableNotification(gatt, aimServiceUUID, aimChar7UUID);
+            return true;
+        } else {
+            Log.d("bletrack", "get service fail");
+            return false;
+        }
+
+
     }
 
 
@@ -163,18 +176,17 @@ public class DeviceManager {
 
     protected static boolean checkGATT(BluetoothGattCharacteristic blechar, BluetoothGattCharacteristic characteristic) {
 
-        if (blechar != null && characteristic != null) {
-            if (characteristic.equals(blechar))
-                return true;
-            else {
+        if (characteristic.equals(blechar))
+            return true;
+        else {
+            if (blechar != null)
                 Log.d("checkGATT", blechar.toString() + "blechar equal fail");
-                return false;
-            }
-        } else {
-            Log.d("checkGATT", blechar.toString() + "blechar null");
+            else
+                Log.d("checkGATT", "blechar equal fail and null");
             return false;
         }
     }
+
     protected boolean checkConRun(Runnable runnable) {
         if (!runnables.isEmpty()) {
             for (Runnable run : runnables) {
@@ -200,16 +212,16 @@ public class DeviceManager {
 }
 
 
-
-
-
-
-
-
-
-
 /**
  * 注册广播
+ * <p>
+ * 广播接收者
+ * <p>
+ * 广播接收者
+ * <p>
+ * 广播接收者
+ * <p>
+ * 广播接收者
  * <p>
  * 广播接收者
  * <p>

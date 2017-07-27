@@ -22,27 +22,31 @@ import java.util.ArrayList;
 
 import static com.action.app.actionctr2.R.id.start_on;
 
-public class humanSensorActivity extends BasicActivity implements View.OnClickListener{
+public class humanSensorActivity extends BasicActivity implements View.OnClickListener {
 
 
-    private ArrayList<Button> buttonsBallList=new ArrayList<>();
-    private ArrayList<Button> buttonsFrisbeeList=new ArrayList<>();
-    private ArrayList<Button> buttonsColumnList=new ArrayList<>();
-    private ArrayList<Button> buttonsDefendList=new ArrayList<>();
+    private ArrayList<Button> buttonsBallList = new ArrayList<>();
+    private ArrayList<Button> buttonsFrisbeeList = new ArrayList<>();
+    private ArrayList<Button> buttonsColumnList = new ArrayList<>();
+    private ArrayList<Button> buttonsDefendList = new ArrayList<>();
 
     private bleDataProcess bleDataManage;
 
-    private boolean isDestroy=false;
+    private boolean isDestroy = false;
 
     private Button starton;
     private Button goback;
     private Button wayleft;
     private Button waymiddle;
     private Button wayright;
+    private Button leftIsEmpty;
+    private Button rightIsEmpty;
 
-    private void changeColorByMCU(final Context context)
-    {
-        final Handler handler=new Handler();
+    private Button defendFirst;
+    private Button defendSecond;
+
+    private void changeColorByMCU(final Context context) {
+        final Handler handler = new Handler();
 //        写个循环函数还搞新花样
         handler.postDelayed(new Runnable() {
             @Override
@@ -50,20 +54,20 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                 if (bleDataManage.getBinder() != null) {
                     final byte[] info = bleDataManage.getMCUinfo();
                     if (info != null) {
-                      //  Log.d("humanSensor","check heartbeats info");
+                        //  Log.d("humanSensor","check heartbeats info");
                         if (info.length == BleService.bleDataLen) {
                             Resources r = context.getResources();
-                            int topGunDefendOrAttack=info[BleService.bleDataLen - 3];
-                            Button btn=(Button) findViewById(R.id.human_topgun_defend_or_attack);
-                            Button btnCopy=(Button) findViewById(R.id.human_topgun_defend_or_attack_copy);
-                            if(topGunDefendOrAttack==0){
+                            int topGunDefendOrAttack = info[BleService.bleDataLen - 3];
+                            Button btn = (Button) findViewById(R.id.human_topgun_defend_or_attack);
+                            Button btnCopy = (Button) findViewById(R.id.human_topgun_defend_or_attack_copy);
+                            if (topGunDefendOrAttack == 0) {
                                 btn.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light));
                                 btnCopy.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light));
-                            } else if(topGunDefendOrAttack==1){
+                            } else if (topGunDefendOrAttack == 1) {
                                 btn.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_dark_disabled));
                                 btnCopy.setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light));
-                            } else{
-                                Toast.makeText(getApplicationContext(),"收到的蓝牙心跳包标志进攻防守错误",Toast.LENGTH_SHORT);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "收到的蓝牙心跳包标志进攻防守错误", Toast.LENGTH_SHORT);
                             }
 
 //                            通过心跳包进行回数
@@ -75,23 +79,23 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                                 int checkBall = ballInfo % 2;
                                 if (checkFrisbee == 1) {
                                     buttonsFrisbeeList.get(i).setBackground(r.getDrawable(R.drawable.common_plus_signin_btn_text_dark));
-                                 //   Log.d("humanSensor", "Frisbee  i： "+String.valueOf(i));
+                                    //   Log.d("humanSensor", "Frisbee  i： "+String.valueOf(i));
                                 } else {
                                     buttonsFrisbeeList.get(i).setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light_pressed));
-                                  //  Log.d("humanSensor", "Frisbee ： "+String.valueOf(i));
+                                    //  Log.d("humanSensor", "Frisbee ： "+String.valueOf(i));
                                 }
                                 if (checkBall == 1) {
                                     buttonsBallList.get(i).setBackground(r.getDrawable(R.drawable.common_plus_signin_btn_text_dark));
-                                 //   Log.d("humanSensor", "Ball  i： "+String.valueOf(i));
+                                    //   Log.d("humanSensor", "Ball  i： "+String.valueOf(i));
                                 } else {
                                     buttonsBallList.get(i).setBackground(r.getDrawable(R.drawable.common_google_signin_btn_text_light_pressed));
-                                //    Log.d("humanSensor", "Ball  ： "+String.valueOf(i));
+                                    //    Log.d("humanSensor", "Ball  ： "+String.valueOf(i));
                                 }
                                 ballInfo /= 2;
                                 frisbeeInfo /= 2;
                             }
                         } else {
-                            Log.e("humanSensor", "请检查代码，心跳包长度不正常： "+String.valueOf(info.length));
+                            Log.e("humanSensor", "请检查代码，心跳包长度不正常： " + String.valueOf(info.length));
                         }
                     }
                 }
@@ -106,137 +110,162 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_human_sensor);
-
-        starton=(Button)findViewById(start_on);
-        goback=(Button)findViewById(R.id.goback);
-        wayleft=(Button)findViewById(R.id.sun_onthewayleft);
-        waymiddle=(Button)findViewById(R.id.sun_onthewaymiddle);
-        wayright=(Button)findViewById(R.id.sun_onthewayright);
+        defendFirst = (Button) findViewById(R.id.human_topgun_defend_or_attack);
+        defendSecond = (Button) findViewById(R.id.human_topgun_defend_or_attack_copy);
+        leftIsEmpty = (Button) findViewById(R.id.human_sensor_left_gun_none);
+        rightIsEmpty = (Button) findViewById(R.id.human_sensor_right_gun_none);
+        starton = (Button) findViewById(start_on);
+        goback = (Button) findViewById(R.id.goback);
+        wayleft = (Button) findViewById(R.id.sun_onthewayleft);
+        waymiddle = (Button) findViewById(R.id.sun_onthewaymiddle);
+        wayright = (Button) findViewById(R.id.sun_onthewayright);
         goback.setOnClickListener(this);
         starton.setOnClickListener(this);
         wayleft.setOnClickListener(this);
         waymiddle.setOnClickListener(this);
         wayright.setOnClickListener(this);
 
-        bleDataManage=new bleDataProcess(this);
+        bleDataManage = new bleDataProcess(this);
 //        按键的初始化
-        for(int i=0;i<7;i++){
+        for (int i = 0; i < 7; i++) {
             buttonsColumnList.add(null);
             buttonsBallList.add(null);
             buttonsFrisbeeList.add(null);
-            if(i<6)
+            if (i < 6)
                 buttonsDefendList.add(null);
         }
 
-        RelativeLayout layout=(RelativeLayout)findViewById(R.id.activity_human_sensor);
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.activity_human_sensor);
 //        获取刚刚初始化的所有按键
-        ArrayList<Button> list=myTool.getAllButton(layout);
+        ArrayList<Button> list = myTool.getAllButton(layout);
 //        把每个按键设定好监听，并加入到各自对应的button列表
-        for (Button b:list) {
+        for (Button b : list) {
             b.setOnClickListener(this);
-            if(String.valueOf(b.getText().subSequence(0,2)).equals("柱子")) {
-                int index=Integer.parseInt(String.valueOf(b.getText().subSequence(2,3)))-1;
-                buttonsColumnList.set(index,b);
-            }
-            else if(String.valueOf(b.getText().subSequence(1,2)).equals("球")) {
-                int index=Integer.parseInt(String.valueOf(b.getText().subSequence(0,1)))-1;
-                buttonsBallList.set(index,b);
-            }
-            else if(String.valueOf(b.getText().subSequence(1,2)).equals("盘")) {
-                int index=Integer.parseInt(String.valueOf(b.getText().subSequence(0,1)))-1;
-                buttonsFrisbeeList.set(index,b);
-            }
-            else if(String.valueOf(b.getText().subSequence(0,2)).equals("防守")) {
-                int index=Integer.parseInt(String.valueOf(b.getText().subSequence(2,3)));
-                buttonsDefendList.set(index,b);
+            if (String.valueOf(b.getText().subSequence(0, 2)).equals("柱子")) {
+                int index = Integer.parseInt(String.valueOf(b.getText().subSequence(2, 3))) - 1;
+                buttonsColumnList.set(index, b);
+            } else if (String.valueOf(b.getText().subSequence(1, 2)).equals("球")) {
+                int index = Integer.parseInt(String.valueOf(b.getText().subSequence(0, 1))) - 1;
+                buttonsBallList.set(index, b);
+            } else if (String.valueOf(b.getText().subSequence(1, 2)).equals("盘")) {
+                int index = Integer.parseInt(String.valueOf(b.getText().subSequence(0, 1))) - 1;
+                buttonsFrisbeeList.set(index, b);
+            } else if (String.valueOf(b.getText().subSequence(0, 2)).equals("防守")) {
+                int index = Integer.parseInt(String.valueOf(b.getText().subSequence(2, 3)));
+                buttonsDefendList.set(index, b);
             }
         }
         changeColorByMCU(this);
-        if(getSharedPreferences("data",MODE_PRIVATE).getBoolean("topGunDefendOrAttack",false)){
-            Log.d("humanSensor","test");
-            ((Button)findViewById(R.id.human_topgun_defend_or_attack)).setTextColor(Color.parseColor("#000000"));
-            ((Button)findViewById(R.id.human_topgun_defend_or_attack_copy)).setTextColor(Color.parseColor("#000000"));
+        if (getSharedPreferences("data", MODE_PRIVATE).getBoolean("topGunDefendOrAttack", false)) {
+            Log.d("humanSensor", "test");
+            ((Button) findViewById(R.id.human_topgun_defend_or_attack)).setTextColor(Color.parseColor("#000000"));
+            ((Button) findViewById(R.id.human_topgun_defend_or_attack_copy)).setTextColor(Color.parseColor("#000000"));
         }
-
+        if (isHumanFirst == false) {
+            if (sharedPreferencesHelper.getString("leftIsEmpty") != null) {
+                if (sharedPreferencesHelper.getString("leftIsEmpty").equals("no")) {
+                    leftIsEmpty.setText("左枪有弹");
+                } else if (sharedPreferencesHelper.getString("leftIsEmpty").equals("yes")) {
+                    leftIsEmpty.setText("左枪无弹");
+                }
+            }
+            if (sharedPreferencesHelper.getString("rightEmpty") != null) {
+                if (sharedPreferencesHelper.getString("rightEmpty").equals("no")) {
+                    leftIsEmpty.setText("右枪有弹");
+                } else if (sharedPreferencesHelper.getString("rightEmpty").equals("yes")) {
+                    leftIsEmpty.setText("右枪无弹");
+                }
+            }
+            if (sharedPreferencesHelper.getString("topGun") != null) {
+                if (sharedPreferencesHelper.getString("topGun").equals("no")) {
+                    defendFirst.setTextColor(Color.parseColor("#000000"));
+                    defendSecond.setTextColor(Color.parseColor("#000000"));
+                } else if (sharedPreferencesHelper.getString("topGun").equals("yes")) {
+                    defendFirst.setTextColor(Color.parseColor("#FF0000"));
+                    defendSecond.setTextColor(Color.parseColor("#FF0000"));
+                }
+            }
+        }
+        isHumanFirst = false;
     }
+
     @Override
     public void onClick(final View v) {
 //        对每个按钮进行循环，如果文字和我们点击的文字一样就发数
 //        实际上就是替代了switch
-        for (int i=0;i<buttonsBallList.size();i++) {
-            Button b=buttonsBallList.get(i);
-            if(b.getText().equals(((Button)v).getText())){
-                Log.d("humanSensor","send"+String.valueOf(10+i));
-                bleDataManage.sendCmd((byte)(10+i));
+        for (int i = 0; i < buttonsBallList.size(); i++) {
+            Button b = buttonsBallList.get(i);
+            if (b.getText().equals(((Button) v).getText())) {
+                Log.d("humanSensor", "send" + String.valueOf(10 + i));
+                bleDataManage.sendCmd((byte) (10 + i));
             }
         }
-        for (int i=0;i<buttonsFrisbeeList.size();i++) {
-            Button b=buttonsFrisbeeList.get(i);
-            if(b.getText().equals(((Button)v).getText())){
-                Log.d("humanSensor","send"+String.valueOf(20+i));
-                bleDataManage.sendCmd((byte)(20+i));
+        for (int i = 0; i < buttonsFrisbeeList.size(); i++) {
+            Button b = buttonsFrisbeeList.get(i);
+            if (b.getText().equals(((Button) v).getText())) {
+                Log.d("humanSensor", "send" + String.valueOf(20 + i));
+                bleDataManage.sendCmd((byte) (20 + i));
             }
         }
         //射6和射7
-        if(v.getId()==R.id.human_sensor_defend_shot6frisbee) {
-            bleDataManage.sendCmd((byte)(20+5));
+        if (v.getId() == R.id.human_sensor_defend_shot6frisbee) {
+            bleDataManage.sendCmd((byte) (20 + 5));
+        } else if (v.getId() == R.id.human_sensor_defend_shot7frisbee) {
+            bleDataManage.sendCmd((byte) (20 + 6));
         }
-        else if(v.getId()==R.id.human_sensor_defend_shot7frisbee){
-            bleDataManage.sendCmd((byte)(20+6));
-        }
-        for(int i=0;i<buttonsColumnList.size();i++){
-            Button b=buttonsColumnList.get(i);
-            if(b.getText().equals(((Button)v).getText())){
+        for (int i = 0; i < buttonsColumnList.size(); i++) {
+            Button b = buttonsColumnList.get(i);
+            if (b.getText().equals(((Button) v).getText())) {
                 Intent intent;
-                intent=new Intent(this,ParamChangeActivity.class);
-                intent.putExtra("button_id",i+1);
+                intent = new Intent(this, ParamChangeActivity.class);
+                intent.putExtra("button_id", i + 1);
                 startActivity(intent);
                 finish();
             }
         }
-        for(int i=0;i<buttonsDefendList.size();i++){
-            Button b=buttonsDefendList.get(i);
-            if(b.getText().equals(((Button)v).getText())){
-                Log.d("humanSensor","send"+String.valueOf(40+i));
-                bleDataManage.sendCmd((byte)(40+i));
+        for (int i = 0; i < buttonsDefendList.size(); i++) {
+            Button b = buttonsDefendList.get(i);
+            if (b.getText().equals(((Button) v).getText())) {
+                Log.d("humanSensor", "send" + String.valueOf(40 + i));
+                bleDataManage.sendCmd((byte) (40 + i));
             }
         }
         switch (v.getId()) {
             case R.id.human_sensor_reset:
             case R.id.human_sensor_left_gun_none:
             case R.id.human_sensor_right_gun_none:
-                AlertDialog.Builder dialog= new AlertDialog.Builder(humanSensorActivity.this);
+                AlertDialog.Builder dialog = new AlertDialog.Builder(humanSensorActivity.this);
                 dialog.setTitle("注意");
                 dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        if(v.getId()==R.id.human_sensor_reset)
-                            bleDataManage.sendCmd((byte)30);
-                        else if(v.getId()==R.id.human_sensor_left_gun_none){
-                            Button button=(Button) findViewById(R.id.human_sensor_left_gun_none);
-                            byte cmd=50;
-                            if(button.getText().equals("左枪有弹"))
-                            {
-                                button.setText("左枪无弹");
+                        if (v.getId() == R.id.human_sensor_reset)
+                            bleDataManage.sendCmd((byte) 30);
+                        else if (v.getId() == R.id.human_sensor_left_gun_none) {
+
+                            byte cmd = 50;
+                            if (leftIsEmpty.getText().equals("左枪有弹")) {
+                                leftIsEmpty.setText("左枪无弹");
                                 cmd++;
+                                sharedPreferencesHelper.putString("leftIsEmpty", "yes");
+                            } else {
+                                leftIsEmpty.setText("左枪有弹");
+                                sharedPreferencesHelper.putString("leftIsEmpty", "no");
                             }
-                            else
-                                button.setText("左枪有弹");
                             bleDataManage.sendCmd(cmd);
-                            Log.d("humanSensor","send "+String.valueOf(cmd));
-                        }
-                        else if(v.getId()==R.id.human_sensor_right_gun_none){
-                            Button button=(Button) findViewById(R.id.human_sensor_right_gun_none);
-                            byte cmd=52;
-                            if(button.getText().equals("右枪有弹"))
-                            {
-                                button.setText("右枪无弹");
+                            Log.d("humanSensor", "send " + String.valueOf(cmd));
+                        } else if (v.getId() == R.id.human_sensor_right_gun_none) {
+                            byte cmd = 52;
+                            if (rightIsEmpty.getText().equals("右枪有弹")) {
+                                rightIsEmpty.setText("右枪无弹");
                                 cmd++;
+                                sharedPreferencesHelper.putString("rightIsEmpty", "yes");
+                            } else {
+                                rightIsEmpty.setText("右枪有弹");
+                                sharedPreferencesHelper.putString("rightIsEmpty", "np");
                             }
-                            else
-                                button.setText("右枪有弹");
                             bleDataManage.sendCmd(cmd);
-                            Log.d("humanSensor","send "+String.valueOf(cmd));
+                            Log.d("humanSensor", "send " + String.valueOf(cmd));
                         }
                     }
                 });
@@ -244,29 +273,28 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                 break;
             case R.id.human_topgun_defend_or_attack:
             case R.id.human_topgun_defend_or_attack_copy:
-                Button btn=(Button)findViewById(R.id.human_topgun_defend_or_attack);
-                Button btnCopy=(Button)findViewById(R.id.human_topgun_defend_or_attack_copy);
-                if(btn.getCurrentTextColor()!=(btnCopy.getCurrentTextColor())){
-                    Toast.makeText(getApplicationContext(),"上枪状态错误",Toast.LENGTH_SHORT).show();
+                if (defendFirst.getCurrentTextColor() != (defendSecond.getCurrentTextColor())) {
+                    Toast.makeText(getApplicationContext(), "上枪状态错误", Toast.LENGTH_SHORT).show();
                 }
-                byte cmd=61;
-                Log.d("humanSensor",String.valueOf(btn.getCurrentTextColor()));
-                if(btn.getCurrentTextColor()== 0xde000000 ||btn.getCurrentTextColor()==0xffff0000){
-                    cmd=60;
-                    btn.setTextColor(Color.parseColor("#000000"));
-                    btnCopy.setTextColor(Color.parseColor("#000000"));
-                }
-                else if(btn.getCurrentTextColor()== 0xff000000){
-                    cmd=61;
-                    btn.setTextColor(Color.parseColor("#FF0000"));
-                    btnCopy.setTextColor(Color.parseColor("#FF0000"));
-                }
-                else{
-                    Toast.makeText(getApplicationContext(),"上枪进攻防御切换时发生错误",Toast.LENGTH_SHORT).show();
-                    Log.e("humanSensor","上枪进攻防御切换时发生错误");
+                byte cmd = 61;
+                Log.d("humanSensor", Integer.toHexString(defendFirst.getCurrentTextColor()));
+                //0xff000000黑色0xffff0000红色
+                if (defendFirst.getCurrentTextColor() == 0xde000000 || defendFirst.getCurrentTextColor() == 0xffff0000) {
+                    cmd = 60;
+                    defendFirst.setTextColor(Color.parseColor("#000000"));
+                    defendSecond.setTextColor(Color.parseColor("#000000"));
+                    sharedPreferencesHelper.putString("topGun","no");
+                } else if (defendFirst.getCurrentTextColor() == 0xff000000) {
+                    cmd = 61;
+                    defendFirst.setTextColor(Color.parseColor("#FF0000"));
+                    defendSecond.setTextColor(Color.parseColor("#FF0000"));
+                    sharedPreferencesHelper.putString("topGun","yes");
+                } else {
+                    Toast.makeText(getApplicationContext(), "上枪进攻防御切换时发生错误", Toast.LENGTH_SHORT).show();
+                    Log.e("humanSensor", "上枪进攻防御切换时发生错误");
                 }
                 bleDataManage.sendCmd(cmd);
-                Log.d("humanSensor","send: "+String.valueOf(cmd));
+                Log.d("humanSensor", "send: " + String.valueOf(cmd));
                 break;
             case R.id.human_sensor_defend:
                 findViewById(R.id.human_sensor_defend_layout).setVisibility(View.VISIBLE);
@@ -277,28 +305,28 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                 findViewById(R.id.human_sensor_normal_layout).setVisibility(View.VISIBLE);
                 break;
             case R.id.human_sensor_cancel:
-                SharedPreferences.Editor editor=getSharedPreferences("data",MODE_PRIVATE).edit();
-                Boolean topGunState=false;
-                if(((Button)findViewById(R.id.human_topgun_defend_or_attack)).getCurrentTextColor()==0xff000000){
-                    topGunState=true;
+                SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+                Boolean topGunState = false;
+                if (((Button) findViewById(R.id.human_topgun_defend_or_attack)).getCurrentTextColor() == 0xff000000) {
+                    topGunState = true;
                 }
-                Log.d("humanSensor","top:"+String.valueOf(topGunState));
-                editor.putBoolean("topGunDefendOrAttack",topGunState);
+                Log.d("humanSensor", "top:" + String.valueOf(topGunState));
+                editor.putBoolean("topGunDefendOrAttack", topGunState);
                 editor.commit();
-                Intent intent= new Intent(this,BeginActivity.class);
+                Intent intent = new Intent(this, BeginActivity.class);
                 startActivity(intent);
                 finish();
                 break;
             case start_on:
-                bleDataManage.sendCmd((byte)70);
+                bleDataManage.sendCmd((byte) 70);
                 break;
             case R.id.goback:
-                AlertDialog.Builder dialog1= new AlertDialog.Builder(humanSensorActivity.this);
+                AlertDialog.Builder dialog1 = new AlertDialog.Builder(humanSensorActivity.this);
                 dialog1.setTitle("你真的确定要重装！！？？");
                 dialog1.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        if(v.getId()==R.id.goback) {
+                        if (v.getId() == R.id.goback) {
                             bleDataManage.sendCmd((byte) 71);
                         }
                     }
@@ -306,20 +334,20 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
                 dialog1.show();
                 break;
             case R.id.sun_onthewayleft:
-                bleDataManage.sendCmd((byte)80);
+                bleDataManage.sendCmd((byte) 80);
                 break;
             case R.id.sun_onthewaymiddle:
-                bleDataManage.sendCmd((byte)81);
+                bleDataManage.sendCmd((byte) 81);
                 break;
             case R.id.sun_onthewayright:
-                bleDataManage.sendCmd((byte)82);
+                bleDataManage.sendCmd((byte) 82);
                 break;
         }
     }
 
     @Override
     public void onDestroy() {
-        isDestroy=true;
+        isDestroy = true;
         super.onDestroy();
         bleDataManage.unbind();
     }

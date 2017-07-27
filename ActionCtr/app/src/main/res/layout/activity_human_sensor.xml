@@ -327,7 +327,7 @@
                         android:layout_weight="1"
                         android:background="@android:drawable/picture_frame"
                         android:text="上枪██"
-                        android:textColor="#FF0000"/>
+                        android:textColor="#FF0000" />
 
                     <Button
                         android:id="@+id/human_sensor_left_gun_none"
@@ -509,12 +509,13 @@
                 android:textSize="50sp"
                 android:textStyle="bold" />
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="horizontal">
-        </LinearLayout>
+            android:orientation="horizontal"></LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"

@@ -24,6 +24,8 @@ import com.action.app.actionctr2.sqlite.Manage;
 
 import java.util.ArrayList;
 
+import static com.action.app.actionctr2.R.id.state;
+
 
 public class ParamChangeActivity extends BasicActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener {
 
@@ -100,7 +102,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         }
 //        对扔打盘打球进行轮询，如果一样就变色
         for (Button button : buttonParamList) {
-            TextView textView = ((TextView) findViewById(R.id.state));
+            TextView textView = ((TextView) findViewById(state));
             if (button.getText().equals(textView.getText().toString())) {
                 button.setTextColor(Color.parseColor("#6495ED"));
             } else {
@@ -132,7 +134,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private int floatToProgress(SeekBar seekBar, float val) {
 //        枪，状态，柱子的指示文本
         String gunNum = ((TextView) findViewById(R.id.gun_num)).getText().toString();
-        String gunState = ((TextView) findViewById(R.id.state)).getText().toString();
+        String gunState = ((TextView) findViewById(state)).getText().toString();
         String column = ((TextView) findViewById(R.id.column_num)).getText().toString();
 //        初始化个对应的seekbar的值
         if (gunNum.equals("上")) {
@@ -265,7 +267,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         TextView textView = (TextView) findViewById(R.id.roll_or_district);
         if (textView.getText().equals("区域")) {
             float region = Float.parseFloat(((TextView) findViewById(R.id.edit_roll)).getText().toString());
-            if (sqlManage.select("column" + String.valueOf(buttonId), String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(R.id.state)).getText()), region)) {
+            if (sqlManage.select("column" + String.valueOf(buttonId), String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(state)).getText()), region)) {
                 setProgressAll(sqlManage);
             }
         }
@@ -393,7 +395,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             if (init_state[1].equals("上")) {
                 ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_top", false));
             }
-            ((TextView) findViewById(R.id.state)).setText(init_state[2]);
+            ((TextView) findViewById(state)).setText(init_state[2]);
             ((TextView) findViewById(R.id.column_onTheWay)).setText(init_state[3]);
 //            判断到底是柱子几  这就体现了学长代码归一性不是很好
             switch (init_state[0]) {
@@ -467,7 +469,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     ((TextView) findViewById(R.id.column_num)).setText("column" + String.valueOf(buttonId));
                     int inOntheWay = readOntheWay();
 //                   更新数据类的值
-                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(R.id.state)).getText()), inOntheWay)) {
+                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(state)).getText()), inOntheWay)) {
                         sqlManage.setZero();
                     }
 //                    把数据类的值填上去
@@ -517,7 +519,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             sqlManage.comment = commentText.getText().toString();
-                            sqlManage.Insert(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(R.id.state)).getText()), inOntheWay);
+                            sqlManage.Insert(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(state)).getText()), inOntheWay);
                             Toast.makeText(ParamChangeActivity.this, "save ok", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -530,7 +532,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     dialog.show();
                 } else {
                     sqlManage.comment = "";
-                    sqlManage.Insert(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(R.id.state)).getText()), inOntheWay);
+                    sqlManage.Insert(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(state)).getText()), inOntheWay);
                     Toast.makeText(ParamChangeActivity.this, "save ok", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -565,7 +567,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         @Override
                         public void run() {
                             //                            用两个switch使id2能表达出他所指的是什么枪的什么状态
-                            switch (String.valueOf(((TextView) findViewById(R.id.state)).getText())) {
+                            switch (String.valueOf(((TextView) findViewById(state)).getText())) {
                                 case "打球":
                                     id2 = 0;
                                     break;
@@ -616,9 +618,12 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                                         break;
                                     case 5:
                                         progressDialog.cancel();
+                                        bleDataManage.setIsSending();
+                                        countforMaxTime = 0;
                                         break;
                                     default:
                                         progressDialog.cancel();
+                                        bleDataManage.setIsSending();
                                         Log.d("datasend", "id is " + String.valueOf(id));
                                         id=0;
                                         Log.e("change button", "onclick run err run err!!!!!");
@@ -632,7 +637,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                                 id++;
                             } else {
                                 countforMaxTime++;
-                                if (countforMaxTime > 40) {
+                                if (countforMaxTime > 35) {
                                     progressDialog.cancel();
                                     countforMaxTime = 0;
                                     id=0;
@@ -701,11 +706,11 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 //                初始化手动按钮
                 ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_left", true));
 //                先判断是不是从数据加载页面跳过来的，然后去更新数据
-                if (param2set != null && init_state[1].equals("左") && init_state[2].equals(String.valueOf(((TextView) findViewById(R.id.state)).getText()))) {
+                if (param2set != null && init_state[1].equals("左") && init_state[2].equals(String.valueOf(((TextView) findViewById(state)).getText()))) {
                     setProgressAll(param2set);
                 } else {
                     int inOntheWay = readOntheWay();
-                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(R.id.state)).getText()), inOntheWay)) {
+                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(state)).getText()), inOntheWay)) {
                         sqlManage.setZero();
                     }
                     setProgressAll(sqlManage);
@@ -717,11 +722,11 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
                 ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_top", true));
 
-                if (param2set != null && init_state[1].equals("上") && init_state[2].equals(String.valueOf(((TextView) findViewById(R.id.state)).getText()))) {
+                if (param2set != null && init_state[1].equals("上") && init_state[2].equals(String.valueOf(((TextView) findViewById(state)).getText()))) {
                     setProgressAll(param2set);
                 } else {
                     int inOntheWay = readOntheWay();
-                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(R.id.state)).getText()), inOntheWay)) {
+                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(state)).getText()), inOntheWay)) {
                         sqlManage.setZero();
                     }
                     setProgressAll(sqlManage);
@@ -732,11 +737,11 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 
                 ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_right", true));
 
-                if (param2set != null && init_state[1].equals("右") && init_state[2].equals(String.valueOf(((TextView) findViewById(R.id.state)).getText()))) {
+                if (param2set != null && init_state[1].equals("右") && init_state[2].equals(String.valueOf(((TextView) findViewById(state)).getText()))) {
                     setProgressAll(param2set);
                 } else {
                     int inOntheWay = readOntheWay();
-                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(R.id.state)).getText()), inOntheWay)) {
+                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(state)).getText()), inOntheWay)) {
                         sqlManage.setZero();
                     }
                     setProgressAll(sqlManage);
@@ -751,11 +756,11 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 } else {
                     ((TextView) findViewById(R.id.column_onTheWay)).setText("中间");
                 }
-                if (param2set != null && init_state[1].equals(String.valueOf(((TextView) findViewById(R.id.gun_num)).getText())) && init_state[2].equals(String.valueOf(((TextView) findViewById(R.id.state)).getText()))) {
+                if (param2set != null && init_state[1].equals(String.valueOf(((TextView) findViewById(R.id.gun_num)).getText())) && init_state[2].equals(String.valueOf(((TextView) findViewById(state)).getText()))) {
                     setProgressAll(param2set);
                 } else {
                     int inOntheWay = readOntheWay();
-                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(R.id.state)).getText()), inOntheWay)) {
+                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(state)).getText()), inOntheWay)) {
                         sqlManage.setZero();
                     }
                     setProgressAll(sqlManage);
@@ -764,42 +769,42 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             }
 //             一个套路
             case R.id.button_param_shotball://打球
-                ((TextView) findViewById(R.id.state)).setText("打球");
+                ((TextView) findViewById(state)).setText("打球");
                 if (param2set != null && init_state != null) {
                     if (init_state[1].equals(String.valueOf(((TextView) findViewById(R.id.gun_num)).getText())) && init_state[2].equals("打球")) {
                         setProgressAll(param2set);
                     }
                 } else {
                     int inOntheWay = readOntheWay();
-                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(R.id.state)).getText()), inOntheWay)) {
+                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(state)).getText()), inOntheWay)) {
                         sqlManage.setZero();
                     }
                     setProgressAll(sqlManage);
                 }
                 break;
             case R.id.button_param_shotfrisbee://打飞盘
-                ((TextView) findViewById(R.id.state)).setText("打盘");
+                ((TextView) findViewById(state)).setText("打盘");
                 if (param2set != null && init_state != null) {
                     if (init_state[1].equals(String.valueOf(((TextView) findViewById(R.id.gun_num)).getText())) && init_state[2].equals("打盘")) {
                         setProgressAll(param2set);
                     }
                 } else {
                     int inOntheWay = readOntheWay();
-                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(R.id.state)).getText()), inOntheWay)) {
+                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(state)).getText()), inOntheWay)) {
                         sqlManage.setZero();
                     }
                     setProgressAll(sqlManage);
                 }
                 break;
             case R.id.button_param_fly: //只是扔
-                ((TextView) findViewById(R.id.state)).setText("扔");
+                ((TextView) findViewById(state)).setText("扔");
                 if (param2set != null && init_state != null) {
                     if (init_state[1].equals(String.valueOf(((TextView) findViewById(R.id.gun_num)).getText())) && init_state[2].equals("扔")) {
                         setProgressAll(param2set);
                     }
                 } else {
                     int inOntheWay = readOntheWay();
-                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(R.id.state)).getText()), inOntheWay)) {
+                    if (!sqlManage.Select(buttonId, String.valueOf(((TextView) findViewById(R.id.gun_num)).getText()), String.valueOf(((TextView) findViewById(state)).getText()), inOntheWay)) {
                         sqlManage.setZero();
                     }
                     setProgressAll(sqlManage);

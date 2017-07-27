@@ -147,4 +147,5 @@ public class bleDataProcess {
         context.unbindService(connection);
     }
 
+    public void setIsSending() { state.setIsSending(); }
 }

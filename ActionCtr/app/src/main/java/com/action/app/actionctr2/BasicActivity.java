@@ -5,17 +5,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 
+import com.action.app.actionctr2.sqlite.SharedPreferencesHelper;
+
 /**
  * Created by 56390 on 2016/12/7.
  */
 
-public class BasicActivity extends AppCompatActivity{
+public class BasicActivity extends AppCompatActivity {
 
     public final String TAG = "activitytrack";
+    protected static SharedPreferencesHelper sharedPreferencesHelper;
+    protected static boolean isHumanFirst = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(R.style.AppTheme);
+        sharedPreferencesHelper = new SharedPreferencesHelper(getApplication(), "data");
         Log.d(TAG, getClass().getSimpleName() + "  onCreate");
     }
 
@@ -25,6 +31,7 @@ public class BasicActivity extends AppCompatActivity{
             return false;
         return super.onKeyDown(keycode, event);
     }
+
     @Override
     public void onStart() {
         super.onStart();

@@ -26,7 +26,6 @@ public class DeviceManager {
     private final static UUID aimServiceUUID = UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb");
     private final static UUID aimChar6UUID = UUID.fromString("0000fff6-0000-1000-8000-00805f9b34fb");
     private final static UUID aimChar7UUID = UUID.fromString("0000fff7-0000-1000-8000-00805f9b34fb");
-    private BluetoothGattService mGATTSevice;
     protected BluetoothGattCharacteristic characteristic6;
     protected BluetoothGattCharacteristic characteristic7;
     protected int connectTime=0;
@@ -53,13 +52,10 @@ public class DeviceManager {
 
     public void findService(BluetoothGatt gatt) {
 
-        mGATTSevice = gatt.getService(aimServiceUUID);
-        characteristic6 = mGATTSevice.getCharacteristic(aimChar6UUID);
-        characteristic7 = mGATTSevice.getCharacteristic(aimChar7UUID);
+        characteristic6 = gatt.getService(aimServiceUUID).getCharacteristic(aimChar6UUID);
+        characteristic7 = gatt.getService(aimServiceUUID).getCharacteristic(aimChar7UUID);
         enableNotification(gatt, aimServiceUUID, aimChar6UUID);
         enableNotification(gatt, aimServiceUUID, aimChar7UUID);
-
-
     }
 
 

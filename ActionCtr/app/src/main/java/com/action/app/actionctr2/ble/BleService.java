@@ -36,13 +36,13 @@ public class BleService extends Service {
     private final IBinder mBinder = new myBleBand();
 
     //有一个默认第一设备，第二设备，如果扫描就是哪个先进哪个是，如果直接连接就用默认的
-    private String AIMADDRESS1 = "F4:5E:AB:B9:58:80";//1号 白色平板
-    // private final String AIMADDRESS1="50:65:83:86:C6:33";//这个参数是车上用的平板 2号
-    private final static String AIMADDRESS2 = "98:7B:F3:60:C7:1C";//测试版
-    // private final String AIMADDRESS1 = "F4:5E:AB:B9:5A:03";// //手机
-    //private String AIMADDRESS2 = "F4:5E:AB:B9:59:77";//手机
-    // private final String AIMADDRESS1="98:7B:F3:60:C7:01";//
-    //private final String AIMADDRESS1 = "90:59:AF:0E:60:1F";//
+//    private final String AIMADDRESS1 = "F4:5E:AB:B9:58:80";//1号平板  1  一号试场
+//    private final String AIMADDRESS2 = "98:7B:F3:60:C7:1C";//1号平板  2  手机试场
+    //private final String AIMADDRESS1 = "F4:5E:AB:B9:5A:03";// 2号平板 1  2号试场
+//    private final String AIMADDRESS2 = "F4:5E:AB:B9:59:77";// 2号平板 2
+    private final String AIMADDRESS1 = "98:7B:F3:60:C7:01";//手机 1
+    private final String AIMADDRESS2 = "90:59:AF:0E:60:1F";//手机 2
+    //private final String AIMADDRESS1="50:65:83:86:C6:33";//已坏的新模块
 
     private DeviceManager deviceFirst = new DeviceManager(AIMADDRESS1);
     private DeviceManager deviceSecond = new DeviceManager(AIMADDRESS2);
@@ -236,7 +236,7 @@ public class BleService extends Service {
 //                    deviceFirst.connectionState = STATE_CONNECTING;
 //                    Log.d("bletrack", "GATT1 connect()");
 //                    return true;
-//                } else {
+//                } else {-;
 //                    Log.d("bletrack", "GATT1 connect()   fail");
 //                    return false;
 //                }
@@ -432,9 +432,9 @@ public class BleService extends Service {
                             deviceFirst.isReadyForNextFor = false;
                             deviceFirst.connectionState = STATE_DISCONNECTED;
                             gatt.close();
-                            if(DeviceManager.checkGATT(1))
-                            if(deviceSecond.connectionState==STATE_CONNECTING)
-                                DeviceManager.connectionQueue.get(1).close();
+                            if (DeviceManager.checkGATT(1))
+                                if (deviceSecond.connectionState == STATE_CONNECTING)
+                                    DeviceManager.connectionQueue.get(1).close();
                             handler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
@@ -446,8 +446,8 @@ public class BleService extends Service {
                             deviceSecond.connectionState = STATE_DISCONNECTED;
                             deviceSecond.isReadyForNextFor = false;
                             gatt.close();
-                            if(DeviceManager.checkGATT(0))
-                                if(deviceFirst.connectionState==STATE_CONNECTING)
+                            if (DeviceManager.checkGATT(0))
+                                if (deviceFirst.connectionState == STATE_CONNECTING)
                                     DeviceManager.connectionQueue.get(0).close();
                             handler.postDelayed(new Runnable() {
                                 @Override
@@ -796,16 +796,6 @@ public class BleService extends Service {
             ble_init();
 
             //scanLeDevice(true);
-
-            connectSafe(deviceFirst.aimAddress);
-
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    connectSafe(deviceSecond.aimAddress);
-                }
-            }, 200);
-
             final Handler handler1 = new Handler();
             handler1.post(new Runnable() {
                 @Override
@@ -1105,6 +1095,20 @@ public class BleService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
 
+        //Log.d("")
+        if (intent.getStringExtra("mode").equals("tryField")) {
+            Log.d("bletrack","single mode");
+            connectSafe(deviceFirst.aimAddress);
+        } else if (intent.getStringExtra("mode").equals("compete")) {
+            Log.d("bletrack","dual mode");
+            connectSafe(deviceFirst.aimAddress);
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    connectSafe(deviceSecond.aimAddress);
+                }
+            }, 200);
+        }
 //        if (intent.getStringExtra("data").equals("scan")) {
 //
 //                if(deviceFirst.connectionState ==STATE_DISCONNECTED)

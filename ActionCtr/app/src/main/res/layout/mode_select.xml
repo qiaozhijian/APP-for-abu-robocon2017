@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:id="@+id/mode_select"
+    android:layout_height="match_parent">
+
+    <Button
+        android:id="@+id/tryField"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
+        android:textSize="100sp"
+        android:text="试场" />
+
+    <Button
+        android:id="@+id/compete"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:textSize="100sp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
+        android:text="比赛" />
+
+</LinearLayout>

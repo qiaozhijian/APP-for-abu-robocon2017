@@ -96,7 +96,7 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
         handler.post(runnable);
 
 
-        actionStart(this, "scan");
+        //actionStart(this, "scan");
     }
 
     public void actionStart(Context context, String data) {

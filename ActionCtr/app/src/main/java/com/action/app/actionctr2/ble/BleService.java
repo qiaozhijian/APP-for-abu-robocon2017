@@ -35,12 +35,12 @@ public class BleService extends Service {
     private final IBinder mBinder = new myBleBand();
 
     //有一个默认第一设备，第二设备，如果扫描就是哪个先进哪个是，如果直接连接就用默认的
-    private final String AIMADDRESS1 = "F4:5E:AB:B9:58:80";//1号平板  1  一号试场
-    private final String AIMADDRESS2 = "98:7B:F3:60:C7:1C";//1号平板  2  手机试场
-    private final String AIMADDRESS3 = "F4:5E:AB:B9:5A:03";// 2号平板 1  2号试场
-//    private final String AIMADDRESS1 = "98:7B:F3:60:C7:01";//手机 1
-//    private final String AIMADDRESS2 = "90:59:AF:0E:60:1F";//手机 2
-//    private final String AIMADDRESS3 = "F4:5E:AB:B9:59:77";//手机 3
+//    private final String AIMADDRESS1 = "F4:5E:AB:B9:58:80";//1号平板  1  一号试场
+//    private final String AIMADDRESS2 = "98:7B:F3:60:C7:1C";//1号平板  2  手机试场
+//    private final String AIMADDRESS3 = "F4:5E:AB:B9:5A:03";// 2号平板 1  2号试场
+    private final String AIMADDRESS1 = "98:7B:F3:60:C7:01";//手机 1
+    private final String AIMADDRESS2 = "90:59:AF:0E:60:1F";//手机 2
+    private final String AIMADDRESS3 = "F4:5E:AB:B9:59:77";//手机 3
     //private final String AIMADDRESS1="50:65:83:86:C6:33";//已坏的新模块
 
     private DeviceManager deviceFirst = new DeviceManager(AIMADDRESS1);
@@ -195,6 +195,7 @@ public class BleService extends Service {
             return false;
         }
 
+        countForCircle = 0;
         isNeedForScan = false;
 
         /* 获取远端的蓝牙设备 */
@@ -229,6 +230,7 @@ public class BleService extends Service {
             return false;
         }
 
+        countForCircle = 0;
         isNeedForScan = false;
 
         /* 获取远端的蓝牙设备 */
@@ -261,6 +263,7 @@ public class BleService extends Service {
             return false;
         }
 
+        countForCircle = 0;
         isNeedForScan = false;
 
         /* 获取远端的蓝牙设备 */
@@ -735,7 +738,10 @@ public class BleService extends Service {
                                 if ((deviceFirst.connectionState == STATE_CONNECTING)
                                         || (deviceFirst.connectionState == STATE_CONNECTED
                                         && !deviceFirst.isReadyForNextFor)) {
-                                    occupyOrder = 2;
+                                    if (tryField != 0)
+                                        occupyOrder = tryField;
+                                    else
+                                        occupyOrder = 2;
                                     if (DeviceManager.checkGATT(0)) {
                                         occupyState = false;
                                         DeviceManager.connectionQueue.get(0).disconnect();
@@ -750,7 +756,10 @@ public class BleService extends Service {
                                 if ((deviceSecond.connectionState == STATE_CONNECTING)
                                         || (deviceSecond.connectionState == STATE_CONNECTED
                                         && !deviceSecond.isReadyForNextFor)) {
-                                    occupyOrder = 3;
+                                    if (tryField != 0)
+                                        occupyOrder = tryField;
+                                    else
+                                        occupyOrder = 3;
                                     if (DeviceManager.checkGATT(1)) {
                                         occupyState = false;
                                         DeviceManager.connectionQueue.get(1).disconnect();
@@ -765,7 +774,10 @@ public class BleService extends Service {
                                 if ((deviceThird.connectionState == STATE_CONNECTING)
                                         || (deviceThird.connectionState == STATE_CONNECTED
                                         && !deviceThird.isReadyForNextFor)) {
-                                    occupyOrder = 1;
+                                    if (tryField != 0)
+                                        occupyOrder = tryField;
+                                    else
+                                        occupyOrder = 1;
                                     if (DeviceManager.checkGATT(2)) {
                                         occupyState = false;
                                         DeviceManager.connectionQueue.get(2).disconnect();
@@ -809,7 +821,7 @@ public class BleService extends Service {
                                     occupyState = false;
                                     occupyOrder = 2;
                                     countForCircle = 0;
-//                                    Log.d("bletrack", "1 to 2");
+                                    //   Log.d("bletrack", "1 to 2");
                                 }
                                 break;
                             case 2:
@@ -840,7 +852,7 @@ public class BleService extends Service {
                                     occupyState = false;
                                     occupyOrder = 3;
                                     countForCircle = 0;
-//                                    Log.d("bletrack", "2 to 3");
+                                    //   Log.d("bletrack", "2 to 3");
                                 }
                                 break;
                             case 3:
@@ -871,7 +883,7 @@ public class BleService extends Service {
                                     occupyOrder = 1;
                                     occupyState = false;
                                     countForCircle = 0;
-//                                    Log.d("bletrack", "3 to 1");
+                                    // Log.d("bletrack", "3 to 1");
                                 }
                                 break;
                         }
@@ -896,9 +908,12 @@ public class BleService extends Service {
                                 + " 2r " + deviceSecond.isReadyForNextFor
                                 + " 3r " + deviceThird.isReadyForNextFor);
                     }
-//                    Log.d("constate", "count " + countForCircle % 10
-//                            + " order " + occupyOrder
-//                            + " state " + occupyState);
+//                    if(deviceFirst.isReadyForNextFor&&countForCircle % 50 == 0) {
+//                        DeviceManager.connectionQueue.get(0).readRemoteRssi();
+//                    }
+                    Log.d("constate", "count " + countForCircle
+                            + " order " + occupyOrder
+                            + " state " + occupyState + " rssi " + deviceFirst.RssiValue);
                     handler1.postDelayed(this, 20);
                 }
             });
@@ -927,7 +942,6 @@ public class BleService extends Service {
                     if (deviceFirst.isReadyForNextFor) {
                         if (deviceFirst.characteristic7 != null) {
                             deviceFirst.characteristic7.setValue(heartBeat);
-                            Log.d("ACHB", "datasending " + isDataSending);
                             if (!isDataSending) {
                                 DeviceManager.connectionQueue.get(0).writeCharacteristic(deviceFirst.characteristic7);
                                 isHBSending = true;
@@ -941,9 +955,7 @@ public class BleService extends Service {
                         lastHBcount1 = deviceFirst.HBcount;
                         if (errCount1 >= 5) {
                             Log.e("bletrack", "HeartBeats 1 disconnect");
-                            deviceFirst.isReadyForNextFor = false;
-                            deviceFirst.connectionState = STATE_DISCONNECTED;
-                            disconnect(1);
+                                disconnect(1);
                             errCount1 = 0;
                         }
                     }
@@ -961,10 +973,8 @@ public class BleService extends Service {
                         else
                             errCount2 = 0;
                         lastHBcount2 = deviceSecond.HBcount;
-                        if (errCount2 >= 6) {
+                        if (errCount2 >= 5) {
                             Log.e("bletrack", "HeartBeats 2 disconnect");
-                            deviceSecond.isReadyForNextFor = false;
-                            deviceSecond.connectionState = STATE_DISCONNECTED;
                             disconnect(2);
                             errCount2 = 0;
                         }
@@ -984,10 +994,8 @@ public class BleService extends Service {
                         else
                             errCount3 = 0;
                         lastHBcount3 = deviceThird.HBcount;
-                        if (errCount3 >= 7) {
+                        if (errCount3 >= 5) {
                             Log.e("bletrack", "HeartBeats 3 disconnect");
-                            deviceThird.isReadyForNextFor = false;
-                            deviceThird.connectionState = STATE_DISCONNECTED;
                             disconnect(3);
                             errCount3 = 0;
                         }

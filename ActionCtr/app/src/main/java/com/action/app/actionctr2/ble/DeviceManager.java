@@ -29,17 +29,17 @@ public class DeviceManager {
     private BluetoothGattService mGATTSevice;
     protected BluetoothGattCharacteristic characteristic6;
     protected BluetoothGattCharacteristic characteristic7;
-    protected int connectTime = 0;
+    protected static int connectTime = 0;
     protected ArrayList<Runnable> runnables = new ArrayList<Runnable>();
 
     protected ArrayList<Runnable> serRunnables = new ArrayList<Runnable>();
 
     protected boolean firstConnect = true;
-    protected boolean firstEnable = false;
 
     DeviceManager(String aimAddress) {
-        connectionQueue.add(mblueToothGatt1);
-        connectionQueue.add(mblueToothGatt2);
+        connectionQueue.add(mblueToothGattTemp);
+        connectionQueue.add(mblueToothGattTemp);
+        connectionQueue.add(mblueToothGattTemp);
         this.aimAddress = aimAddress;
     }
 
@@ -49,9 +49,7 @@ public class DeviceManager {
 
     protected static ArrayList<BluetoothGatt> connectionQueue = new ArrayList<BluetoothGatt>();
 
-    protected static BluetoothGatt mblueToothGatt1;
-
-    protected static BluetoothGatt mblueToothGatt2;
+    protected static BluetoothGatt mblueToothGattTemp;
 
     public boolean findService(BluetoothGatt gatt) {
 
@@ -133,22 +131,22 @@ public class DeviceManager {
 
     protected static boolean checkGATT(int order) {
 
-        if (connectionQueue.size() > order) {
+//        if (connectionQueue.size() > order) {
             if (connectionQueue.get(order) != null)
                 return true;
             else {
                 Log.d("checkGATT", String.valueOf(order) + " null");
                 return false;
             }
-        } else {
-            Log.d("checkGATT", String.valueOf(order) + " size fail");
-            return false;
-        }
+//        } else {
+//            Log.d("checkGATT", String.valueOf(order) + " size fail");
+//            return false;
+//        }
     }
 
     protected static boolean checkGATT(BluetoothGatt gatt, int order) {
 
-        if (connectionQueue.size() > order) {
+//        if (connectionQueue.size() > order) {
             if (gatt.equals(connectionQueue.get(order))) {
                 Log.d("checkGATT", String.valueOf(order) + "  equal ");
                 return true;
@@ -156,10 +154,10 @@ public class DeviceManager {
                 Log.d("checkGATT", String.valueOf(order) + "  equal null");
                 return false;
             }
-        } else {
-            Log.d("checkGATT", String.valueOf(order) + "equal size fail");
-            return false;
-        }
+//        } else {
+//            Log.d("checkGATT", String.valueOf(order) + "equal size fail");
+//            return false;
+//        }
     }
 
 

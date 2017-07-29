@@ -216,6 +216,11 @@ public class humanSensorActivity extends BasicActivity implements View.OnClickLi
         for (int i = 0; i < buttonsColumnList.size(); i++) {
             Button b = buttonsColumnList.get(i);
             if (b.getText().equals(((Button) v).getText())) {
+                SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+                editor.putBoolean("gun_mode_left", true);
+                editor.putBoolean("gun_mode_right", true);
+                editor.putBoolean("gun_mode_top", false);
+                editor.commit();
                 Intent intent;
                 intent = new Intent(this, ParamChangeActivity.class);
                 intent.putExtra("button_id", i + 1);

@@ -115,6 +115,10 @@ public class bleDataProcess {
         return state.checkSendOkSecond();
     }
 
+    public boolean checkSendOkThird() {
+        return state.checkSendOkThird();
+    }
+
     public Binder getBinder() {
         return state;
     }
@@ -127,6 +131,10 @@ public class bleDataProcess {
         return state.isReadySecond();
     }
 
+    public boolean isReadyForDataThird() {
+        return state.isReadyThird();
+    }
+
     public byte[] getMCUinfo() {
         return state.getHeartBeats();
     }
@@ -137,6 +145,10 @@ public class bleDataProcess {
 
     public int readRssiSecond() {
         return state.readRssiSecond();
+    }
+
+    public int readRssiThird() {
+        return state.readRssiThird();
     }
 
     public int readNum() {

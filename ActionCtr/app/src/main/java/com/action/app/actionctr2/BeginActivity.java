@@ -63,7 +63,8 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
             public void run() {
                 if (!isEnding) {
                     if (state.getBinder() != null) {
-                        if (!state.isReadyForDataFirst() && !state.isReadyForDataSecond()) {
+                        if (!state.isReadyForDataFirst()
+                                && !state.isReadyForDataSecond() && !state.isReadyForDataThird()) {
                             bar.setProgress(0);
                             textView.setText("蓝牙断开");
                             textView.setTextColor(Color.parseColor("#FF0000"));
@@ -76,10 +77,12 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
                             if (state.isReadyForDataFirst()) {
                                 rssi = 150 + state.readRssiFirst();
                                 Log.d("ACHB", "1 rssi: " + String.valueOf(state.readRssiFirst()));
-                            }
-                            else if(state.isReadyForDataSecond()) {
+                            } else if (state.isReadyForDataSecond()) {
                                 rssi = 150 + state.readRssiSecond();
                                 Log.d("ACHB", "2 rssi: " + String.valueOf(state.readRssiSecond()));
+                            } else if (state.isReadyForDataThird()) {
+                                rssi = 150 + state.readRssiThird();
+                                Log.d("ACHB", "3 rssi: " + String.valueOf(state.readRssiThird()));
                             }
                             if (rssi > 100)
                                 rssi = 100;
@@ -162,7 +165,7 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
                 finish();
                 break;
             case R.id.thenum:
-                Toast.makeText(this,"断了就重启啊！！",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "断了就重启啊！！", Toast.LENGTH_SHORT).show();
                 break;
         }
     }

@@ -50,7 +50,7 @@ public class BleConnectActivity extends BasicActivity implements View.OnClickLis
                 count%=20;
                 boolean check=false;
                 if(state.getBinder()!=null){
-                    check=(state.isReadyForDataFirst()||state.isReadyForDataSecond());
+                    check=(state.isReadyForDataFirst()||state.isReadyForDataSecond()||state.isReadyForDataThird());
                     if(check){
                         Log.d("ble","ble is ready for sendData");
                         Intent intent=new Intent(BleConnectActivity.this,BeginActivity.class);

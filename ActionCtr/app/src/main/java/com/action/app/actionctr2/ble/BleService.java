@@ -35,12 +35,12 @@ public class BleService extends Service {
     private final IBinder mBinder = new myBleBand();
 
     //有一个默认第一设备，第二设备，如果扫描就是哪个先进哪个是，如果直接连接就用默认的
-//    private final String AIMADDRESS1 = "F4:5E:AB:B9:58:80";//1号平板  1  一号试场
-//    private final String AIMADDRESS2 = "98:7B:F3:60:C7:1C";//1号平板  2  手机试场
-//    private final String AIMADDRESS3 = "F4:5E:AB:B9:5A:03";// 2号平板 1  2号试场
-    private final String AIMADDRESS1 = "98:7B:F3:60:C7:01";//手机 1
-    private final String AIMADDRESS2 = "90:59:AF:0E:60:1F";//手机 2
-    private final String AIMADDRESS3 = "F4:5E:AB:B9:59:77";//手机 3
+    private final String AIMADDRESS1 = "F4:5E:AB:B9:58:80";//1号平板  1  一号试场
+    private final String AIMADDRESS2 = "98:7B:F3:60:C7:1C";//1号平板  2  手机试场
+    private final String AIMADDRESS3 = "F4:5E:AB:B9:5A:03";// 2号平板 1  2号试场
+//    private final String AIMADDRESS1 = "98:7B:F3:60:C7:01";//手机 1
+//    private final String AIMADDRESS2 = "90:59:AF:0E:60:1F";//手机 2
+//    private final String AIMADDRESS3 = "F4:5E:AB:B9:59:77";//手机 3
     //private final String AIMADDRESS1="50:65:83:86:C6:33";//已坏的新模块
 
     private DeviceManager deviceFirst = new DeviceManager(AIMADDRESS1);
@@ -712,6 +712,7 @@ public class BleService extends Service {
 
     private int countForCircle = 1;
     private int occupyOrder = tryPara;
+    private boolean wifsend = false;
 
     @Override
     public void onCreate() {
@@ -935,10 +936,10 @@ public class BleService extends Service {
                     heartBeat[1] = 'C';
                     heartBeat[2] = 'H';
                     heartBeat[3] = 'B';
-                    if (!isDataSending) {
+
+                    if (!wifsend)
                         wifiSend(heartBeat);
-                        //Log.d("wifitrack", "wifisend");
-                    }
+
                     if (deviceFirst.isReadyForNextFor) {
                         if (deviceFirst.characteristic7 != null) {
                             deviceFirst.characteristic7.setValue(heartBeat);
@@ -955,7 +956,7 @@ public class BleService extends Service {
                         lastHBcount1 = deviceFirst.HBcount;
                         if (errCount1 >= 5) {
                             Log.e("bletrack", "HeartBeats 1 disconnect");
-                                disconnect(1);
+                            disconnect(1);
                             errCount1 = 0;
                         }
                     }
@@ -1029,12 +1030,17 @@ public class BleService extends Service {
 //            放到缓存区里
             dataTrans = data;
 //            把最后一个字节当做计数
+            if(data[3]=='T') {
             dataTrans[bleDataLen - 1] = count;
 //            表明这边是第几个命令，防止重复
-            if (count < 100)
-                count++;
-            else
-                count = 0;
+                if (count < 100)
+                    count++;
+                else
+                    count = 0;
+            }else if(data[3]=='C')
+            {
+                dataTrans[bleDataLen - 1] = 0;
+            }
 //            如果GATT有定义
             if (deviceFirst.characteristic6 != null) {
 //                设置值
@@ -1054,8 +1060,9 @@ public class BleService extends Service {
 //                发送
                 DeviceManager.connectionQueue.get(2).writeCharacteristic(deviceThird.characteristic6);
             }
+            wifsend = true;
             wifiSend(dataTrans);
-
+            wifsend = false;
             final Runnable runnable = new Runnable() {
                 int sendCount = 0;
 

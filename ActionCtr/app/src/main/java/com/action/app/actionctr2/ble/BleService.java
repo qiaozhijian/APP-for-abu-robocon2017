@@ -713,7 +713,7 @@ public class BleService extends Service {
     private int countForCircle = 1;
     private int occupyOrder = tryPara;
     private boolean wifsend = false;
-
+    private boolean reSend = false;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -1064,16 +1064,13 @@ public class BleService extends Service {
             wifiSend(dataTrans);
             wifsend = false;
             final Runnable runnable = new Runnable() {
-                int sendCount = 0;
-
                 @Override
                 public void run() {
 //                  没有发送成功
                     isDataSending = true;
                     if ((!checkSendOkFirst()) && (!checkSendOkSecond()) && (!checkSendOkThird())) {
                         isBusy = true;
-                        sendCount++;
-                        Log.d("datasend", "write " + String.valueOf(sendCount));
+                        reSend=true;
                         if (deviceFirst.characteristic6 != null && deviceFirst.isReadyForNextFor) {
                             deviceFirst.characteristic6.setValue(dataTrans);
                             if (!isHBSending) {
@@ -1096,14 +1093,14 @@ public class BleService extends Service {
                             }
                         }
 //                        100ms之后执行runnable
-                        if ((deviceFirst.isReadyForNextFor || deviceSecond.isReadyForNextFor || deviceThird.isReadyForNextFor) && sendCount < 1) {
-                            sendCount = 0;
+                        if ((deviceFirst.isReadyForNextFor || deviceSecond.isReadyForNextFor || deviceThird.isReadyForNextFor)) {
                             isDataSending = false;
                             handler.postDelayed(this, 150);
                         }
                     }
 //                    发送成功
                     else {
+                        reSend=false;
                         handler.removeCallbacks(this);
                         isBusy = false;
                         isDataSending = false;
@@ -1145,6 +1142,8 @@ public class BleService extends Service {
 
 
         public boolean checkSendOkFirst() {
+            if(reSend)
+                return true;
 //            如果二者相等则返回true
             if (Arrays.equals(deviceFirst.dataReceive, dataTrans)) {
                 return true;
@@ -1168,6 +1167,8 @@ public class BleService extends Service {
         }
 
         public boolean checkSendOkSecond() {
+            if(reSend)
+                return true;
 //            如果二者相等则返回true
             if (Arrays.equals(deviceSecond.dataReceive, dataTrans)) {
                 return true;
@@ -1189,6 +1190,8 @@ public class BleService extends Service {
         }
 
         public boolean checkSendOkThird() {
+            if(reSend)
+                return true;
 //            如果二者相等则返回true
             if (Arrays.equals(deviceThird.dataReceive, dataTrans)) {
                 return true;

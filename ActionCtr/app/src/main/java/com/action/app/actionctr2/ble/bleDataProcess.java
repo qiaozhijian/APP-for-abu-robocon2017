@@ -90,7 +90,6 @@ public class bleDataProcess {
     public boolean sendCmd(byte id) {
 
         byte[] sendData = new byte[BleService.bleDataLen];
-
         if (sendData.length >= 10) {
             sendData[0] = 'A';
             sendData[1] = 'C';

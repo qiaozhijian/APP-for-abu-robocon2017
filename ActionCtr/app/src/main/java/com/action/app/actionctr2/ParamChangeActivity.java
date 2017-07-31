@@ -359,7 +359,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             if (!sqlManage.Select(buttonId, "左", "扔", 0)) {
                 sqlManage.setZero();
             }
-            ((ToggleButton)findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data",MODE_PRIVATE).getBoolean("gun_mode_left",true));
+            ((ToggleButton)findViewById(R.id.button_param_mode_change)).setChecked(false);
         }
 
 //        文本输入框功能
@@ -381,7 +381,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         init_state = intent.getStringArrayExtra("state2set");
 //      MODE_PRIVATE  之内被创建他的应用打开  getBoolean(key, default value)
 //        设定默认值
-        ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_left", true));
+        ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(false);
 //      虽然init_state在初始化的时候不是null，但是经过一次赋值之后变成了null
 //        所以这里应该是参数界面导出值时用
         if (init_state != null) {
@@ -390,10 +390,10 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             ((TextView) findViewById(R.id.gun_num)).setText(init_state[1]);
 //            左上右区分自动，手动
             if (init_state[1].equals("右")) {
-                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_right", true));
+                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(false);
             }
             if (init_state[1].equals("上")) {
-                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_top", false));
+                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(false);
             }
             ((TextView) findViewById(state)).setText(init_state[2]);
             ((TextView) findViewById(R.id.column_onTheWay)).setText(init_state[3]);
@@ -546,11 +546,27 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         dialogIsShowing = true;
                 }
                 Log.d("change", "changeDialog is showing:    " + String.valueOf(dialogIsShowing));
+                ToggleButton button=(ToggleButton)findViewById(R.id.button_param_mode_change);
+                TextView textView=(TextView)findViewById(R.id.gun_num);
+                if(String.valueOf(button.getText()).equals("自动")){
+                    Log.d("paraChange","zuo");
+                    if(String.valueOf(textView.getText()).equals("左")){
+                        Log.d("paraChange","zuo");
+                        button.setChecked(true);
+                    }
+                    else if(String.valueOf(textView.getText()).equals("上")){
+                        Log.d("paraChange","shang");
+                        button.setChecked(true);
+                    }
+                    else if(String.valueOf(textView.getText()).equals("右")){
+                        Log.d("paraChange","you");
+                        button.setChecked(true);
+                    }
+                }
 //                如没有在转
                 if (!dialogIsShowing) {
 //                    从文本框里读数据
                     readFromLayout(sqlManage);
-//
                     progressDialog = new ProgressDialog(ParamChangeActivity.this);
                     progressDialog.setTitle("data sending,please wait......");
                     progressDialog.setCancelable(false);
@@ -704,7 +720,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
 //                设置提示文本
                 ((TextView) findViewById(R.id.gun_num)).setText("左");
 //                初始化手动按钮
-                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_left", true));
+                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(false);
 //                先判断是不是从数据加载页面跳过来的，然后去更新数据
                 if (param2set != null && init_state[1].equals("左") && init_state[2].equals(String.valueOf(((TextView) findViewById(state)).getText()))) {
                     setProgressAll(param2set);
@@ -719,7 +735,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 break;
             case R.id.gun_up:
                 ((TextView) findViewById(R.id.gun_num)).setText("上");
-                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_top", false));
+                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(false);
 
                 if (param2set != null && init_state[1].equals("上") && init_state[2].equals(String.valueOf(((TextView) findViewById(state)).getText()))) {
                     setProgressAll(param2set);
@@ -734,7 +750,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                 break;
             case R.id.gun_right:
                 ((TextView) findViewById(R.id.gun_num)).setText("右");
-                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(getSharedPreferences("data", MODE_PRIVATE).getBoolean("gun_mode_right", true));
+                ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(false);
 
                 if (param2set != null && init_state[1].equals("右") && init_state[2].equals(String.valueOf(((TextView) findViewById(state)).getText()))) {
                     setProgressAll(param2set);
@@ -928,15 +944,15 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
         }
         boolean[] gun_mode = new boolean[3];
         SharedPreferences dataSt = getSharedPreferences("data", MODE_PRIVATE);
-        gun_mode[0] = dataSt.getBoolean("gun_mode_left", true);
-        gun_mode[1] = dataSt.getBoolean("gun_mode_right", true);
+        gun_mode[0] = dataSt.getBoolean("gun_mode_left", false);
+        gun_mode[1] = dataSt.getBoolean("gun_mode_right", false);
         gun_mode[2] = dataSt.getBoolean("gun_mode_top", false);
         gun_mode[gunId - 4] = isChecked;
         if (isChecked) {
             gunId += 3;
         }
         bleDataManage.sendCmd((byte) (gunId));
-        Log.d("paraChange",""+gunId);
+        Log.d("paraChange","command"+gunId);
         SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
         editor.putBoolean("gun_mode_left", gun_mode[0]);
         editor.putBoolean("gun_mode_right", gun_mode[1]);

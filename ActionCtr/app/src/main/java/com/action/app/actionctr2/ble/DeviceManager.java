@@ -55,14 +55,12 @@ public class DeviceManager {
 
         mGATTSevice = gatt.getService(aimServiceUUID);
         if (mGATTSevice != null) {
-            Log.d("bletrack", "get service");
             characteristic6 = mGATTSevice.getCharacteristic(aimChar6UUID);
             characteristic7 = mGATTSevice.getCharacteristic(aimChar7UUID);
             enableNotification(gatt, aimServiceUUID, aimChar6UUID);
             enableNotification(gatt, aimServiceUUID, aimChar7UUID);
             return true;
         } else {
-            Log.d("bletrack", "get service fail");
             return false;
         }
 

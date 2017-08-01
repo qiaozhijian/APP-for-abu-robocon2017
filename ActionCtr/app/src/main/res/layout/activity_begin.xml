@@ -120,24 +120,47 @@
             android:layout_weight="0.2"
             android:text="c5" />
     </LinearLayout>
-
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:weightSum="1">
+        android:layout_weight="1">
+
+        <Button
+            android:id="@+id/chufa"
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="20dp"
+            android:text="出发" />
+
+        <Button
+            android:id="@+id/fanzhuan"
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@id/chufa"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="20dp"
+            android:text="翻转" />
 
         <Button
             android:id="@+id/column7"
-            android:layout_width="0dp"
+            android:layout_width="166dp"
             android:layout_height="match_parent"
-            android:layout_marginBottom="20dp"
-            android:layout_marginTop="10dp"
-            android:layout_weight="0.1635"
-            android:text="c7" />
-    </LinearLayout>
+            android:text="c7"
+            android:layout_alignTop="@+id/chufa"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/quzhong"
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="20dp"
+            android:text="去中" />
+
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/activity_bar"

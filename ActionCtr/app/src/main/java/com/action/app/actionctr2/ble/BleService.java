@@ -34,6 +34,9 @@ public class BleService extends Service {
 
     private final IBinder mBinder = new myBleBand();
 
+//    private final String AIMADDRESS1 = "C8:FD:19:59:10:4B";//手机 1
+//    private final String AIMADDRESS1 = "C8:FD:19:59:10:37";//手机 1
+//    private final String AIMADDRESS1 = "C8:FD:19:59:10:29";//手机 1
     //有一个默认第一设备，第二设备，如果扫描就是哪个先进哪个是，如果直接连接就用默认的
     private final String AIMADDRESS1 = "F4:5E:AB:B9:58:80";//1号平板  1  一号试场
     private final String AIMADDRESS2 = "98:7B:F3:60:C7:1C";//1号平板  2  手机试场
@@ -70,7 +73,7 @@ public class BleService extends Service {
     private final Handler handler = new Handler();
 
     private int tryField = 0;
-    private final int tryPara = 2;
+    private final int tryPara = 3;
 
     // 描述扫描蓝牙的状态.
     private boolean mScanning;
@@ -84,7 +87,7 @@ public class BleService extends Service {
             Log.i("bletrack", "begin scanning");
             mScanning = true;
             //在扫描前，最好先调用一次停止扫描
-            //scaner.stopScan(mScanCallback);   // 这时会引用空对象
+            //scaner.stopScan(mScanCallbac  k);   // 这时会引用空对象
             scaner.startScan(mScanCallback);  // 开始扫描
             //  mBluetoothAdapter.startLeScan(aimUUID, mLeScanCallback);5.0及之前的版本
         } else {
@@ -192,7 +195,6 @@ public class BleService extends Service {
             return false;
         }
 
-        countForCircle = 0;
         isNeedForScan = false;
 
         /* 获取远端的蓝牙设备 */
@@ -224,7 +226,6 @@ public class BleService extends Service {
             return false;
         }
 
-        countForCircle = 0;
         isNeedForScan = false;
 
         /* 获取远端的蓝牙设备 */
@@ -254,7 +255,6 @@ public class BleService extends Service {
             return false;
         }
 
-        countForCircle = 0;
         isNeedForScan = false;
 
         /* 获取远端的蓝牙设备 */
@@ -308,6 +308,7 @@ public class BleService extends Service {
                             deviceFirst.connectionState = STATE_CONNECTED;
                             deviceFirst.isConnectPermit = true;
                             occupyState = false;
+                            countForCircle=0;
                             Log.d("bletrack", "GATT 1 connected");
                         } else if (gatt.getDevice().getAddress().equals(deviceSecond.aimAddress)
                                 && deviceSecond.connectionState == STATE_CONNECTING) {
@@ -315,6 +316,7 @@ public class BleService extends Service {
                             deviceSecond.connectionState = STATE_CONNECTED;
                             deviceSecond.isConnectPermit = true;
                             occupyState = false;
+                            countForCircle=0;
                             Log.d("bletrack", "GATT 2 connected");
                         } else if (gatt.getDevice().getAddress().equals(deviceThird.aimAddress)
                                 && deviceThird.connectionState == STATE_CONNECTING) {
@@ -322,6 +324,7 @@ public class BleService extends Service {
                             deviceThird.connectionState = STATE_CONNECTED;
                             deviceThird.isConnectPermit = true;
                             occupyState = false;
+                            countForCircle=0;
                             Log.d("bletrack", "GATT 3 connected");
                         }
                         break;
@@ -355,18 +358,21 @@ public class BleService extends Service {
                     deviceFirst.isReadyForNextFor = false;
                     occupyState = false;
                     deviceFirst.connectionState = STATE_DISCONNECTED;
+                    gatt.disconnect();
                     gatt.close();
                 } else if (DeviceManager.checkGATT(gatt, 1)) {
                     Log.e("bletrack", "2 unkown disconnected: " + String.valueOf(status));
                     deviceSecond.connectionState = STATE_DISCONNECTED;
                     deviceSecond.isReadyForNextFor = false;
                     occupyState = false;
+                    gatt.disconnect();
                     gatt.close();
                 } else if (DeviceManager.checkGATT(gatt, 2)) {
                     Log.e("bletrack", "3 unkown disconnected: " + String.valueOf(status));
                     deviceThird.connectionState = STATE_DISCONNECTED;
                     deviceThird.isReadyForNextFor = false;
                     occupyState = false;
+                    gatt.disconnect();
                     gatt.close();
                 }
             }
@@ -995,7 +1001,7 @@ public class BleService extends Service {
                             }
                             if (errCount3 >= 5) {
                                 Log.e("bletrack", "HeartBeats 3 disconnect");
-                                disconnect(3);
+                                    disconnect(3);
                                 errCount3 = 0;
                             }
                             break;

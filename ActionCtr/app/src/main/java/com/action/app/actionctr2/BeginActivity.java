@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,6 +47,13 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
         final TextView textView = (TextView) findViewById(R.id.begin_textview_rssi);
         final TextView textView1 = (TextView) findViewById(R.id.thenum);
 
+        final Button chufa=(Button)findViewById(R.id.chufa);
+        final Button fanzhuan=(Button)findViewById(R.id.fanzhuan);
+        final Button quzhong=(Button)findViewById(R.id.quzhong);
+
+        chufa.setOnClickListener(this);
+        fanzhuan.setOnClickListener(this);
+        quzhong.setOnClickListener(this);
         findViewById(R.id.thenum).setOnClickListener(this);
 
         textView1.setText(sharedPreferencesHelper.getString("returnState"));
@@ -166,6 +174,15 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
                 break;
             case R.id.thenum:
                 Toast.makeText(this, "断了就重启啊！！", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.chufa:
+                state.sendCmd((byte) 70);
+                break;
+            case R.id.fanzhuan:
+                state.sendCmd((byte) 83);
+                break;
+            case R.id.quzhong:
+                state.sendCmd((byte) 81);
                 break;
         }
     }

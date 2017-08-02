@@ -34,13 +34,13 @@ public class BleService extends Service {
 
     private final IBinder mBinder = new myBleBand();
 
-//    private final String AIMADDRESS1 = "C8:FD:19:59:10:4B";//手机 1
-//    private final String AIMADDRESS1 = "C8:FD:19:59:10:37";//手机 1
-//    private final String AIMADDRESS1 = "C8:FD:19:59:10:29";//手机 1
+    private final String AIMADDRESS1 = "C8:FD:19:59:10:4B";//手机 1
+    private final String AIMADDRESS2 = "C8:FD:19:59:10:37";//手机 1
+    private final String AIMADDRESS3 = "C8:FD:19:59:10:29";//手机 1
     //有一个默认第一设备，第二设备，如果扫描就是哪个先进哪个是，如果直接连接就用默认的
-    private final String AIMADDRESS1 = "F4:5E:AB:B9:58:80";//1号平板  1  一号试场
-    private final String AIMADDRESS2 = "98:7B:F3:60:C7:1C";//1号平板  2  手机试场
-    private final String AIMADDRESS3 = "F4:5E:AB:B9:5A:03";// 2号平板 1  2号试场
+//    private final String AIMADDRESS1 = "F4:5E:AB:B9:58:80";//1号平板  1  一号试场
+//    private final String AIMADDRESS2 = "98:7B:F3:60:C7:1C";//1号平板  2  手机试场
+//    private final String AIMADDRESS3 = "F4:5E:AB:B9:5A:03";// 2号平板 1  2号试场
 //    private final String AIMADDRESS1 = "98:7B:F3:60:C7:01";//手机 1
 //    private final String AIMADDRESS2 = "90:59:AF:0E:60:1F";//手机 2
 //    private final String AIMADDRESS3 = "F4:5E:AB:B9:59:77";//手机 3
@@ -73,7 +73,7 @@ public class BleService extends Service {
     private final Handler handler = new Handler();
 
     private int tryField = 0;
-    private final int tryPara = 3;
+    private final int tryPara = 2;
 
     // 描述扫描蓝牙的状态.
     private boolean mScanning;
@@ -294,311 +294,315 @@ public class BleService extends Service {
     }
 
     /* 连接远程设备的回调函数 */
-    private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
-        @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status,
-                                            int newState) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                switch (newState) {
+    private BluetoothGattCallback mGattCallback;
+    private void gattCallBackInit(){
+        mGattCallback = new BluetoothGattCallback() {
+            @Override
+            public void onConnectionStateChange(BluetoothGatt gatt, int status,
+                                                int newState) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    switch (newState) {
 //                    如果连接状态正常
-                    case BluetoothProfile.STATE_CONNECTED:
-                        if (gatt.getDevice().getAddress().equals(deviceFirst.aimAddress)
-                                && deviceFirst.connectionState == STATE_CONNECTING) {
-                            deviceFirst.isReadyForNextFor = false;           //得到特征值之后才能准备好
-                            deviceFirst.connectionState = STATE_CONNECTED;
-                            deviceFirst.isConnectPermit = true;
-                            occupyState = false;
-                            countForCircle=0;
-                            Log.d("bletrack", "GATT 1 connected");
-                        } else if (gatt.getDevice().getAddress().equals(deviceSecond.aimAddress)
-                                && deviceSecond.connectionState == STATE_CONNECTING) {
-                            deviceSecond.isReadyForNextFor = false;           //得到特征值之后才能准备好
-                            deviceSecond.connectionState = STATE_CONNECTED;
-                            deviceSecond.isConnectPermit = true;
-                            occupyState = false;
-                            countForCircle=0;
-                            Log.d("bletrack", "GATT 2 connected");
-                        } else if (gatt.getDevice().getAddress().equals(deviceThird.aimAddress)
-                                && deviceThird.connectionState == STATE_CONNECTING) {
-                            deviceThird.isReadyForNextFor = false;           //得到特征值之后才能准备好
-                            deviceThird.connectionState = STATE_CONNECTED;
-                            deviceThird.isConnectPermit = true;
-                            occupyState = false;
-                            countForCircle=0;
-                            Log.d("bletrack", "GATT 3 connected");
-                        }
-                        break;
-                    default:
-                        Log.e("bletrack", "unkown newstate: " + String.valueOf(newState));
-                    case BluetoothProfile.STATE_DISCONNECTED:               //断开连接
-                        if (DeviceManager.checkGATT(gatt, 0)) {
-                            deviceFirst.isReadyForNextFor = false;
-                            occupyState = false;
-                            deviceFirst.connectionState = STATE_DISCONNECTED;
-                            Log.d("bletrack", "GATT 1 disconnected");
-                            gatt.close();
-                        } else if (DeviceManager.checkGATT(gatt, 1)) {
-                            deviceSecond.connectionState = STATE_DISCONNECTED;
-                            deviceSecond.isReadyForNextFor = false;
-                            occupyState = false;
-                            Log.d("bletrack", "GATT 2 disconnected");
-                            gatt.close();
-                        } else if (DeviceManager.checkGATT(gatt, 2)) {
-                            deviceThird.connectionState = STATE_DISCONNECTED;
-                            deviceThird.isReadyForNextFor = false;
-                            occupyState = false;
-                            Log.d("bletrack", "GATT 3 disconnected");
-                            gatt.close();
-                        }
-                        break;
-                }
-            } else {
-                if (DeviceManager.checkGATT(gatt, 0)) {
-                    Log.e("bletrack", "1 unkown disconnected: " + String.valueOf(status));
-                    deviceFirst.isReadyForNextFor = false;
-                    occupyState = false;
-                    deviceFirst.connectionState = STATE_DISCONNECTED;
-                    gatt.disconnect();
-                    gatt.close();
-                } else if (DeviceManager.checkGATT(gatt, 1)) {
-                    Log.e("bletrack", "2 unkown disconnected: " + String.valueOf(status));
-                    deviceSecond.connectionState = STATE_DISCONNECTED;
-                    deviceSecond.isReadyForNextFor = false;
-                    occupyState = false;
-                    gatt.disconnect();
-                    gatt.close();
-                } else if (DeviceManager.checkGATT(gatt, 2)) {
-                    Log.e("bletrack", "3 unkown disconnected: " + String.valueOf(status));
-                    deviceThird.connectionState = STATE_DISCONNECTED;
-                    deviceThird.isReadyForNextFor = false;
-                    occupyState = false;
-                    gatt.disconnect();
-                    gatt.close();
-                }
-            }
-        }
-
-        //            当新服务被发现，进这个回调
-        @Override
-        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-//                如果特征值和描述被更新
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                if (DeviceManager.checkGATT(gatt, 0)) {
-                    if (deviceFirst.findService(DeviceManager.connectionQueue.get(0))) {
-                        deviceFirst.isReadyForNextFor = true;
-                        occupyState = false;
-                        Log.d("bletrack", " gatt 1 service success");
-                    } else {
-                        Log.d("bletrack", "gatt 1 service fail");
+                        case BluetoothProfile.STATE_CONNECTED:
+                            if (gatt.getDevice().getAddress().equals(deviceFirst.aimAddress)
+                                    && deviceFirst.connectionState == STATE_CONNECTING) {
+                                deviceFirst.isReadyForNextFor = false;           //得到特征值之后才能准备好
+                                deviceFirst.connectionState = STATE_CONNECTED;
+                                deviceFirst.isConnectPermit = true;
+                                occupyState = false;
+                                countForCircle=0;
+                                Log.d("bletrack", "GATT 1 connected");
+                            } else if (gatt.getDevice().getAddress().equals(deviceSecond.aimAddress)
+                                    && deviceSecond.connectionState == STATE_CONNECTING) {
+                                deviceSecond.isReadyForNextFor = false;           //得到特征值之后才能准备好
+                                deviceSecond.connectionState = STATE_CONNECTED;
+                                deviceSecond.isConnectPermit = true;
+                                occupyState = false;
+                                countForCircle=0;
+                                Log.d("bletrack", "GATT 2 connected");
+                            } else if (gatt.getDevice().getAddress().equals(deviceThird.aimAddress)
+                                    && deviceThird.connectionState == STATE_CONNECTING) {
+                                deviceThird.isReadyForNextFor = false;           //得到特征值之后才能准备好
+                                deviceThird.connectionState = STATE_CONNECTED;
+                                deviceThird.isConnectPermit = true;
+                                occupyState = false;
+                                countForCircle=0;
+                                Log.d("bletrack", "GATT 3 connected");
+                            }
+                            break;
+                        default:
+                            Log.e("bletrack", "unkown newstate: " + String.valueOf(newState));
+                        case BluetoothProfile.STATE_DISCONNECTED:               //断开连接
+                            if (DeviceManager.checkGATT(gatt, 0)) {
+                                deviceFirst.isReadyForNextFor = false;
+                                occupyState = false;
+                                deviceFirst.connectionState = STATE_DISCONNECTED;
+                                Log.d("bletrack", "GATT 1 disconnected");
+                                gatt.close();
+                            } else if (DeviceManager.checkGATT(gatt, 1)) {
+                                deviceSecond.connectionState = STATE_DISCONNECTED;
+                                deviceSecond.isReadyForNextFor = false;
+                                occupyState = false;
+                                Log.d("bletrack", "GATT 2 disconnected");
+                                gatt.close();
+                            } else if (DeviceManager.checkGATT(gatt, 2)) {
+                                deviceThird.connectionState = STATE_DISCONNECTED;
+                                deviceThird.isReadyForNextFor = false;
+                                occupyState = false;
+                                Log.d("bletrack", "GATT 3 disconnected");
+                                gatt.close();
+                            }
+                            break;
+                    }
+                } else {
+                    if (DeviceManager.checkGATT(gatt, 0)) {
+                        Log.e("bletrack", "1 unkown disconnected: " + String.valueOf(status));
                         deviceFirst.isReadyForNextFor = false;
                         occupyState = false;
                         deviceFirst.connectionState = STATE_DISCONNECTED;
                         gatt.disconnect();
                         gatt.close();
-                    }
-                } else if (DeviceManager.checkGATT(gatt, 1)) {
-                    if (deviceSecond.findService(DeviceManager.connectionQueue.get(1))) {
-                        deviceSecond.isReadyForNextFor = true;
-                        occupyState = false;
-                        Log.d("bletrack", " gatt 2 service success");
-                    } else {
-                        Log.d("bletrack", "gatt 2 service fail");
+                    } else if (DeviceManager.checkGATT(gatt, 1)) {
+                        Log.e("bletrack", "2 unkown disconnected: " + String.valueOf(status));
                         deviceSecond.connectionState = STATE_DISCONNECTED;
                         deviceSecond.isReadyForNextFor = false;
+                        occupyState = false;
                         gatt.disconnect();
-                        occupyState = false;
                         gatt.close();
-                    }
-                } else if (DeviceManager.checkGATT(gatt, 2)) {
-                    if (deviceThird.findService(DeviceManager.connectionQueue.get(2))) {
-                        deviceThird.isReadyForNextFor = true;
-                        occupyState = false;
-                        Log.d("bletrack", " gatt 3 service success");
-                    } else {
-                        Log.d("bletrack", "gatt 3 service fail");
+                    } else if (DeviceManager.checkGATT(gatt, 2)) {
+                        Log.e("bletrack", "3 unkown disconnected: " + String.valueOf(status));
                         deviceThird.connectionState = STATE_DISCONNECTED;
                         deviceThird.isReadyForNextFor = false;
-                        gatt.disconnect();
                         occupyState = false;
+                        gatt.disconnect();
                         gatt.close();
                     }
                 }
-            } else {
-                if (DeviceManager.checkGATT(gatt, 0)) {
-                    deviceFirst.isReadyForNextFor = false;
-                    deviceFirst.connectionState = STATE_DISCONNECTED;
-                    Log.d("bletrack", "ble gatt 1 service fail");
-                } else if (DeviceManager.checkGATT(gatt, 1)) {
-                    deviceSecond.isReadyForNextFor = false;
-                    deviceSecond.connectionState = STATE_DISCONNECTED;
-                    Log.d("bletrack", "ble gatt 2 service fail");
-                } else if (DeviceManager.checkGATT(gatt, 2)) {
-                    deviceThird.isReadyForNextFor = false;
-                    deviceThird.connectionState = STATE_DISCONNECTED;
-                    Log.d("bletrack", "ble gatt 3 service fail");
+            }
+
+            //            当新服务被发现，进这个回调
+            @Override
+            public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+//                如果特征值和描述被更新
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    if (DeviceManager.checkGATT(gatt, 0)) {
+                        if (deviceFirst.findService(DeviceManager.connectionQueue.get(0))) {
+                            deviceFirst.isReadyForNextFor = true;
+                            occupyState = false;
+                            Log.d("bletrack", " gatt 1 service success");
+                        } else {
+                            Log.d("bletrack", "gatt 1 service fail");
+                            deviceFirst.isReadyForNextFor = false;
+                            occupyState = false;
+                            deviceFirst.connectionState = STATE_DISCONNECTED;
+                            gatt.disconnect();
+                            gatt.close();
+                        }
+                    } else if (DeviceManager.checkGATT(gatt, 1)) {
+                        if (deviceSecond.findService(DeviceManager.connectionQueue.get(1))) {
+                            deviceSecond.isReadyForNextFor = true;
+                            occupyState = false;
+                            Log.d("bletrack", " gatt 2 service success");
+                        } else {
+                            Log.d("bletrack", "gatt 2 service fail");
+                            deviceSecond.connectionState = STATE_DISCONNECTED;
+                            deviceSecond.isReadyForNextFor = false;
+                            gatt.disconnect();
+                            occupyState = false;
+                            gatt.close();
+                        }
+                    } else if (DeviceManager.checkGATT(gatt, 2)) {
+                        if (deviceThird.findService(DeviceManager.connectionQueue.get(2))) {
+                            deviceThird.isReadyForNextFor = true;
+                            occupyState = false;
+                            Log.d("bletrack", " gatt 3 service success");
+                        } else {
+                            Log.d("bletrack", "gatt 3 service fail");
+                            deviceThird.connectionState = STATE_DISCONNECTED;
+                            deviceThird.isReadyForNextFor = false;
+                            gatt.disconnect();
+                            occupyState = false;
+                            gatt.close();
+                        }
+                    }
+                } else {
+                    if (DeviceManager.checkGATT(gatt, 0)) {
+                        deviceFirst.isReadyForNextFor = false;
+                        deviceFirst.connectionState = STATE_DISCONNECTED;
+                        Log.d("bletrack", "ble gatt 1 service fail");
+                    } else if (DeviceManager.checkGATT(gatt, 1)) {
+                        deviceSecond.isReadyForNextFor = false;
+                        deviceSecond.connectionState = STATE_DISCONNECTED;
+                        Log.d("bletrack", "ble gatt 2 service fail");
+                    } else if (DeviceManager.checkGATT(gatt, 2)) {
+                        deviceThird.isReadyForNextFor = false;
+                        deviceThird.connectionState = STATE_DISCONNECTED;
+                        Log.d("bletrack", "ble gatt 3 service fail");
+                    }
                 }
             }
-        }
 
-        /*
-         * 特征值的读写
-         *
-         */
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt,
-                                         BluetoothGattCharacteristic characteristic, int status) {
-            Log.d("bletrack", "gatt read");
-        }
+            /*
+             * 特征值的读写
+             *
+             */
+            @Override
+            public void onCharacteristicRead(BluetoothGatt gatt,
+                                             BluetoothGattCharacteristic characteristic, int status) {
+                Log.d("bletrack", "gatt read");
+            }
 
-        //是不是从机设置有问题，一是多少错误就断开，二是多长广播还是说，速度重连的要求
+            //是不是从机设置有问题，一是多少错误就断开，二是多长广播还是说，速度重连的要求
         /* *特征值的改* */
-        @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt,
-                                            BluetoothGattCharacteristic characteristic) {
-            String log_out;
-            if (deviceFirst.characteristic6 != null)
-                if (DeviceManager.checkGATT(deviceFirst.characteristic6, characteristic)) {
-                    deviceFirst.dataReceive = characteristic.getValue();
-                    log_out = deviceFirst.getCharValue(characteristic);
-                    Log.d("bletrack", "first notify: " + log_out);
-                }
-            if (deviceFirst.characteristic7 != null)
-                if (DeviceManager.checkGATT(deviceFirst.characteristic7, characteristic)) {
-                    deviceFirst.dataHeartBeats = characteristic.getValue();
-                    deviceFirst.HBcount++;
-                    log_out = deviceFirst.getCharValue(characteristic);
-                    Log.d("ACHB", "first notify: " + log_out);
-                    if (deviceFirst.dataReceive != null)
-                        if (deviceFirst.dataReceive.length != bleDataLen) {
-                            Log.e("bletrack", "notify first length is not equal to require");
-                        }
-                }
-            if (deviceSecond.characteristic6 != null)
-                if (DeviceManager.checkGATT(deviceSecond.characteristic6, characteristic)) {
-                    deviceSecond.dataReceive = characteristic.getValue();
-                    log_out = deviceSecond.getCharValue(characteristic);
-                    Log.d("bletrack", "second notify: " + log_out);
-                }
-            if (deviceSecond.characteristic7 != null)
-                if (DeviceManager.checkGATT(deviceSecond.characteristic7, characteristic)) {
-                    deviceSecond.dataHeartBeats = characteristic.getValue();
-                    deviceSecond.HBcount++;
-                    log_out = deviceSecond.getCharValue(characteristic);
-                    Log.d("ACHB", "second notify: " + log_out);
-                    if (deviceSecond.dataReceive != null)
-                        if (deviceSecond.dataReceive.length != bleDataLen) {
-                            Log.e("bletrack", "notify second length is not equal to require");
-                        }
-                }
-            if (deviceThird.characteristic6 != null)
-                if (DeviceManager.checkGATT(deviceThird.characteristic6, characteristic)) {
-                    deviceThird.dataReceive = characteristic.getValue();
-                    log_out = deviceThird.getCharValue(characteristic);
-                    Log.d("bletrack", "third notify: " + log_out);
-                }
-            if (deviceThird.characteristic7 != null)
-                if (DeviceManager.checkGATT(deviceThird.characteristic7, characteristic)) {
-                    deviceThird.dataHeartBeats = characteristic.getValue();
-                    deviceThird.HBcount++;
-                    log_out = deviceThird.getCharValue(characteristic);
-                    Log.d("ACHB", "third notify: " + log_out);
-                    if (deviceThird.dataReceive != null)
-                        if (deviceThird.dataReceive.length != bleDataLen) {
-                            Log.e("bletrack", "notify third length is not equal to require");
-                        }
-                }
-        }
-
-        /*
-         * 特征值的写
-         * */
-        @Override
-        public void onCharacteristicWrite(BluetoothGatt gatt,
-                                          BluetoothGattCharacteristic characteristic,
-                                          int status) {
-            String log_out;
-            if (status == BluetoothGatt.GATT_SUCCESS) {
+            @Override
+            public void onCharacteristicChanged(BluetoothGatt gatt,
+                                                BluetoothGattCharacteristic characteristic) {
+                String log_out;
                 if (deviceFirst.characteristic6 != null)
                     if (DeviceManager.checkGATT(deviceFirst.characteristic6, characteristic)) {
+                        deviceFirst.dataReceive = characteristic.getValue();
                         log_out = deviceFirst.getCharValue(characteristic);
-                        Log.d("bletrack", "first write: " + log_out);
+                        Log.d("bletrack", "first notify: " + log_out);
                     }
                 if (deviceFirst.characteristic7 != null)
                     if (DeviceManager.checkGATT(deviceFirst.characteristic7, characteristic)) {
+                        deviceFirst.dataHeartBeats = characteristic.getValue();
+                        deviceFirst.HBcount++;
                         log_out = deviceFirst.getCharValue(characteristic);
-                        Log.d("ACHB", "first write: " + log_out);
+                        Log.d("ACHB", "first notify: " + log_out);
                         if (deviceFirst.dataReceive != null)
                             if (deviceFirst.dataReceive.length != bleDataLen) {
-                                Log.e("bletrack", "write first length is not equal to require");
+                                Log.e("bletrack", "notify first length is not equal to require");
                             }
                     }
                 if (deviceSecond.characteristic6 != null)
                     if (DeviceManager.checkGATT(deviceSecond.characteristic6, characteristic)) {
+                        deviceSecond.dataReceive = characteristic.getValue();
                         log_out = deviceSecond.getCharValue(characteristic);
-                        Log.d("bletrack", "second write: " + log_out);
+                        Log.d("bletrack", "second notify: " + log_out);
                     }
                 if (deviceSecond.characteristic7 != null)
                     if (DeviceManager.checkGATT(deviceSecond.characteristic7, characteristic)) {
+                        deviceSecond.dataHeartBeats = characteristic.getValue();
+                        deviceSecond.HBcount++;
                         log_out = deviceSecond.getCharValue(characteristic);
-                        Log.d("ACHB", "second write: " + log_out);
+                        Log.d("ACHB", "second notify: " + log_out);
                         if (deviceSecond.dataReceive != null)
                             if (deviceSecond.dataReceive.length != bleDataLen) {
-                                Log.e("bletrack", "write second length is not equal to require");
+                                Log.e("bletrack", "notify second length is not equal to require");
                             }
                     }
                 if (deviceThird.characteristic6 != null)
                     if (DeviceManager.checkGATT(deviceThird.characteristic6, characteristic)) {
+                        deviceThird.dataReceive = characteristic.getValue();
                         log_out = deviceThird.getCharValue(characteristic);
-                        Log.d("bletrack", "third write: " + log_out);
+                        Log.d("bletrack", "third notify: " + log_out);
                     }
                 if (deviceThird.characteristic7 != null)
                     if (DeviceManager.checkGATT(deviceThird.characteristic7, characteristic)) {
+                        deviceThird.dataHeartBeats = characteristic.getValue();
+                        deviceThird.HBcount++;
                         log_out = deviceThird.getCharValue(characteristic);
-                        Log.d("ACHB", "third write: " + log_out);
+                        Log.d("ACHB", "third notify: " + log_out);
                         if (deviceThird.dataReceive != null)
                             if (deviceThird.dataReceive.length != bleDataLen) {
-                                Log.e("bletrack", "write third length is not equal to require");
+                                Log.e("bletrack", "notify third length is not equal to require");
                             }
                     }
-
-            } else {
-                if (DeviceManager.checkGATT(gatt, 0)) {
-                    Log.d("bletrack", "gatt first char write fail");
-                }
-                if (DeviceManager.checkGATT(gatt, 1)) {
-                    Log.d("bletrack", "gatt second char write fail");
-                }
-                if (DeviceManager.checkGATT(gatt, 2)) {
-                    Log.d("bletrack", "gatt third char write fail");
-                }
-                gatt.disconnect();
-
             }
-        }
 
-        /*读写蓝牙信号值 */
-        @Override
-        public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                if (DeviceManager.checkGATT(gatt, 0)) {
-                    deviceFirst.RssiValue = rssi;
-                } else if (DeviceManager.checkGATT(gatt, 1)) {
-                    deviceSecond.RssiValue = rssi;
-                } else if (DeviceManager.checkGATT(gatt, 2)) {
-                    deviceThird.RssiValue = rssi;
+            /*
+             * 特征值的写
+             * */
+            @Override
+            public void onCharacteristicWrite(BluetoothGatt gatt,
+                                              BluetoothGattCharacteristic characteristic,
+                                              int status) {
+                String log_out;
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    if (deviceFirst.characteristic6 != null)
+                        if (DeviceManager.checkGATT(deviceFirst.characteristic6, characteristic)) {
+                            log_out = deviceFirst.getCharValue(characteristic);
+                            Log.d("bletrack", "first write: " + log_out);
+                        }
+                    if (deviceFirst.characteristic7 != null)
+                        if (DeviceManager.checkGATT(deviceFirst.characteristic7, characteristic)) {
+                            log_out = deviceFirst.getCharValue(characteristic);
+                            Log.d("ACHB", "first write: " + log_out);
+                            if (deviceFirst.dataReceive != null)
+                                if (deviceFirst.dataReceive.length != bleDataLen) {
+                                    Log.e("bletrack", "write first length is not equal to require");
+                                }
+                        }
+                    if (deviceSecond.characteristic6 != null)
+                        if (DeviceManager.checkGATT(deviceSecond.characteristic6, characteristic)) {
+                            log_out = deviceSecond.getCharValue(characteristic);
+                            Log.d("bletrack", "second write: " + log_out);
+                        }
+                    if (deviceSecond.characteristic7 != null)
+                        if (DeviceManager.checkGATT(deviceSecond.characteristic7, characteristic)) {
+                            log_out = deviceSecond.getCharValue(characteristic);
+                            Log.d("ACHB", "second write: " + log_out);
+                            if (deviceSecond.dataReceive != null)
+                                if (deviceSecond.dataReceive.length != bleDataLen) {
+                                    Log.e("bletrack", "write second length is not equal to require");
+                                }
+                        }
+                    if (deviceThird.characteristic6 != null)
+                        if (DeviceManager.checkGATT(deviceThird.characteristic6, characteristic)) {
+                            log_out = deviceThird.getCharValue(characteristic);
+                            Log.d("bletrack", "third write: " + log_out);
+                        }
+                    if (deviceThird.characteristic7 != null)
+                        if (DeviceManager.checkGATT(deviceThird.characteristic7, characteristic)) {
+                            log_out = deviceThird.getCharValue(characteristic);
+                            Log.d("ACHB", "third write: " + log_out);
+                            if (deviceThird.dataReceive != null)
+                                if (deviceThird.dataReceive.length != bleDataLen) {
+                                    Log.e("bletrack", "write third length is not equal to require");
+                                }
+                        }
+
+                } else {
+                    if (DeviceManager.checkGATT(gatt, 0)) {
+                        Log.d("bletrack", "gatt first char write fail");
+                    }
+                    if (DeviceManager.checkGATT(gatt, 1)) {
+                        Log.d("bletrack", "gatt second char write fail");
+                    }
+                    if (DeviceManager.checkGATT(gatt, 2)) {
+                        Log.d("bletrack", "gatt third char write fail");
+                    }
+                    gatt.disconnect();
+
                 }
-            } else {
-                if (DeviceManager.checkGATT(gatt, 0)) {
-                    Log.d("bletrack", "gatt first rssi fail");
-                } else if (DeviceManager.checkGATT(gatt, 1)) {
-                    Log.d("bletrack", "gatt second rssi fail");
-                } else if (DeviceManager.checkGATT(gatt, 2)) {
-                    Log.d("bletrack", "gatt third rssi fail");
-                }
-                gatt.disconnect();
             }
-        }
-    };
+
+            /*读写蓝牙信号值 */
+            @Override
+            public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
+                    if (DeviceManager.checkGATT(gatt, 0)) {
+                        deviceFirst.RssiValue = rssi;
+                    } else if (DeviceManager.checkGATT(gatt, 1)) {
+                        deviceSecond.RssiValue = rssi;
+                    } else if (DeviceManager.checkGATT(gatt, 2)) {
+                        deviceThird.RssiValue = rssi;
+                    }
+                } else {
+                    if (DeviceManager.checkGATT(gatt, 0)) {
+                        Log.d("bletrack", "gatt first rssi fail");
+                    } else if (DeviceManager.checkGATT(gatt, 1)) {
+                        Log.d("bletrack", "gatt second rssi fail");
+                    } else if (DeviceManager.checkGATT(gatt, 2)) {
+                        Log.d("bletrack", "gatt third rssi fail");
+                    }
+                    gatt.disconnect();
+                }
+            }
+        };
+    }
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -694,6 +698,7 @@ public class BleService extends Service {
     private void ble_init() {
         mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = mBluetoothManager.getAdapter();
+        gattCallBackInit();
         //scaner = mBluetoothAdapter.getBluetoothLeScanner();
     }
 
@@ -713,7 +718,7 @@ public class BleService extends Service {
     private int countForCircle = 1;
     private int occupyOrder = tryPara;
     private boolean wifsend = false;
-    private boolean reSend = false;
+    private int reSend = 0;
 
     @Override
     public void onCreate() {
@@ -733,7 +738,7 @@ public class BleService extends Service {
                     if (tryField != 0)
                         occupyOrder = tryField;
 
-                    if (countForCircle == 250) {
+                    if (countForCircle == 300) {
                         countForCircle = 0;
                         switch (occupyOrder) {
                             case 1:
@@ -1095,9 +1100,9 @@ public class BleService extends Service {
                 public void run() {
 //                  没有发送成功
                     isDataSending = true;
+                    reSend ++;
                     if ((!checkSendOkFirst()) && (!checkSendOkSecond()) && (!checkSendOkThird())) {
                         isBusy = true;
-                        reSend = true;
                         if (deviceFirst.characteristic6 != null && deviceFirst.isReadyForNextFor) {
                             deviceFirst.characteristic6.setValue(dataTrans);
                             if (!isHBSending) {
@@ -1122,12 +1127,12 @@ public class BleService extends Service {
 //                        100ms之后执行runnable
                         if ((deviceFirst.isReadyForNextFor || deviceSecond.isReadyForNextFor || deviceThird.isReadyForNextFor)) {
                             isDataSending = false;
-                            handler.postDelayed(this, 150);
+                            handler.postDelayed(this, 500);
                         }
                     }
 //                    发送成功
                     else {
-                        reSend = false;
+                        reSend = 0;
                         handler.removeCallbacks(this);
                         isBusy = false;
                         isDataSending = false;
@@ -1137,7 +1142,7 @@ public class BleService extends Service {
 //           第一次进来的时候不会执行run，只有postDelayed触发时才会
 //·          第二次的时候发现第一次还是没有发送成功就不再运行一遍
             if (!isBusy)
-                handler.postDelayed(runnable, 150);
+                handler.postDelayed(runnable, 500);
             isDataSending = false;
         }
 
@@ -1168,7 +1173,7 @@ public class BleService extends Service {
         }
 
         public boolean checkSendOkFirst() {
-            if (reSend)
+            if (reSend==2)
                 return true;
 //            如果二者相等则返回true
             if (Arrays.equals(deviceFirst.dataReceive, dataTrans)) {
@@ -1193,7 +1198,7 @@ public class BleService extends Service {
         }
 
         public boolean checkSendOkSecond() {
-            if (reSend)
+            if (reSend==2)
                 return true;
 //            如果二者相等则返回true
             if (Arrays.equals(deviceSecond.dataReceive, dataTrans)) {
@@ -1216,7 +1221,7 @@ public class BleService extends Service {
         }
 
         public boolean checkSendOkThird() {
-            if (reSend)
+            if (reSend==2)
                 return true;
 //            如果二者相等则返回true
             if (Arrays.equals(deviceThird.dataReceive, dataTrans)) {
@@ -1242,6 +1247,9 @@ public class BleService extends Service {
             isDataSending = false;
         }
 
+        public void setReSending() {
+            reSend = 0;
+        }
         //        连接是否完成
         public boolean isReadyFirst() {
             return deviceFirst.isReadyForNextFor;

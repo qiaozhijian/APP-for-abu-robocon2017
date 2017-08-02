@@ -159,4 +159,6 @@ public class bleDataProcess {
     }
 
     public void setIsSending() { state.setIsSending(); }
+
+    public void setReSending() { state.setReSending(); }
 }

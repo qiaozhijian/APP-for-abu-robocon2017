@@ -57,8 +57,10 @@ public class DeviceManager {
         if (mGATTSevice != null) {
             characteristic6 = mGATTSevice.getCharacteristic(aimChar6UUID);
             characteristic7 = mGATTSevice.getCharacteristic(aimChar7UUID);
-            enableNotification(gatt, aimServiceUUID, aimChar6UUID);
-            enableNotification(gatt, aimServiceUUID, aimChar7UUID);
+            gatt.setCharacteristicNotification(characteristic6,true);
+            gatt.setCharacteristicNotification(characteristic7,true);
+//            enableNotification(gatt, aimServiceUUID, aimChar6UUID);
+//            enableNotification(gatt, aimServiceUUID, aimChar7UUID);
             return true;
         } else {
             return false;

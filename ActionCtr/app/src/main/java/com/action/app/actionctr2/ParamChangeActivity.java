@@ -612,6 +612,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                             if (((bleDataManage.checkSendOkFirst() || bleDataManage.checkSendOkSecond() || bleDataManage.checkSendOkThird())
                                     && bleDataManage.getBinder() != null) || (!bleDataManage.isReadyForDataFirst()
                                     && !bleDataManage.isReadyForDataSecond() && !bleDataManage.isReadyForDataThird())) {
+                               bleDataManage.setReSending();
                                 switch (id) {
                                     case 0:
                                         bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.roll);

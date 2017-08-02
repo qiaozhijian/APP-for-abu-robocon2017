@@ -73,7 +73,7 @@ public class BleService extends Service {
     private final Handler handler = new Handler();
 
     private int tryField = 0;
-    private final int tryPara = 2;
+    private final int tryPara = 1;
 
     // 描述扫描蓝牙的状态.
     private boolean mScanning;
@@ -718,7 +718,7 @@ public class BleService extends Service {
     private int countForCircle = 1;
     private int occupyOrder = tryPara;
     private boolean wifsend = false;
-    private int reSend = 0;
+    //private int reSend = 0;
 
     @Override
     public void onCreate() {
@@ -1100,7 +1100,7 @@ public class BleService extends Service {
                 public void run() {
 //                  没有发送成功
                     isDataSending = true;
-                    reSend ++;
+                    //reSend ++;
                     if ((!checkSendOkFirst()) && (!checkSendOkSecond()) && (!checkSendOkThird())) {
                         isBusy = true;
                         if (deviceFirst.characteristic6 != null && deviceFirst.isReadyForNextFor) {
@@ -1127,12 +1127,12 @@ public class BleService extends Service {
 //                        100ms之后执行runnable
                         if ((deviceFirst.isReadyForNextFor || deviceSecond.isReadyForNextFor || deviceThird.isReadyForNextFor)) {
                             isDataSending = false;
-                            handler.postDelayed(this, 500);
+                            handler.postDelayed(this, 150);
                         }
                     }
 //                    发送成功
                     else {
-                        reSend = 0;
+                       // reSend = 0;
                         handler.removeCallbacks(this);
                         isBusy = false;
                         isDataSending = false;
@@ -1142,7 +1142,7 @@ public class BleService extends Service {
 //           第一次进来的时候不会执行run，只有postDelayed触发时才会
 //·          第二次的时候发现第一次还是没有发送成功就不再运行一遍
             if (!isBusy)
-                handler.postDelayed(runnable, 500);
+                handler.postDelayed(runnable, 150);
             isDataSending = false;
         }
 
@@ -1173,8 +1173,8 @@ public class BleService extends Service {
         }
 
         public boolean checkSendOkFirst() {
-            if (reSend==2)
-                return true;
+        //    if (reSend==2)
+         //       return true;
 //            如果二者相等则返回true
             if (Arrays.equals(deviceFirst.dataReceive, dataTrans)) {
                 return true;
@@ -1198,8 +1198,8 @@ public class BleService extends Service {
         }
 
         public boolean checkSendOkSecond() {
-            if (reSend==2)
-                return true;
+        //    if (reSend==2)
+       //         return true;
 //            如果二者相等则返回true
             if (Arrays.equals(deviceSecond.dataReceive, dataTrans)) {
                 return true;
@@ -1221,8 +1221,8 @@ public class BleService extends Service {
         }
 
         public boolean checkSendOkThird() {
-            if (reSend==2)
-                return true;
+       //     if (reSend==2)
+        //        return true;
 //            如果二者相等则返回true
             if (Arrays.equals(deviceThird.dataReceive, dataTrans)) {
                 return true;
@@ -1248,7 +1248,7 @@ public class BleService extends Service {
         }
 
         public void setReSending() {
-            reSend = 0;
+    //        reSend = 0;
         }
         //        连接是否完成
         public boolean isReadyFirst() {

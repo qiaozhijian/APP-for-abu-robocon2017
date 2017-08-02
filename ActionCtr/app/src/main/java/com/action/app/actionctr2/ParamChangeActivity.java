@@ -656,7 +656,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                             } else {
                                 countforMaxTime++;
                                 if (countforMaxTime > 35) {
-                                    progressDialog.cancel();
+                                  //  progressDialog.cancel();
                                     countforMaxTime = 0;
                                     id = 0;
                                     Log.d("bletrack", "reconnect ");

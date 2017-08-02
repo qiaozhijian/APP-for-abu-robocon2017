@@ -82,6 +82,7 @@ public class DebugDataDisplayActivity extends BasicActivity implements View.OnCl
         };
         handler.post(runnable);
     }
+
     @Override
     public void onPause(){
         freshFlag=false;

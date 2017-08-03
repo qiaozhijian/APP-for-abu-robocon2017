@@ -77,8 +77,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
     private SeekBar seekBar_speed1;
     private SeekBar seekBar_speed2;
 
-    static int countforMaxTime = 0;
-
     //    左上右按钮的集合
     private ArrayList<Button> gunList = new ArrayList<>();
 
@@ -359,7 +357,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             if (!sqlManage.Select(buttonId, "左", "扔", 0)) {
                 sqlManage.setZero();
             }
-            ((ToggleButton)findViewById(R.id.button_param_mode_change)).setChecked(false);
+            ((ToggleButton) findViewById(R.id.button_param_mode_change)).setChecked(false);
         }
 
 //        文本输入框功能
@@ -546,20 +544,18 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         dialogIsShowing = true;
                 }
                 Log.d("change", "changeDialog is showing:    " + String.valueOf(dialogIsShowing));
-                ToggleButton button=(ToggleButton)findViewById(R.id.button_param_mode_change);
-                TextView textView=(TextView)findViewById(R.id.gun_num);
-                if(String.valueOf(button.getText()).equals("自动")){
-                    Log.d("paraChange","zuo");
-                    if(String.valueOf(textView.getText()).equals("左")){
-                        Log.d("paraChange","zuo");
+                ToggleButton button = (ToggleButton) findViewById(R.id.button_param_mode_change);
+                TextView textView = (TextView) findViewById(R.id.gun_num);
+                if (String.valueOf(button.getText()).equals("自动")) {
+                    Log.d("paraChange", "zuo");
+                    if (String.valueOf(textView.getText()).equals("左")) {
+                        Log.d("paraChange", "zuo");
                         button.setChecked(true);
-                    }
-                    else if(String.valueOf(textView.getText()).equals("上")){
-                        Log.d("paraChange","shang");
+                    } else if (String.valueOf(textView.getText()).equals("上")) {
+                        Log.d("paraChange", "shang");
                         button.setChecked(true);
-                    }
-                    else if(String.valueOf(textView.getText()).equals("右")){
-                        Log.d("paraChange","you");
+                    } else if (String.valueOf(textView.getText()).equals("右")) {
+                        Log.d("paraChange", "you");
                         button.setChecked(true);
                     }
                 }
@@ -569,13 +565,13 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     readFromLayout(sqlManage);
                     progressDialog = new ProgressDialog(ParamChangeActivity.this);
                     progressDialog.setTitle("data sending,please wait......");
-                    progressDialog.setCancelable(false);
+                    progressDialog.setCancelable(true);
 //                    仅仅设置点击屏幕不会返回
                     progressDialog.setCanceledOnTouchOutside(false);
                     progressDialog.show();
 //                    循环设置
                     final Handler handler = new Handler();
-                    Runnable runnable = new Runnable() {
+                    final Runnable runnable = new Runnable() {
                         //                        再进入这个函数时，依然会初始化成0
                         private byte id = 0;
                         private byte id2 = 0;
@@ -583,7 +579,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                         @Override
                         public void run() {
                             //                            用两个switch使id2能表达出他所指的是什么枪的什么状态
-                            switch (String.valueOf(((TextView) findViewById(state)).getText())) {
+                            switch (String.valueOf(((TextView) findViewById(R.id.state)).getText())) {
                                 case "打球":
                                     id2 = 0;
                                     break;
@@ -612,7 +608,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                             if (((bleDataManage.checkSendOkFirst() || bleDataManage.checkSendOkSecond() || bleDataManage.checkSendOkThird())
                                     && bleDataManage.getBinder() != null) || (!bleDataManage.isReadyForDataFirst()
                                     && !bleDataManage.isReadyForDataSecond() && !bleDataManage.isReadyForDataThird())) {
-                               bleDataManage.setReSending();
+                                bleDataManage.setReSending();
                                 switch (id) {
                                     case 0:
                                         bleDataManage.sendParam((byte) (id + buttonId * 5 - 5), id2, sqlManage.roll);
@@ -637,7 +633,6 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                                     case 5:
                                         progressDialog.cancel();
                                         bleDataManage.setIsSending();
-                                        countforMaxTime = 0;
                                         break;
                                     default:
                                         progressDialog.cancel();
@@ -649,24 +644,23 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                                 }
 //                                当其
                                 if (id != 5) {
-                                    handler.postDelayed(this, 50);
+                                    handler.postDelayed(this, 80);
                                 }
                                 Log.d("datasend", "id ++ ");
                                 id++;
                             } else {
-                                countforMaxTime++;
-                                if (countforMaxTime > 35) {
-                                  //  progressDialog.cancel();
-                                    countforMaxTime = 0;
-                                    id = 0;
-                                    Log.d("bletrack", "reconnect ");
-                                    Toast.makeText(ParamChangeActivity.this, "建议你重启app", Toast.LENGTH_SHORT).show();
-                                } else
-                                    handler.postDelayed(this, 50);
+                                Log.d("datasend", "resend para");
+                                handler.postDelayed(this, 80);
                             }
                         }
                     };
-                    handler.postDelayed(runnable, 50);
+                    handler.post(runnable);
+                    progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface dialog) {
+                            handler.removeCallbacks(runnable);
+                        }
+                    });
                 }
                 break;
 //            返回主界面
@@ -732,7 +726,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     }
                     setProgressAll(sqlManage);
                 }
-                Log.d("paraChange","gun_left");
+                Log.d("paraChange", "gun_left");
                 break;
             case R.id.gun_up:
                 ((TextView) findViewById(R.id.gun_num)).setText("上");
@@ -747,7 +741,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     }
                     setProgressAll(sqlManage);
                 }
-                Log.d("paraChange","gun_up");
+                Log.d("paraChange", "gun_up");
                 break;
             case R.id.gun_right:
                 ((TextView) findViewById(R.id.gun_num)).setText("右");
@@ -762,7 +756,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
                     }
                     setProgressAll(sqlManage);
                 }
-                Log.d("paraChange","gun_right");
+                Log.d("paraChange", "gun_right");
                 break;
 //            点途中时则变换一次状态，然后根据文本的具体内容进行更新数据
             case R.id.gun_onTheWay: {
@@ -953,7 +947,7 @@ public class ParamChangeActivity extends BasicActivity implements View.OnClickLi
             gunId += 3;
         }
         bleDataManage.sendCmd((byte) (gunId));
-        Log.d("paraChange","command"+gunId);
+        Log.d("paraChange", "command" + gunId);
         SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
         editor.putBoolean("gun_mode_left", gun_mode[0]);
         editor.putBoolean("gun_mode_right", gun_mode[1]);

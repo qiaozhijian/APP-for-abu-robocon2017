@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.action.app.actionctr2.ble.BleService;
 import com.action.app.actionctr2.ble.bleDataProcess;
 import com.action.app.actionctr2.sqlite.SharedPreferencesHelper;
+import com.action.app.actionctr2.wifi.wifiService;
 
 public class BeginActivity extends BasicActivity implements View.OnClickListener {
     private bleDataProcess state;
@@ -58,8 +59,8 @@ public class BeginActivity extends BasicActivity implements View.OnClickListener
         textView1.setText(sharedPreferencesHelper.getString("returnState"));
         if (sharedPreferencesHelper.getString("returnState") != null)
             Log.d("state2.0", sharedPreferencesHelper.getString("returnState"));
-//        Intent intentWifiService = new Intent(this, wifiService.class);
-//        startService(intentWifiService);
+        Intent intentWifiService = new Intent(this, wifiService.class);
+        startService(intentWifiService);
 
         bar.setProgress(0);
         state = new bleDataProcess(this);

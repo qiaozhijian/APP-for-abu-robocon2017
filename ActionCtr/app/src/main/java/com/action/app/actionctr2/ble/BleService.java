@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.Gravity;
 import android.widget.Toast;
 
 import com.action.app.actionctr2.BeginActivity;
@@ -33,8 +34,7 @@ import java.util.Arrays;
 public class BleService extends Service {
 
     private final IBinder mBinder = new myBleBand();
-
-    private final String AIMADDRESS1 = "C8:FD:19:59:10:4B";//手机 1
+    private final String AIMADDRESS1 = "C8:FD:19:59:10:4B";//手机 10
     private final String AIMADDRESS2 = "C8:FD:19:59:10:37";//手机 1
     private final String AIMADDRESS3 = "C8:FD:19:59:10:29";//手机 1
     //有一个默认第一设备，第二设备，如果扫描就是哪个先进哪个是，如果直接连接就用默认的
@@ -77,6 +77,9 @@ public class BleService extends Service {
 
     // 描述扫描蓝牙的状态.
     private boolean mScanning;
+
+    //试场时报时的
+    private int countForTime = 0;
 
     /**
      * @param enable (扫描使能，true:扫描开始,false:扫描停止)
@@ -295,7 +298,8 @@ public class BleService extends Service {
 
     /* 连接远程设备的回调函数 */
     private BluetoothGattCallback mGattCallback;
-    private void gattCallBackInit(){
+
+    private void gattCallBackInit() {
         mGattCallback = new BluetoothGattCallback() {
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status,
@@ -310,7 +314,7 @@ public class BleService extends Service {
                                 deviceFirst.connectionState = STATE_CONNECTED;
                                 deviceFirst.isConnectPermit = true;
                                 occupyState = false;
-                                countForCircle=0;
+                                countForCircle = 0;
                                 Log.d("bletrack", "GATT 1 connected");
                             } else if (gatt.getDevice().getAddress().equals(deviceSecond.aimAddress)
                                     && deviceSecond.connectionState == STATE_CONNECTING) {
@@ -318,7 +322,7 @@ public class BleService extends Service {
                                 deviceSecond.connectionState = STATE_CONNECTED;
                                 deviceSecond.isConnectPermit = true;
                                 occupyState = false;
-                                countForCircle=0;
+                                countForCircle = 0;
                                 Log.d("bletrack", "GATT 2 connected");
                             } else if (gatt.getDevice().getAddress().equals(deviceThird.aimAddress)
                                     && deviceThird.connectionState == STATE_CONNECTING) {
@@ -326,7 +330,7 @@ public class BleService extends Service {
                                 deviceThird.connectionState = STATE_CONNECTED;
                                 deviceThird.isConnectPermit = true;
                                 occupyState = false;
-                                countForCircle=0;
+                                countForCircle = 0;
                                 Log.d("bletrack", "GATT 3 connected");
                             }
                             break;
@@ -898,6 +902,19 @@ public class BleService extends Service {
                         }
                     }
 
+                    if (tryField != 0) {
+                        countForTime++;
+                        if (countForTime % 1500 == 0) {
+                            if (countForTime % 3000 == 0) {
+                                handler.post(new ToastRunnable("还剩" + (10 - countForTime / 3000) + "分钟", false));
+                                Log.d("timetest", "还剩" + (10 - countForTime / 3000) + "分钟");
+                            } else {
+                                handler.post(new ToastRunnable("还剩" + (9 - countForTime / 3000) + "分30秒", false));
+                                Log.d("timetest", "还剩" + (9 - countForTime / 3000) + "分30秒");
+                            }
+                        }
+                        if (countForTime > 30000) countForTime = 0;
+                    }
 
                     if (deviceFirst.connectionState != STATE_CONNECTED
                             && deviceSecond.connectionState != STATE_CONNECTED
@@ -905,24 +922,22 @@ public class BleService extends Service {
                         DeviceManager.connectTime++;
                     else
                         DeviceManager.connectTime = 0;
-                    if (DeviceManager.connectTime > 250) {
-                        handler.post(new ToastRunnable("蓝牙断开，建议你重启APP"));
+                    if (DeviceManager.connectTime > 400) {
+                        handler.post(new ToastRunnable("蓝牙断开，建议你重启APP", true));
                         DeviceManager.connectTime = 0;
                     }
-                    if (countForCircle % 50 == 0) {
-                        Log.d("constate", "1st " + deviceFirst.connectionState
-                                + " 2nd " + deviceSecond.connectionState
-                                + " 3rd " + deviceThird.connectionState);
-                        Log.d("constate", "1r " + deviceFirst.isReadyForNextFor
-                                + " 2r " + deviceSecond.isReadyForNextFor
-                                + " 3r " + deviceThird.isReadyForNextFor);
-                    }
-//                    if(deviceFirst.isReadyForNextFor&&countForCircle % 50 == 0) {
-//                        DeviceManager.connectionQueue.get(0).readRemoteRssi();
+//                    if (countForCircle % 50 == 0) {
+//                        Log.d("constate", "1st " + deviceFirst.connectionState
+//                                + " 2nd " + deviceSecond.connectionState
+//                                + " 3rd " + deviceThird.connectionState);
+//                        Log.d("constate", "1r " + deviceFirst.isReadyForNextFor
+//                                + " 2r " + deviceSecond.isReadyForNextFor
+//                                + " 3r " + deviceThird.isReadyForNextFor);
 //                    }
-                    Log.d("constate", "count " + countForCircle
-                            + " order " + occupyOrder
-                            + " state " + occupyState + " rssi " + deviceFirst.RssiValue);
+//
+//                    Log.d("constate", "count " + countForCircle
+//                            + " order " + occupyOrder
+//                            + " state " + occupyState + " rssi " + deviceFirst.RssiValue);
                     handler1.postDelayed(this, 20);
                 }
             });
@@ -1006,7 +1021,7 @@ public class BleService extends Service {
                             }
                             if (errCount3 >= 5) {
                                 Log.e("bletrack", "HeartBeats 3 disconnect");
-                                    disconnect(3);
+                                disconnect(3);
                                 errCount3 = 0;
                             }
                             break;
@@ -1073,28 +1088,28 @@ public class BleService extends Service {
             } else if (data[3] == 'C') {
                 dataTrans[bleDataLen - 1] = 0;
             }
+            wifsend = true;
+            wifiSend(dataTrans);
+            wifsend = false;
 //            如果GATT有定义
-            if (deviceFirst.characteristic6 != null) {
+            if (deviceFirst.characteristic6 != null && deviceFirst.isReadyForNextFor) {
 //                设置值
                 deviceFirst.characteristic6.setValue(dataTrans);
 //                发送
                 DeviceManager.connectionQueue.get(0).writeCharacteristic(deviceFirst.characteristic6);
             }
-            if (deviceSecond.characteristic6 != null) {
+            if (deviceSecond.characteristic6 != null && deviceSecond.isReadyForNextFor) {
 //                设置值
                 deviceSecond.characteristic6.setValue(dataTrans);
 //                发送
                 DeviceManager.connectionQueue.get(1).writeCharacteristic(deviceSecond.characteristic6);
             }
-            if (deviceThird.characteristic6 != null) {
+            if (deviceThird.characteristic6 != null && deviceThird.isReadyForNextFor) {
 //                设置值
                 deviceThird.characteristic6.setValue(dataTrans);
 //                发送
                 DeviceManager.connectionQueue.get(2).writeCharacteristic(deviceThird.characteristic6);
             }
-            wifsend = true;
-            wifiSend(dataTrans);
-            wifsend = false;
             final Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
@@ -1132,7 +1147,7 @@ public class BleService extends Service {
                     }
 //                    发送成功
                     else {
-                       // reSend = 0;
+                        // reSend = 0;
                         handler.removeCallbacks(this);
                         isBusy = false;
                         isDataSending = false;
@@ -1173,8 +1188,11 @@ public class BleService extends Service {
         }
 
         public boolean checkSendOkFirst() {
-        //    if (reSend==2)
-         //       return true;
+            //    if (reSend==2)
+            //       return true;
+            if (!deviceFirst.isReadyForNextFor) {
+                return true;
+            }
 //            如果二者相等则返回true
             if (Arrays.equals(deviceFirst.dataReceive, dataTrans)) {
                 return true;
@@ -1192,14 +1210,15 @@ public class BleService extends Service {
                     return true;
                 }
             }
-            if (isDataSending == false)
-                return true;
             return false;
         }
 
         public boolean checkSendOkSecond() {
-        //    if (reSend==2)
-       //         return true;
+            //    if (reSend==2)
+            //         return true;
+            if (!deviceSecond.isReadyForNextFor) {
+                return true;
+            }
 //            如果二者相等则返回true
             if (Arrays.equals(deviceSecond.dataReceive, dataTrans)) {
                 return true;
@@ -1221,8 +1240,11 @@ public class BleService extends Service {
         }
 
         public boolean checkSendOkThird() {
-       //     if (reSend==2)
-        //        return true;
+            //     if (reSend==2)
+            //        return true;
+            if (!deviceThird.isReadyForNextFor) {
+                return true;
+            }
 //            如果二者相等则返回true
             if (Arrays.equals(deviceThird.dataReceive, dataTrans)) {
                 return true;
@@ -1248,8 +1270,9 @@ public class BleService extends Service {
         }
 
         public void setReSending() {
-    //        reSend = 0;
+            //        reSend = 0;
         }
+
         //        连接是否完成
         public boolean isReadyFirst() {
             return deviceFirst.isReadyForNextFor;
@@ -1295,14 +1318,22 @@ public class BleService extends Service {
 
     private class ToastRunnable implements Runnable {
         String mText;
+        boolean mway;
 
-        public ToastRunnable(String text) {
+        public ToastRunnable(String text, boolean way) {
             mText = text;
+            mway = way;
         }
 
         @Override
         public void run() {
-            Toast.makeText(getApplicationContext(), mText, Toast.LENGTH_SHORT).show();
+            if (mway)
+                Toast.makeText(getApplicationContext(), mText, Toast.LENGTH_SHORT).show();
+            else {
+                Toast toast = Toast.makeText(getApplicationContext(), mText, Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+            }
         }
     }
 
